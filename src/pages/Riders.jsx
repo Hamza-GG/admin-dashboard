@@ -95,7 +95,7 @@ export default function Riders() {
   async function submitAdd(e) {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:8000/riders", addForm, {
+      await axios.post("https://employee-inspection-backend.onrender.com/riders", addForm, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setShowAddForm(false);
