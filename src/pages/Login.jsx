@@ -20,7 +20,7 @@ function Login() {
       formData.append("username", username);
       formData.append("password", password);
 
-      const res = await axios.post("http://localhost:8000/token", formData, {
+      const res = await axios.post("https://employee-inspection-backend.onrender.com/token", formData, {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
 
@@ -40,7 +40,7 @@ function Login() {
     setResetMsg("");
     setResetErr("");
     try {
-      await axios.post("http://localhost:8000/forgot-password", {
+      await axios.post("https://employee-inspection-backend.onrender.com/forgot-password", {
         username: resetEmail,
       });
       setResetMsg("If this email exists, a reset link has been sent.");

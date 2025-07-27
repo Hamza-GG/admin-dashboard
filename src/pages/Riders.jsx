@@ -28,7 +28,7 @@ export default function Riders() {
   async function fetchRiders() {
     setLoading(true);
     try {
-      const { data } = await axios.get("http://localhost:8000/riders", {
+      const { data } = await axios.get("https://employee-inspection-backend.onrender.com/riders", {
         headers: { Authorization: `Bearer ${token}` }
       });
       setRiders(data);
@@ -64,7 +64,7 @@ export default function Riders() {
 
   async function saveEdit(rider_id) {
     try {
-      await axios.put(`http://localhost:8000/riders/${rider_id}`, editForm, {
+      await axios.put(`https://employee-inspection-backend.onrender.com/riders/${rider_id}`, editForm, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert("Rider updated!");
@@ -78,7 +78,7 @@ export default function Riders() {
   async function handleDelete(rider_id) {
     if (!window.confirm("Delete this rider?")) return;
     try {
-      await axios.delete(`http://localhost:8000/riders/${rider_id}`, {
+      await axios.delete(`https://employee-inspection-backend.onrender.com/riders/${rider_id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchRiders();
