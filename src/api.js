@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8000"; // change to your FastAPI URL
+const BASE_URL = "https://employee-inspection-backend.onrender.com"; // change to your FastAPI URL
 
 export async function login(username, password) {
   const response = await fetch(`${BASE_URL}/token`, {
