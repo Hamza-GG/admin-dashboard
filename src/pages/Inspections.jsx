@@ -42,7 +42,7 @@ export default function Inspections() {
   useEffect(() => {
     async function fetchInspections() {
       try {
-        const res = await axios.get("http://localhost:8000/inspections", {
+        const res = await axios.get("https://employee-inspection-backend.onrender.com/inspections", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setInspections(res.data);
@@ -75,7 +75,7 @@ export default function Inspections() {
   async function handleDelete(id) {
     if (!window.confirm("Delete this inspection?")) return;
     try {
-      await axios.delete(`http://localhost:8000/inspections/${id}`, {
+      await axios.delete(`https://employee-inspection-backend.onrender.com/inspections/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setInspections((prev) => prev.filter((i) => i.id !== id));
@@ -88,7 +88,7 @@ export default function Inspections() {
     e.preventDefault();
     try {
       await axios.patch(
-        `http://localhost:8000/inspections/${editInspection.id}`,
+        `https://employee-inspection-backend.onrender.com/inspections/${editInspection.id}`,
         editInspection,
         { headers: { Authorization: `Bearer ${token}` } }
       );
