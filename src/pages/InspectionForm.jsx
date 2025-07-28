@@ -101,7 +101,7 @@ export default function InspectionForm() {
       });
       data.append("inspected_by", inspected_by);
 
-      await axios.post("http://localhost:8000/inspections", data, {
+      await axios.post("https://employee-inspection-backend.onrender.com/inspections", data, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
