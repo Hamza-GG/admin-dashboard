@@ -1,76 +1,122 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
-  Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Button, IconButton, TextField, Typography, Dialog, DialogTitle, DialogContent,
-  DialogActions, Box, CircularProgress
+  Box,
+  Typography,
+  TextField,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  IconButton,
+  CircularProgress,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  MenuItem,
+  Stack,
+  Grid,
 } from "@mui/material";
-import { Add, Edit, Delete, Save, Cancel } from "@mui/icons-material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import AddIcon from "@mui/icons-material/Add";
+import SearchIcon from "@mui/icons-material/Search";
 
 export default function Riders() {
   const [riders, setRiders] = useState([]);
-  const [editingId, setEditingId] = useState(null);
-  const [editForm, setEditForm] = useState({});
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [addForm, setAddForm] = useState({
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [openAdd, setOpenAdd] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [selectedRider, setSelectedRider] = useState(null);
+  const token = localStorage.getItem("token");
+
+  const emptyForm = {
+    rider_id: "", // Now editable on add
     first_name: "",
     first_last_name: "",
     id_number: "",
     city_code: "",
     vehicle_type: "",
+    box_serial_number: "",
+    plate_number: "",
     joined_at: "",
-  });
-  const [loading, setLoading] = useState(true);
-  const token = localStorage.getItem("token");
+  };
+  const [form, setForm] = useState(emptyForm);
 
-  useEffect(() => { fetchRiders(); }, []);
-
-  async function fetchRiders() {
-    setLoading(true);
-    try {
-      const { data } = await axios.get("https://employee-inspection-backend.onrender.com/riders", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setRiders(data);
-    } catch {
-      alert("Failed to load riders.");
+  useEffect(() => {
+    async function fetchRiders() {
+      try {
+        const res = await axios.get(
+          "https://employee-inspection-backend.onrender.com/riders",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setRiders(res.data);
+      } catch (error) {
+        alert("Failed to fetch riders.");
+      } finally {
+        setLoading(false);
+      }
     }
-    setLoading(false);
-  }
+    fetchRiders();
+  }, [token]);
 
-  function startEdit(rider) {
-    setEditingId(rider.rider_id);
-    setEditForm({
-      first_name: rider.first_name,
-      first_last_name: rider.first_last_name,
-      id_number: rider.id_number,
-      city_code: rider.city_code,
-      vehicle_type: rider.vehicle_type,
-      joined_at: rider.joined_at
-        ? new Date(rider.joined_at).toISOString().slice(0, 16)
-        : "",
-    });
-  }
+  const filtered = riders.filter((r) =>
+    [r.rider_id, r.first_name, r.first_last_name, r.id_number, r.city_code, r.vehicle_type, r.plate_number, r.box_serial_number]
+      .map((v) => (v ? v.toString().toLowerCase() : ""))
+      .some((v) => v.includes(search.toLowerCase()))
+  );
 
-  function cancelEdit() {
-    setEditingId(null);
-    setEditForm({});
-  }
-
-  function handleEditChange(e) {
+  function handleChange(e) {
     const { name, value } = e.target;
-    setEditForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  async function saveEdit(rider_id) {
+  function handleAddOpen() {
+    setForm(emptyForm);
+    setOpenAdd(true);
+  }
+
+  function handleEditOpen(rider) {
+    setSelectedRider(rider);
+    setForm({ ...rider, joined_at: rider.joined_at ? rider.joined_at.slice(0, 10) : "" });
+    setOpenEdit(true);
+  }
+
+  async function handleAddSubmit(e) {
+    e.preventDefault();
     try {
-      await axios.put(`https://employee-inspection-backend.onrender.com/riders/${rider_id}`, editForm, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      alert("Rider updated!");
-      setEditingId(null);
-      fetchRiders();
-    } catch (e) {
+      const data = { ...form };
+      // Don't send empty string for optional rider_id
+      if (!data.rider_id) delete data.rider_id;
+      await axios.post(
+        "https://employee-inspection-backend.onrender.com/riders",
+        data,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      window.location.reload(); // Refresh to show new rider (or re-fetch)
+    } catch (error) {
+      alert("Failed to add rider.");
+    }
+  }
+
+  async function handleEditSubmit(e) {
+    e.preventDefault();
+    try {
+      const data = { ...form };
+      await axios.put(
+        `https://employee-inspection-backend.onrender.com/riders/${selectedRider.rider_id}`,
+        data,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      window.location.reload();
+    } catch (error) {
       alert("Failed to update rider.");
     }
   }
@@ -78,38 +124,13 @@ export default function Riders() {
   async function handleDelete(rider_id) {
     if (!window.confirm("Delete this rider?")) return;
     try {
-      await axios.delete(`https://employee-inspection-backend.onrender.com/riders/${rider_id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      fetchRiders();
-    } catch {
+      await axios.delete(
+        `https://employee-inspection-backend.onrender.com/riders/${rider_id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setRiders((prev) => prev.filter((r) => r.rider_id !== rider_id));
+    } catch (error) {
       alert("Failed to delete rider.");
-    }
-  }
-
-  function handleAddChange(e) {
-    const { name, value } = e.target;
-    setAddForm((prev) => ({ ...prev, [name]: value }));
-  }
-
-  async function submitAdd(e) {
-    e.preventDefault();
-    try {
-      await axios.post("https://employee-inspection-backend.onrender.com/riders", addForm, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setShowAddForm(false);
-      setAddForm({
-        first_name: "",
-        first_last_name: "",
-        id_number: "",
-        city_code: "",
-        vehicle_type: "",
-        joined_at: "",
-      });
-      fetchRiders();
-    } catch (e) {
-      alert("Failed to add rider.");
     }
   }
 
@@ -120,229 +141,255 @@ export default function Riders() {
         width: "100vw",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "center",
         alignItems: "center",
         backgroundColor: "#f7fafd",
       }}
     >
-      <Typography
-        variant="h4"
-        gutterBottom
-        fontWeight="bold"
-        align="center"
-        sx={{ mt: 7, mb: 2 }}
-      >
-        Riders Management
-      </Typography>
-      <Button
-        variant="contained"
-        color="primary"
-        startIcon={<Add />}
-        onClick={() => setShowAddForm(true)}
-        sx={{ mb: 3, fontWeight: "bold", fontSize: 16, px: 2 }}
-      >
-        Add New Rider
-      </Button>
-      <Dialog open={showAddForm} onClose={() => setShowAddForm(false)}>
-        <DialogTitle>Add New Rider</DialogTitle>
+      <Box sx={{ width: "100%", maxWidth: 1200, mx: "auto", py: 6 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+          <Typography variant="h4" fontWeight="bold">
+            Riders
+          </Typography>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleAddOpen}
+            sx={{ bgcolor: "#17417e", ":hover": { bgcolor: "#122e57" } }}
+          >
+            Add Rider
+          </Button>
+        </Stack>
+        <Paper sx={{ p: 2, mb: 3 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <SearchIcon color="action" />
+            <TextField
+              label="Search (ID, Name, Plate, etc)"
+              variant="standard"
+              fullWidth
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </Box>
+        </Paper>
+        <Paper elevation={2}>
+          {loading ? (
+            <Box sx={{ textAlign: "center", py: 6 }}>
+              <CircularProgress />
+              <Typography>Loading riders...</Typography>
+            </Box>
+          ) : filtered.length === 0 ? (
+            <Typography sx={{ p: 4 }}>No riders found.</Typography>
+          ) : (
+            <TableContainer>
+              <Table size="small">
+                <TableHead sx={{ background: "#f5f5f5" }}>
+                  <TableRow>
+                    <TableCell>Rider ID</TableCell>
+                    <TableCell>First Name</TableCell>
+                    <TableCell>Last Name</TableCell>
+                    <TableCell>ID Number</TableCell>
+                    <TableCell>City Code</TableCell>
+                    <TableCell>Vehicle Type</TableCell>
+                    <TableCell>Box Serial Number</TableCell>
+                    <TableCell>Plate Number</TableCell>
+                    <TableCell>Joined At</TableCell>
+                    <TableCell align="center">Actions</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {filtered.map((rider) => (
+                    <TableRow key={rider.rider_id}>
+                      <TableCell>{rider.rider_id}</TableCell>
+                      <TableCell>{rider.first_name}</TableCell>
+                      <TableCell>{rider.first_last_name}</TableCell>
+                      <TableCell>{rider.id_number}</TableCell>
+                      <TableCell>{rider.city_code}</TableCell>
+                      <TableCell>{rider.vehicle_type}</TableCell>
+                      <TableCell>{rider.box_serial_number}</TableCell>
+                      <TableCell>{rider.plate_number}</TableCell>
+                      <TableCell>{rider.joined_at?.slice(0, 10)}</TableCell>
+                      <TableCell align="center">
+                        <Tooltip title="Edit">
+                          <IconButton color="primary" onClick={() => handleEditOpen(rider)}>
+                            <EditIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete">
+                          <IconButton color="error" onClick={() => handleDelete(rider.rider_id)}>
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </Paper>
+      </Box>
+
+      {/* --------- ADD DIALOG --------- */}
+      <Dialog open={openAdd} onClose={() => setOpenAdd(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Add Rider</DialogTitle>
         <DialogContent>
           <Box
             component="form"
-            onSubmit={submitAdd}
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 2,
-              minWidth: 350,
-              mt: 1,
-            }}
+            onSubmit={handleAddSubmit}
+            sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
           >
+            <TextField
+              label="Courier ID (optional)"
+              name="rider_id"
+              value={form.rider_id}
+              onChange={handleChange}
+              placeholder="e.g. 123"
+              type="number"
+            />
             <TextField
               label="First Name"
               name="first_name"
-              value={addForm.first_name}
-              onChange={handleAddChange}
+              value={form.first_name}
+              onChange={handleChange}
               required
-              fullWidth
             />
             <TextField
               label="Last Name"
               name="first_last_name"
-              value={addForm.first_last_name}
-              onChange={handleAddChange}
+              value={form.first_last_name}
+              onChange={handleChange}
               required
-              fullWidth
             />
             <TextField
               label="ID Number"
               name="id_number"
-              value={addForm.id_number}
-              onChange={handleAddChange}
-              fullWidth
+              value={form.id_number}
+              onChange={handleChange}
+              required
             />
             <TextField
               label="City Code"
               name="city_code"
-              value={addForm.city_code}
-              onChange={handleAddChange}
-              fullWidth
+              value={form.city_code}
+              onChange={handleChange}
+              required
             />
             <TextField
               label="Vehicle Type"
               name="vehicle_type"
-              value={addForm.vehicle_type}
-              onChange={handleAddChange}
-              fullWidth
+              value={form.vehicle_type}
+              onChange={handleChange}
+              required
+            />
+            <TextField
+              label="Box Serial Number"
+              name="box_serial_number"
+              value={form.box_serial_number}
+              onChange={handleChange}
+            />
+            <TextField
+              label="Plate Number"
+              name="plate_number"
+              value={form.plate_number}
+              onChange={handleChange}
             />
             <TextField
               label="Joined At"
               name="joined_at"
-              type="datetime-local"
-              value={addForm.joined_at}
-              onChange={handleAddChange}
+              type="date"
+              value={form.joined_at}
+              onChange={handleChange}
               InputLabelProps={{ shrink: true }}
-              fullWidth
             />
-            <DialogActions>
-              <Button
-                onClick={() => setShowAddForm(false)}
-                startIcon={<Cancel />}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                color="primary"
-                variant="contained"
-                startIcon={<Save />}
-              >
+            <DialogActions sx={{ mt: 2 }}>
+              <Button onClick={() => setOpenAdd(false)}>Cancel</Button>
+              <Button type="submit" variant="contained">
                 Save
               </Button>
             </DialogActions>
           </Box>
         </DialogContent>
       </Dialog>
-      <Paper
-        elevation={3}
-        sx={{
-          p: 2,
-          mt: 1,
-          width: "100%",
-          maxWidth: 1000,
-          mx: "auto",
-        }}
-      >
-        {loading ? (
-          <Box sx={{ textAlign: "center", py: 4 }}>
-            <CircularProgress />
-            <Typography>Loading riders...</Typography>
+
+      {/* --------- EDIT DIALOG --------- */}
+      <Dialog open={openEdit} onClose={() => setOpenEdit(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Edit Rider</DialogTitle>
+        <DialogContent>
+          <Box
+            component="form"
+            onSubmit={handleEditSubmit}
+            sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
+          >
+            <TextField
+              label="Courier ID"
+              name="rider_id"
+              value={form.rider_id}
+              disabled
+            />
+            <TextField
+              label="First Name"
+              name="first_name"
+              value={form.first_name}
+              onChange={handleChange}
+              required
+            />
+            <TextField
+              label="Last Name"
+              name="first_last_name"
+              value={form.first_last_name}
+              onChange={handleChange}
+              required
+            />
+            <TextField
+              label="ID Number"
+              name="id_number"
+              value={form.id_number}
+              onChange={handleChange}
+              required
+            />
+            <TextField
+              label="City Code"
+              name="city_code"
+              value={form.city_code}
+              onChange={handleChange}
+              required
+            />
+            <TextField
+              label="Vehicle Type"
+              name="vehicle_type"
+              value={form.vehicle_type}
+              onChange={handleChange}
+              required
+            />
+            <TextField
+              label="Box Serial Number"
+              name="box_serial_number"
+              value={form.box_serial_number}
+              onChange={handleChange}
+            />
+            <TextField
+              label="Plate Number"
+              name="plate_number"
+              value={form.plate_number}
+              onChange={handleChange}
+            />
+            <TextField
+              label="Joined At"
+              name="joined_at"
+              type="date"
+              value={form.joined_at}
+              onChange={handleChange}
+              InputLabelProps={{ shrink: true }}
+            />
+            <DialogActions sx={{ mt: 2 }}>
+              <Button onClick={() => setOpenEdit(false)}>Cancel</Button>
+              <Button type="submit" variant="contained">
+                Save
+              </Button>
+            </DialogActions>
           </Box>
-        ) : (
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>First Name</TableCell>
-                  <TableCell>Last Name</TableCell>
-                  <TableCell>ID Number</TableCell>
-                  <TableCell>City Code</TableCell>
-                  <TableCell>Vehicle</TableCell>
-                  <TableCell>Joined At</TableCell>
-                  <TableCell align="center">Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {riders.map((r) =>
-                  editingId === r.rider_id ? (
-                    <TableRow key={r.rider_id}>
-                      <TableCell>{r.rider_id}</TableCell>
-                      <TableCell>
-                        <TextField
-                          name="first_name"
-                          value={editForm.first_name}
-                          onChange={handleEditChange}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <TextField
-                          name="first_last_name"
-                          value={editForm.first_last_name}
-                          onChange={handleEditChange}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <TextField
-                          name="id_number"
-                          value={editForm.id_number}
-                          onChange={handleEditChange}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <TextField
-                          name="city_code"
-                          value={editForm.city_code || ""}
-                          onChange={handleEditChange}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <TextField
-                          name="vehicle_type"
-                          value={editForm.vehicle_type || ""}
-                          onChange={handleEditChange}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <TextField
-                          type="datetime-local"
-                          name="joined_at"
-                          value={editForm.joined_at}
-                          onChange={handleEditChange}
-                          size="small"
-                          InputLabelProps={{ shrink: true }}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <IconButton color="primary" onClick={() => saveEdit(r.rider_id)}>
-                          <Save />
-                        </IconButton>
-                        <IconButton color="secondary" onClick={cancelEdit}>
-                          <Cancel />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    <TableRow key={r.rider_id}>
-                      <TableCell>{r.rider_id}</TableCell>
-                      <TableCell>{r.first_name}</TableCell>
-                      <TableCell>{r.first_last_name}</TableCell>
-                      <TableCell>{r.id_number}</TableCell>
-                      <TableCell>{r.city_code}</TableCell>
-                      <TableCell>{r.vehicle_type}</TableCell>
-                      <TableCell>
-                        {r.joined_at ? new Date(r.joined_at).toLocaleString() : ""}
-                      </TableCell>
-                      <TableCell align="center">
-                        <IconButton color="primary" onClick={() => startEdit(r)}>
-                          <Edit />
-                        </IconButton>
-                        <IconButton color="error" onClick={() => handleDelete(r.rider_id)}>
-                          <Delete />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  )
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
-      </Paper>
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 }
