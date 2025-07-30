@@ -19,8 +19,10 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  Checkbox,
-  FormControlLabel,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SearchIcon from "@mui/icons-material/Search";
@@ -59,7 +61,9 @@ export default function Inspections() {
     const textMatch =
       (insp.rider_id && insp.rider_id.toString().includes(search)) ||
       (insp.inspected_by && insp.inspected_by.toLowerCase().includes(search.toLowerCase())) ||
-      (insp.id_number && insp.id_number.toLowerCase().includes(search.toLowerCase()));
+      (insp.id_number && insp.id_number.toLowerCase().includes(search.toLowerCase())) ||
+      (insp.plate_number && insp.plate_number.toLowerCase().includes(search.toLowerCase())) ||
+      (insp.box_serial_number && insp.box_serial_number.toLowerCase().includes(search.toLowerCase()));
 
     let timeMatch = true;
     if (startDate) {
@@ -113,7 +117,7 @@ export default function Inspections() {
         backgroundColor: "#f7fafd",
       }}
     >
-      <Box sx={{ width: "100%", maxWidth: 1300, mx: "auto", py: 6 }}>
+      <Box sx={{ width: "100%", maxWidth: 1400, mx: "auto", py: 6 }}>
         <Typography variant="h4" fontWeight="bold" gutterBottom align="center">
           Inspections
         </Typography>
@@ -121,7 +125,7 @@ export default function Inspections() {
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <SearchIcon color="action" />
             <TextField
-              label="Search by Rider ID, Inspector, or ID Number"
+              label="Search by Rider ID, Inspector, ID Number, Plate, Box Serial"
               variant="standard"
               fullWidth
               value={search}
@@ -159,21 +163,25 @@ export default function Inspections() {
             <Typography sx={{ p: 4 }}>No inspections found.</Typography>
           ) : (
             <TableContainer>
-              <Table>
+              <Table size="small">
                 <TableHead sx={{ background: "#f5f5f5" }}>
                   <TableRow>
                     <TableCell>ID</TableCell>
                     <TableCell>Rider ID</TableCell>
                     <TableCell>ID Number</TableCell>
+                    <TableCell>Plate Number</TableCell>
+                    <TableCell>Box Serial Number</TableCell>
                     <TableCell>Inspected By</TableCell>
                     <TableCell>City</TableCell>
                     <TableCell>Location</TableCell>
                     <TableCell>Helmet</TableCell>
                     <TableCell>Box</TableCell>
-                    <TableCell>ID</TableCell>
-                    <TableCell>Zone</TableCell>
-                    <TableCell>Clothes</TableCell>
-                    <TableCell>Well Behaved</TableCell>
+                    <TableCell>Account</TableCell>
+                    <TableCell>Parking</TableCell>
+                    <TableCell>Appearance</TableCell>
+                    <TableCell>Driving</TableCell>
+                    <TableCell>MFC Status</TableCell>
+                    <TableCell>Courier Behavior</TableCell>
                     <TableCell>Timestamp</TableCell>
                     <TableCell>Image</TableCell>
                     <TableCell>Comments</TableCell>
@@ -186,15 +194,19 @@ export default function Inspections() {
                       <TableCell>{insp.id}</TableCell>
                       <TableCell>{insp.rider_id ?? "N/A"}</TableCell>
                       <TableCell>{insp.id_number ?? "N/A"}</TableCell>
+                      <TableCell>{insp.plate_number ?? "—"}</TableCell>
+                      <TableCell>{insp.box_serial_number ?? "—"}</TableCell>
                       <TableCell>{insp.inspected_by}</TableCell>
                       <TableCell>{insp.city || "—"}</TableCell>
                       <TableCell>{insp.location || "—"}</TableCell>
-                      <TableCell>{insp.helmet_ok ? "✅" : "❌"}</TableCell>
-                      <TableCell>{insp.box_ok ? "✅" : "❌"}</TableCell>
-                      <TableCell>{insp.id_ok ? "✅" : "❌"}</TableCell>
-                      <TableCell>{insp.zone_ok ? "✅" : "❌"}</TableCell>
-                      <TableCell>{insp.clothes_ok ? "✅" : "❌"}</TableCell>
-                      <TableCell>{insp.well_behaved ? "✅" : "❌"}</TableCell>
+                      <TableCell>{insp.helmet || "—"}</TableCell>
+                      <TableCell>{insp.box || "—"}</TableCell>
+                      <TableCell>{insp.account || "—"}</TableCell>
+                      <TableCell>{insp.parking || "—"}</TableCell>
+                      <TableCell>{insp.appearance || "—"}</TableCell>
+                      <TableCell>{insp.driving || "—"}</TableCell>
+                      <TableCell>{insp.mfc_status || "—"}</TableCell>
+                      <TableCell>{insp.courier_behavior || "—"}</TableCell>
                       <TableCell>
                         {insp.timestamp?.replace("T", " ").slice(0, 19)}
                       </TableCell>
@@ -252,6 +264,20 @@ export default function Inspections() {
                 }
               />
               <TextField
+                label="Plate Number"
+                value={editInspection.plate_number ?? ""}
+                onChange={(e) =>
+                  setEditInspection((prev) => ({ ...prev, plate_number: e.target.value }))
+                }
+              />
+              <TextField
+                label="Box Serial Number"
+                value={editInspection.box_serial_number ?? ""}
+                onChange={(e) =>
+                  setEditInspection((prev) => ({ ...prev, box_serial_number: e.target.value }))
+                }
+              />
+              <TextField
                 label="City"
                 value={editInspection.city ?? ""}
                 onChange={(e) =>
@@ -265,72 +291,108 @@ export default function Inspections() {
                   setEditInspection((prev) => ({ ...prev, location: e.target.value }))
                 }
               />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={!!editInspection.helmet_ok}
-                    onChange={(e) =>
-                      setEditInspection((prev) => ({ ...prev, helmet_ok: e.target.checked }))
-                    }
-                  />
-                }
-                label="Helmet OK"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={!!editInspection.box_ok}
-                    onChange={(e) =>
-                      setEditInspection((prev) => ({ ...prev, box_ok: e.target.checked }))
-                    }
-                  />
-                }
-                label="Box OK"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={!!editInspection.id_ok}
-                    onChange={(e) =>
-                      setEditInspection((prev) => ({ ...prev, id_ok: e.target.checked }))
-                    }
-                  />
-                }
-                label="ID OK"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={!!editInspection.zone_ok}
-                    onChange={(e) =>
-                      setEditInspection((prev) => ({ ...prev, zone_ok: e.target.checked }))
-                    }
-                  />
-                }
-                label="Zone OK"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={!!editInspection.clothes_ok}
-                    onChange={(e) =>
-                      setEditInspection((prev) => ({ ...prev, clothes_ok: e.target.checked }))
-                    }
-                  />
-                }
-                label="Clothes OK"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={!!editInspection.well_behaved}
-                    onChange={(e) =>
-                      setEditInspection((prev) => ({ ...prev, well_behaved: e.target.checked }))
-                    }
-                  />
-                }
-                label="Well Behaved"
-              />
+
+              <FormControl fullWidth size="small">
+                <InputLabel>Helmet</InputLabel>
+                <Select
+                  value={editInspection.helmet || ""}
+                  label="Helmet"
+                  onChange={e => setEditInspection(prev => ({ ...prev, helmet: e.target.value }))}
+                >
+                  <MenuItem value="">—</MenuItem>
+                  <MenuItem value="Yes">Yes</MenuItem>
+                  <MenuItem value="No">No</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl fullWidth size="small">
+                <InputLabel>Box</InputLabel>
+                <Select
+                  value={editInspection.box || ""}
+                  label="Box"
+                  onChange={e => setEditInspection(prev => ({ ...prev, box: e.target.value }))}
+                >
+                  <MenuItem value="">—</MenuItem>
+                  <MenuItem value="Clean">Clean</MenuItem>
+                  <MenuItem value="Dirty or torn">Dirty or torn</MenuItem>
+                  <MenuItem value="Does not have a box">Does not have a box</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl fullWidth size="small">
+                <InputLabel>Account</InputLabel>
+                <Select
+                  value={editInspection.account || ""}
+                  label="Account"
+                  onChange={e => setEditInspection(prev => ({ ...prev, account: e.target.value }))}
+                >
+                  <MenuItem value="">—</MenuItem>
+                  <MenuItem value="Valid">Valid</MenuItem>
+                  <MenuItem value="Rented">Rented</MenuItem>
+                  <MenuItem value="Refused to provide account or CIN.">Refused to provide account or CIN.</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl fullWidth size="small">
+                <InputLabel>Parking</InputLabel>
+                <Select
+                  value={editInspection.parking || ""}
+                  label="Parking"
+                  onChange={e => setEditInspection(prev => ({ ...prev, parking: e.target.value }))}
+                >
+                  <MenuItem value="">—</MenuItem>
+                  <MenuItem value="Valid - in a dedicated area">Valid - in a dedicated area</MenuItem>
+                  <MenuItem value="Not valid - in a prohibited area">Not valid - in a prohibited area</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl fullWidth size="small">
+                <InputLabel>Appearance</InputLabel>
+                <Select
+                  value={editInspection.appearance || ""}
+                  label="Appearance"
+                  onChange={e => setEditInspection(prev => ({ ...prev, appearance: e.target.value }))}
+                >
+                  <MenuItem value="">—</MenuItem>
+                  <MenuItem value="Valid - Decent attire with gilet">Valid - Decent attire with gilet</MenuItem>
+                  <MenuItem value="Valid - Decent attire sans gilet">Valid - Decent attire sans gilet</MenuItem>
+                  <MenuItem value="Not valid - wearing pyjama, Sandals, sabots etc">Not valid - wearing pyjama, Sandals, sabots etc</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl fullWidth size="small">
+                <InputLabel>Driving</InputLabel>
+                <Select
+                  value={editInspection.driving || ""}
+                  label="Driving"
+                  onChange={e => setEditInspection(prev => ({ ...prev, driving: e.target.value }))}
+                >
+                  <MenuItem value="">—</MenuItem>
+                  <MenuItem value="Reckless driving">Reckless driving</MenuItem>
+                  <MenuItem value="Overspeed">Overspeed</MenuItem>
+                  <MenuItem value="One way driving">One way driving</MenuItem>
+                  <MenuItem value="Good Behavior">Good Behavior</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl fullWidth size="small">
+                <InputLabel>MFC Status</InputLabel>
+                <Select
+                  value={editInspection.mfc_status || ""}
+                  label="MFC Status"
+                  onChange={e => setEditInspection(prev => ({ ...prev, mfc_status: e.target.value }))}
+                >
+                  <MenuItem value="">—</MenuItem>
+                  <MenuItem value="Ongoing order - waiting for pick up">Ongoing order - waiting for pick up</MenuItem>
+                  <MenuItem value="Not ongoing order - waiting for new order">Not ongoing order - waiting for new order</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl fullWidth size="small">
+                <InputLabel>Courier Behavior</InputLabel>
+                <Select
+                  value={editInspection.courier_behavior || ""}
+                  label="Courier Behavior"
+                  onChange={e => setEditInspection(prev => ({ ...prev, courier_behavior: e.target.value }))}
+                >
+                  <MenuItem value="">—</MenuItem>
+                  <MenuItem value="Valid - Collaborative, respectful">Valid - Collaborative, respectful</MenuItem>
+                  <MenuItem value="Not valid - Not collaborative">Not valid - Not collaborative</MenuItem>
+                </Select>
+              </FormControl>
               <TextField
                 label="Comments"
                 value={editInspection.comments ?? ""}
