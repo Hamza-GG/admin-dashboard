@@ -318,7 +318,7 @@ export default function InspectionForm() {
         labelId="helmet-label"
         id="helmet"
         name="helmet"
-        value={form.helmet || ""}
+        value={form.helmet}
         label="Helmet"
         onChange={handleChange}
       >
@@ -333,7 +333,7 @@ export default function InspectionForm() {
         labelId="box-label"
         id="box"
         name="box"
-        value={form.box || ""}
+        value={form.box}
         label="Box"
         onChange={handleChange}
       >
@@ -349,7 +349,7 @@ export default function InspectionForm() {
         labelId="account-label"
         id="account"
         name="account"
-        value={form.account || ""}
+        value={form.account}
         label="Account"
         onChange={handleChange}
       >
@@ -365,7 +365,7 @@ export default function InspectionForm() {
         labelId="parking-label"
         id="parking"
         name="parking"
-        value={form.parking || ""}
+        value={form.parking}
         label="Parking"
         onChange={handleChange}
       >
@@ -380,7 +380,7 @@ export default function InspectionForm() {
         labelId="appearance-label"
         id="appearance"
         name="appearance"
-        value={form.appearance || ""}
+        value={form.appearance}
         label="Appearance"
         onChange={handleChange}
       >
@@ -396,7 +396,7 @@ export default function InspectionForm() {
         labelId="driving-label"
         id="driving"
         name="driving"
-        value={form.driving || ""}
+        value={form.driving}
         label="Driving"
         onChange={handleChange}
       >
@@ -413,7 +413,7 @@ export default function InspectionForm() {
         labelId="mfc_status-label"
         id="mfc_status"
         name="mfc_status"
-        value={form.mfc_status || ""}
+        value={form.mfc_status}
         label="MFC Status"
         onChange={handleChange}
       >
@@ -428,7 +428,7 @@ export default function InspectionForm() {
         labelId="courier_behavior-label"
         id="courier_behavior"
         name="courier_behavior"
-        value={form.courier_behavior || ""}
+        value={form.courier_behavior}
         label="Courier Behavior"
         onChange={handleChange}
       >
