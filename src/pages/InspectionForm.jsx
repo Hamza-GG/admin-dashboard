@@ -7,8 +7,6 @@ import {
   Typography,
   TextField,
   Button,
-  Checkbox,
-  FormControlLabel,
   Paper,
   Alert,
   CircularProgress,
@@ -19,18 +17,51 @@ import {
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import ImageIcon from "@mui/icons-material/Image";
 
+const dropdownOptions = {
+  helmet: ["Yes", "No"],
+  box: ["Clean", "Dirty or torn", "Does not have a box"],
+  account: ["Valid", "Rented", "Refused to provide account or CIN."],
+  parking: [
+    "Valid - in a dedicated area",
+    "Not valid - in a prohibited area",
+  ],
+  appearance: [
+    "Valid - Decent attire with gilet",
+    "Valid - Decent attire sans gilet",
+    "Not valid - wearing pyjama, Sandals, sabots etc",
+  ],
+  driving: [
+    "Reckless driving",
+    "Overspeed",
+    "One way driving",
+    "Good Behavior",
+  ],
+  mfc_status: [
+    "Ongoing order - waiting for pick up",
+    "Not ongoing order - waiting for new order",
+  ],
+  courier_behavior: [
+    "Valid - Collaborative, respectful",
+    "Not valid - Not collaborative",
+  ],
+};
+
 export default function InspectionForm() {
   const [form, setForm] = useState({
     rider_id: "",
     id_number: "",
+    box_serial_number: "",
+    plate_number: "",
     city: "",
     location: "",
-    helmet_ok: false,
-    box_ok: false,
-    id_ok: false,
-    zone_ok: false,
-    clothes_ok: false,
-    well_behaved: false,
+    helmet: "",
+    box: "",
+    account: "",
+    parking: "",
+    appearance: "",
+    driving: "",
+    mfc_status: "",
+    courier_behavior: "",
     image: null,
     comments: "",
   });
@@ -49,10 +80,8 @@ export default function InspectionForm() {
   }
 
   function handleChange(e) {
-    const { name, value, type, checked, files } = e.target;
-    if (type === "checkbox") {
-      setForm((prev) => ({ ...prev, [name]: checked }));
-    } else if (type === "file") {
+    const { name, value, type, files } = e.target;
+    if (type === "file") {
       setForm((prev) => ({ ...prev, image: files[0] }));
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
@@ -111,14 +140,18 @@ export default function InspectionForm() {
       setForm({
         rider_id: "",
         id_number: "",
+        box_serial_number: "",
+        plate_number: "",
         city: "",
         location: "",
-        helmet_ok: false,
-        box_ok: false,
-        id_ok: false,
-        zone_ok: false,
-        clothes_ok: false,
-        well_behaved: false,
+        helmet: "",
+        box: "",
+        account: "",
+        parking: "",
+        appearance: "",
+        driving: "",
+        mfc_status: "",
+        courier_behavior: "",
         image: null,
         comments: "",
       });
@@ -136,7 +169,7 @@ export default function InspectionForm() {
   return (
     <Box
       sx={{
-        minHeight: "calc(100vh - 64px)", // adjust 64px to match your navbar height if needed
+        minHeight: "calc(100vh - 64px)",
         width: "100vw",
         bgcolor: "#eef2fa",
         display: "flex",
@@ -175,13 +208,35 @@ export default function InspectionForm() {
             {error && <Alert severity="error">{error}</Alert>}
             {success && <Alert severity="success">{success}</Alert>}
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={4}>
                 <TextField
                   label="Rider ID (optional)"
                   name="rider_id"
                   value={form.rider_id}
                   onChange={handleChange}
                   placeholder="e.g. 123"
+                  fullWidth
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label="Box Serial Number"
+                  name="box_serial_number"
+                  value={form.box_serial_number}
+                  onChange={handleChange}
+                  placeholder="Box Serial Number"
+                  fullWidth
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label="Plate Number"
+                  name="plate_number"
+                  value={form.plate_number}
+                  onChange={handleChange}
+                  placeholder="Plate Number"
                   fullWidth
                   size="small"
                 />
@@ -198,56 +253,32 @@ export default function InspectionForm() {
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-  <FormControl fullWidth size="small" sx={{ minWidth: 240 }}>
-    <InputLabel id="city-label">City</InputLabel>
-<Select
-  labelId="city-label"
-  id="city"
-  name="city"
-  value={form.city}
-  label="City"
-  onChange={handleChange}
-  displayEmpty
->
-  <MenuItem value="">
-  </MenuItem>
-  <MenuItem value="Agadir">Agadir</MenuItem>
-  <MenuItem value="Ben guerir">Ben guerir</MenuItem>
-  <MenuItem value="Beni mellal">Beni mellal</MenuItem>
-  <MenuItem value="Berrechid">Berrechid</MenuItem>
-  <MenuItem value="Bouskoura">Bouskoura</MenuItem>
-  <MenuItem value="Bouznika">Bouznika</MenuItem>
-  <MenuItem value="Casablanca">Casablanca</MenuItem>
-  <MenuItem value="Dakhla">Dakhla</MenuItem>
-  <MenuItem value="Dar bouazza">Dar bouazza</MenuItem>
-  <MenuItem value="El jadida">El jadida</MenuItem>
-  <MenuItem value="Essaouira">Essaouira</MenuItem>
-  <MenuItem value="Fes">Fes</MenuItem>
-  <MenuItem value="Ifrane">Ifrane</MenuItem>
-  <MenuItem value="Kenitra">Kenitra</MenuItem>
-  <MenuItem value="Khemisset">Khemisset</MenuItem>
-  <MenuItem value="Khouribga">Khouribga</MenuItem>
-  <MenuItem value="Laayoune">Laayoune</MenuItem>
-  <MenuItem value="Larache">Larache</MenuItem>
-  <MenuItem value="M'diq">M'diq</MenuItem>
-  <MenuItem value="Marrakech">Marrakech</MenuItem>
-  <MenuItem value="Meknes">Meknes</MenuItem>
-  <MenuItem value="Mohammedia">Mohammedia</MenuItem>
-  <MenuItem value="Nador">Nador</MenuItem>
-  <MenuItem value="Nouacer">Nouacer</MenuItem>
-  <MenuItem value="Ouarzazate">Ouarzazate</MenuItem>
-  <MenuItem value="Oujda">Oujda</MenuItem>
-  <MenuItem value="Rabat">Rabat</MenuItem>
-  <MenuItem value="Safi">Safi</MenuItem>
-  <MenuItem value="Settat">Settat</MenuItem>
-  <MenuItem value="Tamesna">Tamesna</MenuItem>
-  <MenuItem value="Tanger">Tanger</MenuItem>
-  <MenuItem value="Technopolis">Technopolis</MenuItem>
-  <MenuItem value="Tetouan">Tetouan</MenuItem>
-</Select>
-  </FormControl>
-</Grid>
-              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth size="small" sx={{ minWidth: 240 }}>
+                  <InputLabel id="city-label">City</InputLabel>
+                  <Select
+                    labelId="city-label"
+                    id="city"
+                    name="city"
+                    value={form.city}
+                    label="City"
+                    onChange={handleChange}
+                    displayEmpty
+                  >
+                    <MenuItem value="" />
+                    {[
+                      "Agadir", "Ben guerir", "Beni mellal", "Berrechid", "Bouskoura",
+                      "Bouznika", "Casablanca", "Dakhla", "Dar bouazza", "El jadida",
+                      "Essaouira", "Fes", "Ifrane", "Kenitra", "Khemisset", "Khouribga",
+                      "Laayoune", "Larache", "M'diq", "Marrakech", "Meknes", "Mohammedia",
+                      "Nador", "Nouacer", "Ouarzazate", "Oujda", "Rabat", "Safi", "Settat",
+                      "Tamesna", "Tanger", "Technopolis", "Tetouan"
+                    ].map((city) => (
+                      <MenuItem key={city} value={city}>{city}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={12}>
                 <Box display="flex" alignItems="center">
                   <TextField
                     label="Location (describe if no rider ID, e.g. store, street...)"
@@ -259,98 +290,55 @@ export default function InspectionForm() {
                     size="small"
                   />
                   <Button
-  startIcon={<LocationOnIcon />}
-  variant="outlined"
-  sx={{ ml: 4, minWidth: 180, whiteSpace: "nowrap" }}  // <-- more space!
-  onClick={handleUseLocation}
-  disabled={gettingLocation || submitting}
->
-  {gettingLocation ? (
-    <CircularProgress size={18} sx={{ mr: 1 }} />
-  ) : (
-    "Use my location"
-  )}
-</Button>
+                    startIcon={<LocationOnIcon />}
+                    variant="outlined"
+                    sx={{ ml: 4, minWidth: 180, whiteSpace: "nowrap" }}
+                    onClick={handleUseLocation}
+                    disabled={gettingLocation || submitting}
+                  >
+                    {gettingLocation ? (
+                      <CircularProgress size={18} sx={{ mr: 1 }} />
+                    ) : (
+                      "Use my location"
+                    )}
+                  </Button>
                 </Box>
               </Grid>
             </Grid>
             <Divider />
             <Typography variant="subtitle1" sx={{ color: "#17417e", mt: 1 }}>
-              Inspection Checklist
+              Inspection Details
             </Typography>
             <Grid container spacing={2}>
-              <Grid item xs={6} sm={4}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="helmet_ok"
-                      checked={form.helmet_ok}
+              {[
+                { key: "helmet", label: "Helmet", options: dropdownOptions.helmet },
+                { key: "box", label: "Box", options: dropdownOptions.box },
+                { key: "account", label: "Account", options: dropdownOptions.account },
+                { key: "parking", label: "Parking", options: dropdownOptions.parking },
+                { key: "appearance", label: "Appearance", options: dropdownOptions.appearance },
+                { key: "driving", label: "Driving", options: dropdownOptions.driving },
+                { key: "mfc_status", label: "MFC Status", options: dropdownOptions.mfc_status },
+                { key: "courier_behavior", label: "Courier Behavior", options: dropdownOptions.courier_behavior },
+              ].map(({ key, label, options }) => (
+                <Grid item xs={12} sm={6} key={key}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel id={`${key}-label`}>{label}</InputLabel>
+                    <Select
+                      labelId={`${key}-label`}
+                      id={key}
+                      name={key}
+                      value={form[key]}
+                      label={label}
                       onChange={handleChange}
-                    />
-                  }
-                  label="Helmet OK"
-                />
-              </Grid>
-              <Grid item xs={6} sm={4}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="box_ok"
-                      checked={form.box_ok}
-                      onChange={handleChange}
-                    />
-                  }
-                  label="Box OK"
-                />
-              </Grid>
-              <Grid item xs={6} sm={4}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="id_ok"
-                      checked={form.id_ok}
-                      onChange={handleChange}
-                    />
-                  }
-                  label="ID OK"
-                />
-              </Grid>
-              <Grid item xs={6} sm={4}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="zone_ok"
-                      checked={form.zone_ok}
-                      onChange={handleChange}
-                    />
-                  }
-                  label="Zone OK"
-                />
-              </Grid>
-              <Grid item xs={6} sm={4}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="clothes_ok"
-                      checked={form.clothes_ok}
-                      onChange={handleChange}
-                    />
-                  }
-                  label="Clothes OK"
-                />
-              </Grid>
-              <Grid item xs={6} sm={4}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="well_behaved"
-                      checked={form.well_behaved}
-                      onChange={handleChange}
-                    />
-                  }
-                  label="Well Behaved"
-                />
-              </Grid>
+                    >
+                      <MenuItem value="" />
+                      {options.map((opt) => (
+                        <MenuItem value={opt} key={opt}>{opt}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              ))}
             </Grid>
             <Divider />
             <Button
