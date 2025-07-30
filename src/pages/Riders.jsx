@@ -38,7 +38,7 @@ export default function Riders() {
   const token = localStorage.getItem("token");
 
   const emptyForm = {
-    rider_id: "", // Now editable on add
+    rider_id: "", // Optional, as a string initially
     first_name: "",
     first_last_name: "",
     id_number: "",
@@ -93,8 +93,12 @@ export default function Riders() {
     e.preventDefault();
     try {
       const data = { ...form };
-      // Don't send empty string for optional rider_id
-      if (!data.rider_id) delete data.rider_id;
+      // Only send rider_id if filled, and as a number
+      if (data.rider_id === "") {
+        delete data.rider_id;
+      } else {
+        data.rider_id = Number(data.rider_id);
+      }
       await axios.post(
         "https://employee-inspection-backend.onrender.com/riders",
         data,
@@ -102,7 +106,7 @@ export default function Riders() {
       );
       window.location.reload(); // Refresh to show new rider (or re-fetch)
     } catch (error) {
-      alert("Failed to add rider.");
+      alert(error?.response?.data?.detail || "Failed to add rider.");
     }
   }
 
@@ -110,6 +114,10 @@ export default function Riders() {
     e.preventDefault();
     try {
       const data = { ...form };
+      // Always send rider_id as number for edit
+      if (data.rider_id !== "") {
+        data.rider_id = Number(data.rider_id);
+      }
       await axios.put(
         `https://employee-inspection-backend.onrender.com/riders/${selectedRider.rider_id}`,
         data,
@@ -117,7 +125,7 @@ export default function Riders() {
       );
       window.location.reload();
     } catch (error) {
-      alert("Failed to update rider.");
+      alert(error?.response?.data?.detail || "Failed to update rider.");
     }
   }
 
