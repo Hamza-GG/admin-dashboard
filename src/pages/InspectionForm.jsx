@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { Select, MenuItem, InputLabel, FormControl } from "@mui/material";
@@ -70,13 +70,62 @@ export default function InspectionForm() {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
+  // Rider data for auto-fill
+  const [riders, setRiders] = useState([]);
   const token = localStorage.getItem("token");
   let inspected_by = "";
-
   try {
     inspected_by = jwtDecode(token).sub;
   } catch {
     inspected_by = "";
+  }
+
+  // Fetch riders once on mount
+  useEffect(() => {
+    async function fetchRiders() {
+      try {
+        const res = await axios.get(
+          "https://employee-inspection-backend.onrender.com/riders",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setRiders(res.data || []);
+      } catch (e) {
+        // Optionally handle error
+      }
+    }
+    fetchRiders();
+  }, [token]);
+
+  // Lookup function for any field
+  function autofillByField(field, value) {
+    if (!value) return;
+    let match = null;
+    if (field === "rider_id") {
+      match = riders.find((r) => r.rider_id && r.rider_id.toString() === value.toString());
+    } else if (field === "id_number") {
+      match = riders.find((r) => r.id_number && r.id_number.toLowerCase() === value.toLowerCase());
+    } else if (field === "box_serial_number") {
+      match = riders.find((r) => r.box_serial_number && r.box_serial_number.toLowerCase() === value.toLowerCase());
+    } else if (field === "plate_number") {
+      match = riders.find((r) => r.plate_number && r.plate_number.toLowerCase() === value.toLowerCase());
+    }
+    if (match) {
+      setForm((prev) => ({
+        ...prev,
+        rider_id: match.rider_id || "",
+        id_number: match.id_number || "",
+        box_serial_number: match.box_serial_number || "",
+        plate_number: match.plate_number || "",
+      }));
+    }
+  }
+
+  // OnBlur handler for the auto-fill fields
+  function handleBlur(e) {
+    const { name, value } = e.target;
+    if (["rider_id", "id_number", "box_serial_number", "plate_number"].includes(name)) {
+      autofillByField(name, value);
+    }
   }
 
   function handleChange(e) {
@@ -214,6 +263,7 @@ export default function InspectionForm() {
                   name="rider_id"
                   value={form.rider_id}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   placeholder="e.g. 123"
                   fullWidth
                   size="small"
@@ -225,6 +275,7 @@ export default function InspectionForm() {
                   name="box_serial_number"
                   value={form.box_serial_number}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   placeholder="Box Serial Number"
                   fullWidth
                   size="small"
@@ -236,6 +287,7 @@ export default function InspectionForm() {
                   name="plate_number"
                   value={form.plate_number}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   placeholder="Plate Number"
                   fullWidth
                   size="small"
@@ -247,11 +299,13 @@ export default function InspectionForm() {
                   name="id_number"
                   value={form.id_number}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   placeholder="National ID/Other"
                   fullWidth
                   size="small"
                 />
               </Grid>
+          
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth size="small" sx={{ minWidth: 240 }}>
                   <InputLabel id="city-label">City</InputLabel>
