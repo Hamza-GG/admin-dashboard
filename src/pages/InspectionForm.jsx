@@ -307,41 +307,137 @@ export default function InspectionForm() {
             </Grid>
             <Divider />
             
-            <Box sx={{ width: '100%' }}>
-  <Typography variant="subtitle1" sx={{ color: "#17417e", mt: 1 }}>
+            <Box sx={{ width: "100%" }}>
+  <Typography variant="subtitle1" sx={{ color: "#17417e", mt: 1, mb: 1 }}>
     Inspection Details
   </Typography>
-  <Grid container spacing={2}>
-    {[
-      { key: "helmet", label: "Helmet", options: dropdownOptions.helmet },
-      { key: "box", label: "Box", options: dropdownOptions.box },
-      { key: "account", label: "Account", options: dropdownOptions.account },
-      { key: "parking", label: "Parking", options: dropdownOptions.parking },
-      { key: "appearance", label: "Appearance", options: dropdownOptions.appearance },
-      { key: "driving", label: "Driving", options: dropdownOptions.driving },
-      { key: "mfc_status", label: "MFC Status", options: dropdownOptions.mfc_status },
-      { key: "courier_behavior", label: "Courier Behavior", options: dropdownOptions.courier_behavior },
-    ].map(({ key, label, options }) => (
-      <Grid item xs={12} key={key}>
-        <FormControl fullWidth size="small" sx={{ my: 1 }}>
-          <InputLabel id={`${key}-label`}>{label}</InputLabel>
-          <Select
-            labelId={`${key}-label`}
-            id={key}
-            name={key}
-            value={form[key] || ""}
-            label={label}
-            onChange={handleChange}
-          >
-            <MenuItem value=""><em>None</em></MenuItem>
-            {options.map((opt) => (
-              <MenuItem value={opt} key={opt}>{opt}</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Grid>
-    ))}
-  </Grid>
+  <Stack spacing={2}>
+    <FormControl fullWidth size="small">
+      <InputLabel id="helmet-label">Helmet</InputLabel>
+      <Select
+        labelId="helmet-label"
+        id="helmet"
+        name="helmet"
+        value={form.helmet || ""}
+        label="Helmet"
+        onChange={handleChange}
+      >
+        <MenuItem value=""><em>None</em></MenuItem>
+        <MenuItem value="Yes">Yes</MenuItem>
+        <MenuItem value="No">No</MenuItem>
+      </Select>
+    </FormControl>
+    <FormControl fullWidth size="small">
+      <InputLabel id="box-label">Box</InputLabel>
+      <Select
+        labelId="box-label"
+        id="box"
+        name="box"
+        value={form.box || ""}
+        label="Box"
+        onChange={handleChange}
+      >
+        <MenuItem value=""><em>None</em></MenuItem>
+        <MenuItem value="Clean">Clean</MenuItem>
+        <MenuItem value="Dirty or torn">Dirty or torn</MenuItem>
+        <MenuItem value="Does not have a box">Does not have a box</MenuItem>
+      </Select>
+    </FormControl>
+    <FormControl fullWidth size="small">
+      <InputLabel id="account-label">Account</InputLabel>
+      <Select
+        labelId="account-label"
+        id="account"
+        name="account"
+        value={form.account || ""}
+        label="Account"
+        onChange={handleChange}
+      >
+        <MenuItem value=""><em>None</em></MenuItem>
+        <MenuItem value="Valid">Valid</MenuItem>
+        <MenuItem value="Rented">Rented</MenuItem>
+        <MenuItem value="Refused to provide account or CIN.">Refused to provide account or CIN.</MenuItem>
+      </Select>
+    </FormControl>
+    <FormControl fullWidth size="small">
+      <InputLabel id="parking-label">Parking</InputLabel>
+      <Select
+        labelId="parking-label"
+        id="parking"
+        name="parking"
+        value={form.parking || ""}
+        label="Parking"
+        onChange={handleChange}
+      >
+        <MenuItem value=""><em>None</em></MenuItem>
+        <MenuItem value="Valid - in a dedicated area">Valid - in a dedicated area</MenuItem>
+        <MenuItem value="Not valid - in a prohibited area">Not valid - in a prohibited area</MenuItem>
+      </Select>
+    </FormControl>
+    <FormControl fullWidth size="small">
+      <InputLabel id="appearance-label">Appearance</InputLabel>
+      <Select
+        labelId="appearance-label"
+        id="appearance"
+        name="appearance"
+        value={form.appearance || ""}
+        label="Appearance"
+        onChange={handleChange}
+      >
+        <MenuItem value=""><em>None</em></MenuItem>
+        <MenuItem value="Valid - Decent attire with gilet">Valid - Decent attire with gilet</MenuItem>
+        <MenuItem value="Valid - Decent attire sans gilet">Valid - Decent attire sans gilet</MenuItem>
+        <MenuItem value="Not valid - wearing pyjama, Sandals, sabots etc">Not valid - wearing pyjama, Sandals, sabots etc</MenuItem>
+      </Select>
+    </FormControl>
+    <FormControl fullWidth size="small">
+      <InputLabel id="driving-label">Driving</InputLabel>
+      <Select
+        labelId="driving-label"
+        id="driving"
+        name="driving"
+        value={form.driving || ""}
+        label="Driving"
+        onChange={handleChange}
+      >
+        <MenuItem value=""><em>None</em></MenuItem>
+        <MenuItem value="Reckless driving">Reckless driving</MenuItem>
+        <MenuItem value="Overspeed">Overspeed</MenuItem>
+        <MenuItem value="One way driving">One way driving</MenuItem>
+        <MenuItem value="Good Behavior">Good Behavior</MenuItem>
+      </Select>
+    </FormControl>
+    <FormControl fullWidth size="small">
+      <InputLabel id="mfc_status-label">MFC Status</InputLabel>
+      <Select
+        labelId="mfc_status-label"
+        id="mfc_status"
+        name="mfc_status"
+        value={form.mfc_status || ""}
+        label="MFC Status"
+        onChange={handleChange}
+      >
+        <MenuItem value=""><em>None</em></MenuItem>
+        <MenuItem value="Ongoing order - waiting for pick up">Ongoing order - waiting for pick up</MenuItem>
+        <MenuItem value="Not ongoing order - waiting for new order">Not ongoing order - waiting for new order</MenuItem>
+      </Select>
+    </FormControl>
+    <FormControl fullWidth size="small">
+      <InputLabel id="courier_behavior-label">Courier Behavior</InputLabel>
+      <Select
+        labelId="courier_behavior-label"
+        id="courier_behavior"
+        name="courier_behavior"
+        value={form.courier_behavior || ""}
+        label="Courier Behavior"
+        onChange={handleChange}
+      >
+        <MenuItem value=""><em>None</em></MenuItem>
+        <MenuItem value="Valid - Collaborative, respectful">Valid - Collaborative, respectful</MenuItem>
+        <MenuItem value="Not valid - Not collaborative">Not valid - Not collaborative</MenuItem>
+      </Select>
+    </FormControl>
+  </Stack>
 </Box>
 
             <Divider />
