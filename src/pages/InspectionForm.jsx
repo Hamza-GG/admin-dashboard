@@ -306,41 +306,43 @@ export default function InspectionForm() {
               </Grid>
             </Grid>
             <Divider />
-            <Typography variant="subtitle1" sx={{ color: "#17417e", mt: 1 }}>
-              Inspection Details
-            </Typography>
-            <Grid container spacing={2}>
-  {[
-    { key: "helmet", label: "Helmet", options: dropdownOptions.helmet },
-    { key: "box", label: "Box", options: dropdownOptions.box },
-    { key: "account", label: "Account", options: dropdownOptions.account },
-    { key: "parking", label: "Parking", options: dropdownOptions.parking },
-    { key: "appearance", label: "Appearance", options: dropdownOptions.appearance },
-    { key: "driving", label: "Driving", options: dropdownOptions.driving },
-    { key: "mfc_status", label: "MFC Status", options: dropdownOptions.mfc_status },
-    { key: "courier_behavior", label: "Courier Behavior", options: dropdownOptions.courier_behavior },
-  ].map(({ key, label, options }) => (
-    <Grid item xs={12} key={key}>  {/* <-- Each dropdown full row */}
-      <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-        <InputLabel id={`${key}-label`}>{label}</InputLabel>
-        <Select
-          labelId={`${key}-label`}
-          id={key}
-          name={key}
-          value={form[key]}
-          label={label}
-          onChange={handleChange}
-        >
-          <MenuItem value="" />
-          {options.map((opt) => (
-            <MenuItem value={opt} key={opt}>{opt}</MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-    </Grid>
-  ))}
-</Grid>
-
+            
+            <Box sx={{ width: '100%' }}>
+  <Typography variant="subtitle1" sx={{ color: "#17417e", mt: 1 }}>
+    Inspection Details
+  </Typography>
+  <Grid container spacing={2}>
+    {[
+      { key: "helmet", label: "Helmet", options: dropdownOptions.helmet },
+      { key: "box", label: "Box", options: dropdownOptions.box },
+      { key: "account", label: "Account", options: dropdownOptions.account },
+      { key: "parking", label: "Parking", options: dropdownOptions.parking },
+      { key: "appearance", label: "Appearance", options: dropdownOptions.appearance },
+      { key: "driving", label: "Driving", options: dropdownOptions.driving },
+      { key: "mfc_status", label: "MFC Status", options: dropdownOptions.mfc_status },
+      { key: "courier_behavior", label: "Courier Behavior", options: dropdownOptions.courier_behavior },
+    ].map(({ key, label, options }) => (
+      <Grid item xs={12} key={key}>
+        <FormControl fullWidth size="small" sx={{ my: 1 }}>
+          <InputLabel id={`${key}-label`}>{label}</InputLabel>
+          <Select
+            labelId={`${key}-label`}
+            id={key}
+            name={key}
+            value={form[key] || ""}
+            label={label}
+            onChange={handleChange}
+          >
+            <MenuItem value=""><em>None</em></MenuItem>
+            {options.map((opt) => (
+              <MenuItem value={opt} key={opt}>{opt}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Grid>
+    ))}
+  </Grid>
+</Box>
 
             <Divider />
             <Button
