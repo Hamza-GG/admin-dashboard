@@ -1,4 +1,3 @@
-// src/pages/Riders.jsx
 import React, { useEffect, useState } from "react";
 import authAxios from "../utils/authAxios";
 import {
@@ -63,7 +62,16 @@ export default function Riders() {
   }, []);
 
   const filtered = riders.filter((r) =>
-    [r.rider_id, r.first_name, r.first_last_name, r.id_number, r.city_code, r.vehicle_type, r.plate_number, r.box_serial_number]
+    [
+      r.rider_id,
+      r.first_name,
+      r.first_last_name,
+      r.id_number,
+      r.city_code,
+      r.vehicle_type,
+      r.plate_number,
+      r.box_serial_number,
+    ]
       .map((v) => (v ? v.toString().toLowerCase() : ""))
       .some((v) => v.includes(search.toLowerCase()))
   );
@@ -80,7 +88,7 @@ export default function Riders() {
 
   function handleEditOpen(rider) {
     setSelectedRider(rider);
-    setForm({ ...rider, joined_at: rider.joined_at ? rider.joined_at.slice(0, 10) : "" });
+    setForm({ ...rider, joined_at: rider.joined_at?.slice(0, 10) || "" });
     setOpenEdit(true);
   }
 
@@ -125,8 +133,8 @@ export default function Riders() {
   }
 
   return (
-    <Box sx={{ minHeight: "100vh", backgroundColor: "#f7fafd", p: 4 }}>
-      <Box sx={{ maxWidth: 1200, mx: "auto" }}>
+    <Box sx={{ minHeight: "100vh", backgroundColor: "#f7fafd", display: "flex", justifyContent: "center", p: 4 }}>
+      <Box sx={{ width: "100%", maxWidth: 1200 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
           <Typography variant="h4" fontWeight="bold">
             Riders
@@ -203,10 +211,38 @@ export default function Riders() {
             </TableContainer>
           )}
         </Paper>
-      </Box>
 
-      {/* Add and Edit dialogs remain unchanged */}
-      {/* ... You can paste them here as-is ... */}
+        {/* Add Rider Dialog */}
+        <Dialog open={openAdd} onClose={() => setOpenAdd(false)} fullWidth>
+          <DialogTitle>Add New Rider</DialogTitle>
+          <form onSubmit={handleAddSubmit}>
+            <DialogContent>
+              <Stack spacing={2}>
+                <TextField label="First Name" name="first_name" value={form.first_name} onChange={handleChange} fullWidth required />
+                <TextField label="Last Name" name="first_last_name" value={form.first_last_name} onChange={handleChange} fullWidth required />
+                <TextField label="ID Number" name="id_number" value={form.id_number} onChange={handleChange} fullWidth required />
+                <TextField label="City Code" name="city_code" value={form.city_code} onChange={handleChange} fullWidth />
+                <TextField label="Vehicle Type" name="vehicle_type" value={form.vehicle_type} onChange={handleChange} fullWidth />
+                <TextField label="Box Serial Number" name="box_serial_number" value={form.box_serial_number} onChange={handleChange} fullWidth />
+                <TextField label="Plate Number" name="plate_number" value={form.plate_number} onChange={handleChange} fullWidth />
+                <TextField
+                  label="Joined At"
+                  name="joined_at"
+                  type="date"
+                  value={form.joined_at}
+                  onChange={handleChange}
+                  fullWidth
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Stack>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setOpenAdd(false)}>Cancel</Button>
+              <Button type="submit" variant="contained">Add</Button>
+            </DialogActions>
+          </form>
+        </Dialog>
+      </Box>
     </Box>
   );
 }
