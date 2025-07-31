@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import authAxios from "../utils/authAxios"; // <-- Make sure this is correct
 import {
   Box,
   Typography,
@@ -39,14 +39,11 @@ export default function Inspections() {
   const [editInspection, setEditInspection] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const token = localStorage.getItem("token");
 
   useEffect(() => {
     async function fetchInspections() {
       try {
-        const res = await axios.get("https://employee-inspection-backend.onrender.com/inspections", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await authAxios.get("/inspections");
         setInspections(res.data);
       } catch (error) {
         alert("Failed to fetch inspections.");
@@ -55,7 +52,7 @@ export default function Inspections() {
       }
     }
     fetchInspections();
-  }, [token]);
+  }, []);
 
   const filtered = inspections.filter((insp) => {
     const textMatch =
@@ -79,9 +76,7 @@ export default function Inspections() {
   async function handleDelete(id) {
     if (!window.confirm("Delete this inspection?")) return;
     try {
-      await axios.delete(`https://employee-inspection-backend.onrender.com/inspections/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await authAxios.delete(`/inspections/${id}`);
       setInspections((prev) => prev.filter((i) => i.id !== id));
     } catch (error) {
       alert("Failed to delete inspection.");
@@ -91,11 +86,7 @@ export default function Inspections() {
   async function handleEditSubmit(e) {
     e.preventDefault();
     try {
-      await axios.patch(
-        `https://employee-inspection-backend.onrender.com/inspections/${editInspection.id}`,
-        editInspection,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await authAxios.patch(`/inspections/${editInspection.id}`, editInspection);
       setInspections((prev) =>
         prev.map((insp) => (insp.id === editInspection.id ? editInspection : insp))
       );
