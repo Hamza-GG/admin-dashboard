@@ -5,20 +5,25 @@ import { Link, useNavigate } from "react-router-dom";
 function Navbar({ setIsAuthenticated }) {
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    try {
-      await fetch("/logout", {
-        method: "POST",
-        credentials: "include", // ⬅️ to clear refresh_token cookie
-      });
-    } catch (err) {
-      console.error("Failed to log out:", err);
-    }
+const BASE_URL = "https://employee-inspection-backend.onrender.com";
 
-    localStorage.removeItem("access_token");
-    setIsAuthenticated(false);
-    navigate("/login");
-  };
+const handleLogout = async () => {
+  try {
+    await fetch(`${BASE_URL}/logout`, {
+      method: "POST",
+      credentials: "include", // ensures refresh_token is cleared
+    });
+  } catch (err) {
+    console.error("Failed to log out:", err);
+  }
+
+  // Clean both for safety
+  localStorage.removeItem("token");
+  localStorage.removeItem("access_token");
+
+  setIsAuthenticated(false);
+  navigate("/login");
+};
 
   return (
     <AppBar

@@ -20,12 +20,12 @@ function Login() {
       formData.append("username", username);
       formData.append("password", password);
 
-      const res = await axios.post("https://employee-inspection-backend.onrender.com//token", formData, {
+      const res = await axios.post("https://employee-inspection-backend.onrender.com/token", formData, {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         withCredentials: true, // This ensures the refresh token cookie is stored
       });
 
-      localStorage.setItem("token", res.data.access_token);
+      localStorage.setItem("access_token", res.data.access_token);
       navigate("/dashboard");
     } catch (err) {
       if (err.response?.data?.detail) {
@@ -36,20 +36,33 @@ function Login() {
     }
   }
 
-  async function handleForgotSubmit(e) {
-    e.preventDefault();
-    setResetMsg("");
-    setResetErr("");
-    try {
-      await axios.post("https://employee-inspection-backend.onrender.com//forgot-password", {
-        username: resetEmail,
-      });
-      setResetMsg("If this email exists, a reset link has been sent.");
-    } catch (err) {
-      setResetErr("Failed to send reset email.");
+async function handleSubmit(e) {
+  e.preventDefault();
+  setError("");
+  try {
+    const formData = new URLSearchParams();
+    formData.append("username", username);
+    formData.append("password", password);
+
+    const res = await axios.post(
+      "https://employee-inspection-backend.onrender.com/token",
+      formData,
+      {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        withCredentials: true, // stores refresh_token in HttpOnly cookie
+      }
+    );
+
+    localStorage.setItem("access_token", res.data.access_token); // <-- consistent
+    navigate("/dashboard");
+  } catch (err) {
+    if (err.response?.data?.detail) {
+      setError(err.response.data.detail);
+    } else {
+      setError("Login failed. Please try again.");
     }
   }
-
+}
   return (
     <div style={{
       minHeight: "100vh",
