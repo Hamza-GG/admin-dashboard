@@ -1,9 +1,29 @@
-import { Container, Typography, Box, Button, Card, CardContent, CardActions, Grid } from "@mui/material";
+import {
+  Container,
+  Typography,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardActions,
+  Grid,
+} from "@mui/material";
 import { Link } from "react-router-dom";
 import GroupIcon from "@mui/icons-material/Group";
 import FactCheckIcon from "@mui/icons-material/FactCheck";
+import { useEffect, useState } from "react";
+import { fetchWithAutoRefresh } from "../utils/api"; // 👈 make sure this exists
 
 function Dashboard() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    fetchWithAutoRefresh("/users/me")
+      .then((res) => res.json())
+      .then((data) => setUser(data))
+      .catch((err) => console.error("Failed to fetch user info:", err));
+  }, []);
+
   return (
     <Box
       minHeight="100vh"
@@ -17,15 +37,24 @@ function Dashboard() {
         paddingBottom: 0,
       }}
     >
-      <Container maxWidth="md" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+      <Container
+        maxWidth="md"
+        sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%" }}
+      >
         <Typography
           variant="h3"
           align="center"
           gutterBottom
-          sx={{ fontWeight: 700, letterSpacing: 1, mb: 6, mt: 0 }}
+          sx={{ fontWeight: 700, letterSpacing: 1, mb: 1, mt: 0 }}
         >
           Admin Dashboard
         </Typography>
+
+        {user && (
+          <Typography variant="h6" sx={{ mb: 4 }}>
+            Welcome, {user.username} 👋
+          </Typography>
+        )}
 
         <Grid container spacing={6} justifyContent="center" alignItems="center">
           <Grid item xs={12} md={6}>
@@ -40,7 +69,9 @@ function Dashboard() {
                 "&:hover": { transform: "scale(1.03)", boxShadow: 12 },
               }}
             >
-              <CardContent sx={{ flexGrow: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <CardContent
+                sx={{ flexGrow: 1, display: "flex", flexDirection: "column", alignItems: "center" }}
+              >
                 <GroupIcon color="primary" sx={{ fontSize: 60, mb: 2 }} />
                 <Typography variant="h5" gutterBottom>
                   Riders
@@ -75,7 +106,9 @@ function Dashboard() {
                 "&:hover": { transform: "scale(1.03)", boxShadow: 12 },
               }}
             >
-              <CardContent sx={{ flexGrow: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <CardContent
+                sx={{ flexGrow: 1, display: "flex", flexDirection: "column", alignItems: "center" }}
+              >
                 <FactCheckIcon color="success" sx={{ fontSize: 60, mb: 2 }} />
                 <Typography variant="h5" gutterBottom>
                   Inspections
