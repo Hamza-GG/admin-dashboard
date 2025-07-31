@@ -2,11 +2,21 @@
 import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 
-function Navbar() {
+function Navbar({ setIsAuthenticated }) {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
+  const handleLogout = async () => {
+    try {
+      await fetch("/logout", {
+        method: "POST",
+        credentials: "include", // ⬅️ to clear refresh_token cookie
+      });
+    } catch (err) {
+      console.error("Failed to log out:", err);
+    }
+
+    localStorage.removeItem("access_token");
+    setIsAuthenticated(false);
     navigate("/login");
   };
 

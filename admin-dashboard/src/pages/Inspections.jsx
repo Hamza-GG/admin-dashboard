@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import {
   Box,
   Typography,
@@ -29,6 +28,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { fetchWithAutoRefresh } from "../utils/api";
 
 export default function Inspections() {
   const [inspections, setInspections] = useState([]);
@@ -37,15 +37,13 @@ export default function Inspections() {
   const [editInspection, setEditInspection] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const token = localStorage.getItem("token");
 
   useEffect(() => {
     async function fetchInspections() {
       try {
-        const res = await axios.get("http://localhost:8000/inspections", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setInspections(res.data);
+        const res = await fetchWithAutoRefresh("/inspections");
+        const data = await res.json();
+        setInspections(data);
       } catch (error) {
         alert("Failed to fetch inspections.");
       } finally {
@@ -53,7 +51,7 @@ export default function Inspections() {
       }
     }
     fetchInspections();
-  }, [token]);
+  }, []);
 
   const filtered = inspections.filter((insp) => {
     const textMatch =
@@ -75,9 +73,8 @@ export default function Inspections() {
   async function handleDelete(id) {
     if (!window.confirm("Delete this inspection?")) return;
     try {
-      await axios.delete(`http://localhost:8000/inspections/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetchWithAutoRefresh(`/inspections/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error();
       setInspections((prev) => prev.filter((i) => i.id !== id));
     } catch (error) {
       alert("Failed to delete inspection.");
@@ -87,11 +84,16 @@ export default function Inspections() {
   async function handleEditSubmit(e) {
     e.preventDefault();
     try {
-      await axios.patch(
-        `http://localhost:8000/inspections/${editInspection.id}`,
-        editInspection,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const res = await fetchWithAutoRefresh(`/inspections/${editInspection.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(editInspection),
+      });
+
+      if (!res.ok) throw new Error();
+
       setInspections((prev) =>
         prev.map((insp) => (insp.id === editInspection.id ? editInspection : insp))
       );
@@ -102,21 +104,10 @@ export default function Inspections() {
   }
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        width: "100vw",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "#f7fafd",
-      }}
-    >
+    <Box sx={{ minHeight: "100vh", width: "100vw", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", backgroundColor: "#f7fafd" }}>
       <Box sx={{ width: "100%", maxWidth: 1300, mx: "auto", py: 6 }}>
-        <Typography variant="h4" fontWeight="bold" gutterBottom align="center">
-          Inspections
-        </Typography>
+        <Typography variant="h4" fontWeight="bold" gutterBottom align="center">Inspections</Typography>
+
         <Paper sx={{ p: 2, mb: 3 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <SearchIcon color="action" />
@@ -133,22 +124,19 @@ export default function Inspections() {
               <DatePicker
                 label="Start Date"
                 value={startDate}
-                onChange={date => setStartDate(date)}
-                slotProps={{
-                  textField: { size: "small", sx: { minWidth: 150 } }
-                }}
+                onChange={setStartDate}
+                slotProps={{ textField: { size: "small", sx: { minWidth: 150 } } }}
               />
               <DatePicker
                 label="End Date"
                 value={endDate}
-                onChange={date => setEndDate(date)}
-                slotProps={{
-                  textField: { size: "small", sx: { minWidth: 150 } }
-                }}
+                onChange={setEndDate}
+                slotProps={{ textField: { size: "small", sx: { minWidth: 150 } } }}
               />
             </Box>
           </LocalizationProvider>
         </Paper>
+
         <Paper elevation={2}>
           {loading ? (
             <Box sx={{ textAlign: "center", py: 6 }}>
@@ -195,9 +183,7 @@ export default function Inspections() {
                       <TableCell>{insp.zone_ok ? "✅" : "❌"}</TableCell>
                       <TableCell>{insp.clothes_ok ? "✅" : "❌"}</TableCell>
                       <TableCell>{insp.well_behaved ? "✅" : "❌"}</TableCell>
-                      <TableCell>
-                        {insp.timestamp?.replace("T", " ").slice(0, 19)}
-                      </TableCell>
+                      <TableCell>{insp.timestamp?.replace("T", " ").slice(0, 19)}</TableCell>
                       <TableCell>
                         {insp.image_url ? (
                           <Tooltip title="View Image">
@@ -231,123 +217,41 @@ export default function Inspections() {
         </Paper>
       </Box>
 
-      {/* --------- EDIT DIALOG --------- */}
       <Dialog open={!!editInspection} onClose={() => setEditInspection(null)} maxWidth="sm" fullWidth>
         <DialogTitle>Edit Inspection</DialogTitle>
         <DialogContent>
           {editInspection && (
             <Box component="form" onSubmit={handleEditSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
-              <TextField
-                label="Rider ID"
-                value={editInspection.rider_id ?? ""}
-                onChange={(e) =>
-                  setEditInspection((prev) => ({ ...prev, rider_id: e.target.value || null }))
-                }
-              />
-              <TextField
-                label="ID Number"
-                value={editInspection.id_number ?? ""}
-                onChange={(e) =>
-                  setEditInspection((prev) => ({ ...prev, id_number: e.target.value || null }))
-                }
-              />
-              <TextField
-                label="City"
-                value={editInspection.city ?? ""}
-                onChange={(e) =>
-                  setEditInspection((prev) => ({ ...prev, city: e.target.value }))
-                }
-              />
-              <TextField
-                label="Location"
-                value={editInspection.location ?? ""}
-                onChange={(e) =>
-                  setEditInspection((prev) => ({ ...prev, location: e.target.value }))
-                }
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={!!editInspection.helmet_ok}
-                    onChange={(e) =>
-                      setEditInspection((prev) => ({ ...prev, helmet_ok: e.target.checked }))
-                    }
-                  />
-                }
-                label="Helmet OK"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={!!editInspection.box_ok}
-                    onChange={(e) =>
-                      setEditInspection((prev) => ({ ...prev, box_ok: e.target.checked }))
-                    }
-                  />
-                }
-                label="Box OK"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={!!editInspection.id_ok}
-                    onChange={(e) =>
-                      setEditInspection((prev) => ({ ...prev, id_ok: e.target.checked }))
-                    }
-                  />
-                }
-                label="ID OK"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={!!editInspection.zone_ok}
-                    onChange={(e) =>
-                      setEditInspection((prev) => ({ ...prev, zone_ok: e.target.checked }))
-                    }
-                  />
-                }
-                label="Zone OK"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={!!editInspection.clothes_ok}
-                    onChange={(e) =>
-                      setEditInspection((prev) => ({ ...prev, clothes_ok: e.target.checked }))
-                    }
-                  />
-                }
-                label="Clothes OK"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={!!editInspection.well_behaved}
-                    onChange={(e) =>
-                      setEditInspection((prev) => ({ ...prev, well_behaved: e.target.checked }))
-                    }
-                  />
-                }
-                label="Well Behaved"
-              />
+              <TextField label="Rider ID" value={editInspection.rider_id ?? ""} onChange={(e) => setEditInspection((prev) => ({ ...prev, rider_id: e.target.value || null }))} />
+              <TextField label="ID Number" value={editInspection.id_number ?? ""} onChange={(e) => setEditInspection((prev) => ({ ...prev, id_number: e.target.value || null }))} />
+              <TextField label="City" value={editInspection.city ?? ""} onChange={(e) => setEditInspection((prev) => ({ ...prev, city: e.target.value }))} />
+              <TextField label="Location" value={editInspection.location ?? ""} onChange={(e) => setEditInspection((prev) => ({ ...prev, location: e.target.value }))} />
+              {[
+                ["helmet_ok", "Helmet OK"],
+                ["box_ok", "Box OK"],
+                ["id_ok", "ID OK"],
+                ["zone_ok", "Zone OK"],
+                ["clothes_ok", "Clothes OK"],
+                ["well_behaved", "Well Behaved"],
+              ].map(([key, label]) => (
+                <FormControlLabel
+                  key={key}
+                  control={<Checkbox checked={!!editInspection[key]} onChange={(e) => setEditInspection((prev) => ({ ...prev, [key]: e.target.checked }))} />}
+                  label={label}
+                />
+              ))}
               <TextField
                 label="Comments"
                 value={editInspection.comments ?? ""}
-                onChange={(e) =>
-                  setEditInspection((prev) => ({ ...prev, comments: e.target.value }))
-                }
-                multiline
-                rows={2}
+                onChange={(e) => setEditInspection((prev) => ({ ...prev, comments: e.target.value }))}
+                multiline rows={2}
               />
             </Box>
           )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setEditInspection(null)}>Cancel</Button>
-          <Button type="submit" onClick={handleEditSubmit} variant="contained">
-            Save
-          </Button>
+          <Button type="submit" onClick={handleEditSubmit} variant="contained">Save</Button>
         </DialogActions>
       </Dialog>
     </Box>

@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 function Login() {
-  const [username, setUsername] = useState(""); // Email as username
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showForgot, setShowForgot] = useState(false);
@@ -20,14 +20,15 @@ function Login() {
       formData.append("username", username);
       formData.append("password", password);
 
-      const res = await axios.post("http://localhost:8000/token", formData, {
+      const res = await axios.post("https://employee-inspection-backend.onrender.com//token", formData, {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        withCredentials: true, // This ensures the refresh token cookie is stored
       });
 
       localStorage.setItem("token", res.data.access_token);
       navigate("/dashboard");
     } catch (err) {
-      if (err.response && err.response.data && err.response.data.detail) {
+      if (err.response?.data?.detail) {
         setError(err.response.data.detail);
       } else {
         setError("Login failed. Please try again.");
@@ -40,7 +41,7 @@ function Login() {
     setResetMsg("");
     setResetErr("");
     try {
-      await axios.post("http://localhost:8000/forgot-password", {
+      await axios.post("https://employee-inspection-backend.onrender.com//forgot-password", {
         username: resetEmail,
       });
       setResetMsg("If this email exists, a reset link has been sent.");
@@ -50,39 +51,33 @@ function Login() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        width: "100vw",
-        background: "#f4f8fc",
+    <div style={{
+      minHeight: "100vh",
+      width: "100vw",
+      background: "#f4f8fc",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center"
+    }}>
+      <div style={{
+        maxWidth: 400,
+        width: "100%",
+        background: "#fff",
+        padding: "36px 32px 32px 32px",
+        borderRadius: 16,
+        boxShadow: "0 4px 32px rgba(0,0,0,0.09)",
         display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: 400,
-          width: "100%",
-          background: "#fff",
-          padding: "36px 32px 32px 32px",
-          borderRadius: 16,
-          boxShadow: "0 4px 32px rgba(0,0,0,0.09)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <h2
-          style={{
-            fontWeight: 800,
-            color: "#1565c0",
-            letterSpacing: 1,
-            marginBottom: 24,
-            fontSize: 32,
-            textAlign: "center",
-          }}
-        >
+        flexDirection: "column",
+        alignItems: "center"
+      }}>
+        <h2 style={{
+          fontWeight: 800,
+          color: "#1565c0",
+          letterSpacing: 1,
+          marginBottom: 24,
+          fontSize: 32,
+          textAlign: "center"
+        }}>
           Inspection Admin Login
         </h2>
         <form onSubmit={handleSubmit} style={{ width: "100%" }}>
@@ -102,7 +97,7 @@ function Login() {
               outline: "none",
               background: "#f6faff",
               color: "black",
-              WebkitTextFillColor: "black",
+              WebkitTextFillColor: "black"
             }}
           />
           <input
@@ -121,34 +116,27 @@ function Login() {
               outline: "none",
               background: "#f6faff",
               color: "black",
-              WebkitTextFillColor: "black",
+              WebkitTextFillColor: "black"
             }}
           />
-          <button
-            type="submit"
-            style={{
-              width: "100%",
-              padding: "12px",
-              background: "#1565c0",
-              color: "#fff",
-              fontWeight: 700,
-              fontSize: 17,
-              border: "none",
-              borderRadius: 8,
-              cursor: "pointer",
-              transition: "background 0.2s",
-              marginBottom: 6,
-            }}
-          >
+          <button type="submit" style={{
+            width: "100%",
+            padding: "12px",
+            background: "#1565c0",
+            color: "#fff",
+            fontWeight: 700,
+            fontSize: 17,
+            border: "none",
+            borderRadius: 8,
+            cursor: "pointer",
+            transition: "background 0.2s",
+            marginBottom: 6
+          }}>
             Login
           </button>
-          {error && (
-            <p style={{ color: "red", marginTop: 12, textAlign: "center" }}>
-              {error}
-            </p>
-          )}
+          {error && <p style={{ color: "red", marginTop: 12, textAlign: "center" }}>{error}</p>}
         </form>
-        {/* Forgot Password link */}
+
         <div style={{ width: "100%", marginTop: 8, textAlign: "right" }}>
           <button
             type="button"
@@ -159,14 +147,14 @@ function Login() {
               textDecoration: "underline",
               cursor: "pointer",
               fontSize: 15,
-              padding: 0,
+              padding: 0
             }}
             onClick={() => setShowForgot(true)}
           >
             Forgot Password?
           </button>
         </div>
-        {/* Modal for forgot password */}
+
         {showForgot && (
           <div
             style={{
@@ -179,7 +167,7 @@ function Login() {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              zIndex: 20,
+              zIndex: 20
             }}
             onClick={() => setShowForgot(false)}
           >
@@ -193,7 +181,7 @@ function Login() {
                 position: "relative",
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "center",
+                alignItems: "center"
               }}
               onClick={e => e.stopPropagation()}
             >
@@ -206,20 +194,18 @@ function Login() {
                   border: "none",
                   fontSize: 20,
                   color: "#888",
-                  cursor: "pointer",
+                  cursor: "pointer"
                 }}
                 onClick={() => setShowForgot(false)}
               >
                 &times;
               </button>
-              <h3
-                style={{
-                  color: "#1565c0",
-                  marginBottom: 16,
-                  fontWeight: 700,
-                  fontSize: 22,
-                }}
-              >
+              <h3 style={{
+                color: "#1565c0",
+                marginBottom: 16,
+                fontWeight: 700,
+                fontSize: 22
+              }}>
                 Reset Password
               </h3>
               <form onSubmit={handleForgotSubmit} style={{ width: "100%" }}>
@@ -239,7 +225,7 @@ function Login() {
                     outline: "none",
                     background: "#f6faff",
                     color: "black",
-                    WebkitTextFillColor: "black",
+                    WebkitTextFillColor: "black"
                   }}
                 />
                 <button
@@ -253,17 +239,13 @@ function Login() {
                     fontSize: 16,
                     border: "none",
                     borderRadius: 7,
-                    cursor: "pointer",
+                    cursor: "pointer"
                   }}
                 >
                   Send Reset Email
                 </button>
-                {resetMsg && (
-                  <p style={{ color: "green", marginTop: 10, textAlign: "center" }}>{resetMsg}</p>
-                )}
-                {resetErr && (
-                  <p style={{ color: "red", marginTop: 10, textAlign: "center" }}>{resetErr}</p>
-                )}
+                {resetMsg && <p style={{ color: "green", marginTop: 10, textAlign: "center" }}>{resetMsg}</p>}
+                {resetErr && <p style={{ color: "red", marginTop: 10, textAlign: "center" }}>{resetErr}</p>}
               </form>
             </div>
           </div>

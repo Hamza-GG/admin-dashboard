@@ -9,18 +9,18 @@ import InspectionForm from "./pages/InspectionForm";
 import Login from "./pages/Login";
 import Navbar from "./components/Navbar";
 
-const theme = createTheme(); // Customize as needed
+const theme = createTheme();
 
 function ProtectedRoute({ children }) {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("access_token");
   return token ? children : <Navigate to="/login" replace />;
 }
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("token"));
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("access_token"));
 
   useEffect(() => {
-    const onStorage = () => setIsAuthenticated(!!localStorage.getItem("token"));
+    const onStorage = () => setIsAuthenticated(!!localStorage.getItem("access_token"));
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
   }, []);
@@ -29,9 +29,7 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        {/* Navbar fixed at top, only when authenticated */}
         {isAuthenticated && <Navbar setIsAuthenticated={setIsAuthenticated} />}
-        {/* All page content pushed down by 64px (default AppBar height) */}
         <Box sx={{ mt: isAuthenticated ? 8 : 0 }}>
           <Routes>
             <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
