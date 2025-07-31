@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import authAxios from "../utils/authAxios";
 import {
   Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Button, IconButton, TextField, Typography, Dialog, DialogTitle, DialogContent,
