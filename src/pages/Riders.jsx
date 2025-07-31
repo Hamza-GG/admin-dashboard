@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import authAxios from "../utils/authAxios"; // <- use custom Axios instance
+import authAxios from "../utils/authAxios";
 import {
   Box,
   Typography,
@@ -73,11 +73,13 @@ export default function Riders() {
   }
 
   function handleAddOpen() {
+    console.log("Opening add rider dialog");
     setForm(emptyForm);
     setOpenAdd(true);
   }
 
   function handleEditOpen(rider) {
+    console.log("Opening edit rider dialog", rider);
     setSelectedRider(rider);
     setForm({ ...rider, joined_at: rider.joined_at?.slice(0, 10) || "" });
     setOpenEdit(true);
@@ -85,6 +87,7 @@ export default function Riders() {
 
   async function handleAddSubmit(e) {
     e.preventDefault();
+    console.log("Submitting new rider", form);
     try {
       const data = { ...form };
       if (!data.rider_id) delete data.rider_id;
@@ -98,6 +101,7 @@ export default function Riders() {
 
   async function handleEditSubmit(e) {
     e.preventDefault();
+    console.log("Updating rider", form);
     try {
       const data = { ...form };
       if (data.rider_id) data.rider_id = Number(data.rider_id);
@@ -117,6 +121,23 @@ export default function Riders() {
       alert("Failed to delete rider.");
     }
   }
+
+  const renderFormFields = () => (
+    <>
+      {Object.entries(emptyForm).map(([key]) => (
+        <TextField
+          key={key}
+          name={key}
+          label={key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+          value={form[key]}
+          onChange={handleChange}
+          type={key === 'joined_at' ? 'date' : 'text'}
+          InputLabelProps={key === 'joined_at' ? { shrink: true } : {}}
+          fullWidth
+        />
+      ))}
+    </>
+  );
 
   return (
     <Box sx={{ minHeight: "100vh", width: "100vw", backgroundColor: "#f7fafd" }}>
@@ -146,30 +167,18 @@ export default function Riders() {
               <Table size="small">
                 <TableHead sx={{ background: "#f5f5f5" }}>
                   <TableRow>
-                    <TableCell>Rider ID</TableCell>
-                    <TableCell>First Name</TableCell>
-                    <TableCell>Last Name</TableCell>
-                    <TableCell>ID Number</TableCell>
-                    <TableCell>City Code</TableCell>
-                    <TableCell>Vehicle Type</TableCell>
-                    <TableCell>Box Serial Number</TableCell>
-                    <TableCell>Plate Number</TableCell>
-                    <TableCell>Joined At</TableCell>
+                    {Object.keys(emptyForm).map((key) => (
+                      <TableCell key={key}>{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</TableCell>
+                    ))}
                     <TableCell align="center">Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {filtered.map((rider) => (
                     <TableRow key={rider.rider_id}>
-                      <TableCell>{rider.rider_id}</TableCell>
-                      <TableCell>{rider.first_name}</TableCell>
-                      <TableCell>{rider.first_last_name}</TableCell>
-                      <TableCell>{rider.id_number}</TableCell>
-                      <TableCell>{rider.city_code}</TableCell>
-                      <TableCell>{rider.vehicle_type}</TableCell>
-                      <TableCell>{rider.box_serial_number}</TableCell>
-                      <TableCell>{rider.plate_number}</TableCell>
-                      <TableCell>{rider.joined_at?.slice(0, 10)}</TableCell>
+                      {Object.keys(emptyForm).map((key) => (
+                        <TableCell key={key}>{key === 'joined_at' ? rider[key]?.slice(0, 10) : rider[key]}</TableCell>
+                      ))}
                       <TableCell align="center">
                         <Tooltip title="Edit">
                           <IconButton color="primary" onClick={() => handleEditOpen(rider)}>
@@ -190,7 +199,34 @@ export default function Riders() {
           )}
         </Paper>
       </Box>
-      {/* Add/Edit dialogs stay unchanged */}
+
+      {/* ADD DIALOG */}
+      <Dialog open={openAdd} onClose={() => setOpenAdd(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Add Rider</DialogTitle>
+        <DialogContent>
+          <Box component="form" onSubmit={handleAddSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}>
+            {renderFormFields()}
+            <DialogActions>
+              <Button onClick={() => setOpenAdd(false)}>Cancel</Button>
+              <Button type="submit" variant="contained">Save</Button>
+            </DialogActions>
+          </Box>
+        </DialogContent>
+      </Dialog>
+
+      {/* EDIT DIALOG */}
+      <Dialog open={openEdit} onClose={() => setOpenEdit(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Edit Rider</DialogTitle>
+        <DialogContent>
+          <Box component="form" onSubmit={handleEditSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}>
+            {renderFormFields()}
+            <DialogActions>
+              <Button onClick={() => setOpenEdit(false)}>Cancel</Button>
+              <Button type="submit" variant="contained">Update</Button>
+            </DialogActions>
+          </Box>
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 }
