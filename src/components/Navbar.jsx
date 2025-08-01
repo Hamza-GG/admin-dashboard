@@ -64,7 +64,7 @@ function Navbar({ setIsAuthenticated }) {
           <img
             src="/rider.png" // make sure this exists in your public/ folder
             alt="logo"
-            style={{ height: 32, marginRight: 10 }}
+            style={{ height: 52, marginRight: 30 }}
           />
           <Typography
             variant="h6"
@@ -75,7 +75,7 @@ function Navbar({ setIsAuthenticated }) {
               fontSize: 22,
             }}
           >
-            MA OPS Watcher
+            OPS Watcher
           </Typography>
         </Box>
 
