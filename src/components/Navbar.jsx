@@ -17,7 +17,6 @@ function Navbar({ setIsAuthenticated }) {
       console.error("Failed to log out:", err);
     }
 
-    localStorage.removeItem("token");
     localStorage.removeItem("access_token");
 
     setIsAuthenticated(false);
