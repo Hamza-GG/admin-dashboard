@@ -364,7 +364,7 @@ export default function InspectionForm() {
   </Typography>
   <Stack spacing={2}>
     <FormControl fullWidth size="small">
-      <InputLabel id="helmet-label">Helmet</InputLabel>
+      <InputLabel id="helmet-label">Casque</InputLabel>
       <Select
         labelId="helmet-label"
         id="helmet"
@@ -395,7 +395,7 @@ export default function InspectionForm() {
       </Select>
     </FormControl>
     <FormControl fullWidth size="small">
-      <InputLabel id="account-label">Account</InputLabel>
+      <InputLabel id="account-label">Compte Glovo</InputLabel>
       <Select
         labelId="account-label"
         id="account"
@@ -411,7 +411,7 @@ export default function InspectionForm() {
       </Select>
     </FormControl>
     <FormControl fullWidth size="small">
-      <InputLabel id="parking-label">Parking</InputLabel>
+      <InputLabel id="parking-label">Emplacement de stationnement</InputLabel>
       <Select
         labelId="parking-label"
         id="parking"
@@ -426,7 +426,7 @@ export default function InspectionForm() {
       </Select>
     </FormControl>
     <FormControl fullWidth size="small">
-      <InputLabel id="appearance-label">Appearance</InputLabel>
+      <InputLabel id="appearance-label">Apparence</InputLabel>
       <Select
         labelId="appearance-label"
         id="appearance"
@@ -442,7 +442,7 @@ export default function InspectionForm() {
       </Select>
     </FormControl>
     <FormControl fullWidth size="small">
-      <InputLabel id="driving-label">Driving</InputLabel>
+      <InputLabel id="driving-label">Conduite</InputLabel>
       <Select
         labelId="driving-label"
         id="driving"
@@ -459,7 +459,7 @@ export default function InspectionForm() {
       </Select>
     </FormControl>
     <FormControl fullWidth size="small">
-      <InputLabel id="mfc_status-label">MFC Status</InputLabel>
+      <InputLabel id="mfc_status-label">MFC</InputLabel>
       <Select
         labelId="mfc_status-label"
         id="mfc_status"
@@ -474,7 +474,7 @@ export default function InspectionForm() {
       </Select>
     </FormControl>
     <FormControl fullWidth size="small">
-      <InputLabel id="courier_behavior-label">Courier Behavior</InputLabel>
+      <InputLabel id="courier_behavior-label">Comportement du coursier</InputLabel>
       <Select
         labelId="courier_behavior-label"
         id="courier_behavior"
@@ -507,7 +507,7 @@ export default function InspectionForm() {
               />
             </Button>
             <TextField
-              label="Comments"
+              label="Commentaire"
               name="comments"
               value={form.comments}
               onChange={handleChange}
