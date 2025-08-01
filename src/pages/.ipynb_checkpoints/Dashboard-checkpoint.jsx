@@ -32,126 +32,116 @@ function Dashboard() {
       display="flex"
       alignItems="center"
       justifyContent="center"
-      sx={{
-        background: "#fff",
-        paddingTop: 0,
-        paddingBottom: 0,
-      }}
+      sx={{ background: "#fff", paddingY: 4 }}
     >
-      <Container
-        maxWidth="md"
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100%",
-        }}
-      >
+      <Container maxWidth="lg">
         <Typography
           variant="h3"
           align="center"
           gutterBottom
-          sx={{ fontWeight: 700, letterSpacing: 1, mb: 1, mt: 0 }}
+          sx={{ fontWeight: 700 }}
         >
           Admin Dashboard
         </Typography>
 
         {user && (
-          <Typography variant="h6" sx={{ mb: 4 }}>
+          <Typography variant="h6" align="center" sx={{ mb: 4 }}>
             Welcome, {user.username} 👋
           </Typography>
         )}
 
         <Grid container spacing={4} justifyContent="center">
-          {/* Riders Card */}
-          <Grid item xs={12} md={6} sx={{ display: "flex" }}>
-            <Card
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                flex: 1,
-                boxShadow: 6,
-                p: 2,
-              }}
-            >
-              <CardContent sx={{ textAlign: "center", flexGrow: 1 }}>
-                <GroupIcon color="primary" sx={{ fontSize: 60, mb: 2 }} />
-                <Typography variant="h5" gutterBottom>
-                  Riders
-                </Typography>
-                <Typography color="text.secondary">
-                  Afficher, modifier ou rechercher des riders
-                </Typography>
-              </CardContent>
-              <CardActions>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  component={Link}
-                  to="/riders"
-                  size="large"
-                  fullWidth
-                >
-                  GÉRER LES RIDERS
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
-
-          {/* Controls Card */}
-          <Grid item xs={12} md={6} sx={{ display: "flex" }}>
-            <Card
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                flex: 1,
-                boxShadow: 6,
-                p: 2,
-              }}
-            >
-              <CardContent sx={{ textAlign: "center", flexGrow: 1 }}>
-                <FactCheckIcon color="success" sx={{ fontSize: 60, mb: 2 }} />
-                <Typography variant="h5" gutterBottom>
-                  Contrôles
-                </Typography>
-                <Typography color="text.secondary">
-                  Afficher, modifier, rechercher ou supprimer des contrôles.
-                </Typography>
-              </CardContent>
-              <CardActions sx={{ flexDirection: "column", gap: 1, width: "100%" }}>
-                <Button
-                  variant="contained"
-                  color="success"
-                  component={Link}
-                  to="/inspections"
-                  size="large"
-                  fullWidth
-                >
-                  GÉRER LES CONTRÔLES
-                </Button>
-                <Button
-                  variant="contained"
-                  component={Link}
-                  to="/inspection-form"
-                  size="large"
-                  fullWidth
-                  startIcon={<AddCircleOutlineIcon />}
-                  sx={{
+          {[ // Riders and Controls config
+            {
+              icon: <GroupIcon color="primary" sx={{ fontSize: 60, mb: 2 }} />,
+              title: "Riders",
+              desc: "Afficher, modifier ou rechercher des riders",
+              buttons: [
+                {
+                  label: "GÉRER LES RIDERS",
+                  color: "primary",
+                  to: "/riders",
+                },
+              ],
+            },
+            {
+              icon: <FactCheckIcon color="success" sx={{ fontSize: 60, mb: 2 }} />,
+              title: "Contrôles",
+              desc: "Afficher, modifier, rechercher ou supprimer des contrôles.",
+              buttons: [
+                {
+                  label: "GÉRER LES CONTRÔLES",
+                  color: "success",
+                  to: "/inspections",
+                },
+                {
+                  label: "➕ NOUVEAU CONTRÔLE",
+                  color: "warning",
+                  to: "/inspection-form",
+                  customStyle: {
                     bgcolor: "orange",
-                    color: "#fff",
+                    color: "white",
                     "&:hover": {
                       bgcolor: "#ff9800",
                     },
+                  },
+                },
+              ],
+            },
+          ].map((card, index) => (
+            <Grid item xs={12} md={6} key={index} sx={{ display: "flex" }}>
+              <Card
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flex: 1,
+                  boxShadow: 6,
+                  padding: 2,
+                }}
+              >
+                <CardContent
+                  sx={{
+                    textAlign: "center",
+                    flexGrow: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
                   }}
                 >
-                  NOUVEAU CONTRÔLE
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
+                  {card.icon}
+                  <Typography variant="h5" gutterBottom>
+                    {card.title}
+                  </Typography>
+                  <Typography color="text.secondary">{card.desc}</Typography>
+                </CardContent>
+                <CardActions
+                  sx={{
+                    width: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 1,
+                  }}
+                >
+                  {card.buttons.map((btn, i) => (
+                    <Button
+                      key={i}
+                      variant="contained"
+                      color={btn.color}
+                      component={Link}
+                      to={btn.to}
+                      size="large"
+                      fullWidth
+                      sx={btn.customStyle}
+                    >
+                      {btn.label}
+                    </Button>
+                  ))}
+                </CardActions>
+              </Card>
+            </Grid>
+          ))}
         </Grid>
       </Container>
     </Box>
