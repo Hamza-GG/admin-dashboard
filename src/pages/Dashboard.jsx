@@ -11,6 +11,7 @@ import {
 import { Link } from "react-router-dom";
 import GroupIcon from "@mui/icons-material/Group";
 import FactCheckIcon from "@mui/icons-material/FactCheck";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { useEffect, useState } from "react";
 import { fetchWithAutoRefresh } from "../utils/api";
 
@@ -63,16 +64,14 @@ function Dashboard() {
         )}
 
         <Grid container spacing={6} justifyContent="center" alignItems="stretch">
-          {/* Riders */}
-          <Grid item xs={12} md={6} sx={{ height: "100%" }}>
+          {/* Riders Card */}
+          <Grid item xs={12} md={6} sx={{ display: "flex" }}>
             <Card
               sx={{
-                height: "100%",
-                minHeight: 220,
+                flexGrow: 1,
                 boxShadow: 6,
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: "space-between",
                 alignItems: "center",
                 transition: "transform 0.2s",
                 "&:hover": { transform: "scale(1.03)", boxShadow: 12 },
@@ -109,16 +108,14 @@ function Dashboard() {
             </Card>
           </Grid>
 
-          {/* Contrôles */}
-          <Grid item xs={12} md={6} sx={{ height: "100%" }}>
+          {/* Controls Card */}
+          <Grid item xs={12} md={6} sx={{ display: "flex" }}>
             <Card
               sx={{
-                height: "100%",
-                minHeight: 220,
+                flexGrow: 1,
                 boxShadow: 6,
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: "space-between",
                 alignItems: "center",
                 transition: "transform 0.2s",
                 "&:hover": { transform: "scale(1.03)", boxShadow: 12 },
@@ -140,8 +137,13 @@ function Dashboard() {
                   Afficher, modifier, rechercher ou supprimer des contrôles.
                 </Typography>
               </CardContent>
-
-              <CardActions sx={{ flexDirection: "column", gap: 1, width: "100%" }}>
+              <CardActions
+                sx={{
+                  flexDirection: "column",
+                  gap: 1,
+                  width: "100%",
+                }}
+              >
                 <Button
                   variant="contained"
                   color="success"
@@ -154,11 +156,12 @@ function Dashboard() {
                 </Button>
                 <Button
                   variant="contained"
-                  color="warning"
+                  sx={{ bgcolor: "orange", color: "#fff", "&:hover": { bgcolor: "#ff9800" } }}
                   component={Link}
                   to="/inspection-form"
                   size="large"
                   fullWidth
+                  startIcon={<AddCircleOutlineIcon />}
                 >
                   NOUVEAU CONTRÔLE
                 </Button>
