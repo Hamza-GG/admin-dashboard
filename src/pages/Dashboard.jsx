@@ -184,7 +184,7 @@ function Dashboard() {
                   variant="contained"
                   color="info"
                   component={Link}
-                  to="/inspectionForm"
+                  to="/inspection-form"
                   size="large"
                   fullWidth
                 >
