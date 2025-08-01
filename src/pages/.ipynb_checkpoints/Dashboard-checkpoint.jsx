@@ -135,64 +135,33 @@ function Dashboard() {
                   Afficher, modifier, rechercher ou supprimer des contrôles.
                 </Typography>
               </CardContent>
-              <CardActions>
-                <Button
-                  variant="contained"
-                  color="success"
-                  component={Link}
-                  to="/inspections"
-                  size="large"
-                  fullWidth
-                >
-                  Gérer les Contrôles
-                </Button>
-              </CardActions>
+            
+                <CardActions sx={{ flexDirection: "column", gap: 1, width: "100%" }}>
+  <Button
+    variant="contained"
+    color="success"
+    component={Link}
+    to="/inspections"
+    size="large"
+    fullWidth
+  >
+    Gérer les Contrôles
+  </Button>
+  <Button
+    variant="outlined"
+    color="success"
+    component={Link}
+    to="/inspection-form"
+    size="large"
+    fullWidth
+  >
+    Nouveau Contrôle
+  </Button>
+</CardActions>
+                
             </Card>
           </Grid>
-
-          {/* ➕ Add Inspection Card */}
-          <Grid item xs={12} md={6}>
-            <Card
-              sx={{
-                minHeight: 220,
-                boxShadow: 6,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                transition: "transform 0.2s",
-                "&:hover": { transform: "scale(1.03)", boxShadow: 12 },
-              }}
-            >
-              <CardContent
-                sx={{
-                  flexGrow: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                }}
-              >
-                <AddCircleOutlineIcon color="info" sx={{ fontSize: 60, mb: 2 }} />
-                <Typography variant="h5" gutterBottom>
-                  Ajouter un Contrôle
-                </Typography>
-                <Typography color="text.secondary" align="center">
-                  Ajouter un nouveau contrôle.
-                </Typography>
-              </CardContent>
-              <CardActions>
-                <Button
-                  variant="contained"
-                  color="info"
-                  component={Link}
-                  to="/inspection-form"
-                  size="large"
-                  fullWidth
-                >
-                  New Inspection
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
+         
         </Grid>
       </Container>
     </Box>
