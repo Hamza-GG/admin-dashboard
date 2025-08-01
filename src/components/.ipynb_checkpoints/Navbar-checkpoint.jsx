@@ -1,154 +1,115 @@
-import React from "react";
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Button,
-  Box,
-  IconButton,
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
-} from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
+// src/components/Navbar.jsx
+import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 
 function Navbar({ setIsAuthenticated }) {
-  const [drawerOpen, setDrawerOpen] = React.useState(false);
   const navigate = useNavigate();
 
-  const handleLogout = () => {
+  const BASE_URL = "https://employee-inspection-backend.onrender.com";
+
+  const handleLogout = async () => {
+    try {
+      await fetch(`${BASE_URL}/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (err) {
+      console.error("Failed to log out:", err);
+    }
+
     localStorage.removeItem("token");
-    setIsAuthenticated && setIsAuthenticated(false);
+    localStorage.removeItem("access_token");
+
+    setIsAuthenticated(false);
     navigate("/login");
   };
 
-  // All your nav links in one place for easy mapping
-  const navLinks = [
-    { label: "Dashboard", to: "/dashboard" },
-    { label: "Riders", to: "/riders" },
-    { label: "Inspections", to: "/inspections" },
-    { label: "Add Inspection", to: "/inspection-form" },
-  ];
-
   return (
-    <>
-      <AppBar
-        position="fixed"
+    <AppBar
+      position="fixed"
+      sx={{
+        left: 0,
+        top: 0,
+        right: 0,
+        boxShadow: 2,
+        backgroundColor: "#1976d2",
+        zIndex: 1300,
+        width: "100%",
+        minHeight: 64,
+        m: 0,
+        p: 0,
+      }}
+      elevation={3}
+    >
+      <Toolbar
         sx={{
-          left: 0,
-          top: 0,
-          right: 0,
-          backgroundColor: "#1976d2",
-          zIndex: 1300,
-          width: "100%",
+          display: "flex",
+          justifyContent: "space-between",
+          px: 3,
           minHeight: 64,
-          m: 0,
-          p: 0,
+          width: "100%",
+          maxWidth: "100vw",
         }}
-        elevation={3}
       >
-        <Toolbar
+        {/* Logo and Title */}
+        <Box
+          component={Link}
+          to="/dashboard"
           sx={{
             display: "flex",
-            justifyContent: "space-between",
-            px: 2,
-            minHeight: 64,
-            width: "100%",
-            maxWidth: "100vw",
+            alignItems: "center",
+            textDecoration: "none",
           }}
         >
+          <img
+            src="/rider.png" // make sure this exists in your public/ folder
+            alt="logo"
+            style={{ height: 52, marginRight: 30 }}
+          />
           <Typography
             variant="h6"
-            component={Link}
-            to="/dashboard"
             sx={{
               color: "#fff",
-              textDecoration: "none",
               fontWeight: 700,
               letterSpacing: 1,
-              fontSize: { xs: 18, sm: 22 },
+              fontSize: 22,
             }}
           >
-            INSPECTION ADMIN
+            OPS Watcher
           </Typography>
-
-          {/* Desktop menu */}
-          <Box sx={{ display: { xs: "none", md: "flex" }, gap: 2 }}>
-            {navLinks.map((item) => (
-              <Button
-                key={item.to}
-                color="inherit"
-                component={Link}
-                to={item.to}
-                sx={{ fontWeight: 500 }}
-              >
-                {item.label}
-              </Button>
-            ))}
-            <Button
-              color="inherit"
-              variant="outlined"
-              sx={{
-                ml: 2,
-                borderColor: "#fff",
-                fontWeight: 700,
-                bgcolor: "rgba(255,255,255,0.08)",
-                "&:hover": { bgcolor: "rgba(255,255,255,0.15)" },
-              }}
-              onClick={handleLogout}
-            >
-              Logout
-            </Button>
-          </Box>
-
-          {/* Hamburger Icon for mobile */}
-          <Box sx={{ display: { xs: "block", md: "none" } }}>
-            <IconButton
-              edge="end"
-              color="inherit"
-              aria-label="menu"
-              onClick={() => setDrawerOpen(true)}
-            >
-              <MenuIcon />
-            </IconButton>
-          </Box>
-        </Toolbar>
-      </AppBar>
-
-      {/* Mobile Drawer */}
-      <Drawer
-        anchor="right"
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        PaperProps={{ sx: { width: 220 } }}
-      >
-        <Box sx={{ p: 2 }}>
-          <Typography variant="h6" sx={{ mb: 1 }}>
-            Menu
-          </Typography>
-          <Divider sx={{ mb: 1 }} />
-          <List>
-            {navLinks.map((item) => (
-              <ListItem
-                button
-                key={item.to}
-                component={Link}
-                to={item.to}
-                onClick={() => setDrawerOpen(false)}
-              >
-                <ListItemText primary={item.label} />
-              </ListItem>
-            ))}
-            <ListItem button onClick={() => { setDrawerOpen(false); handleLogout(); }}>
-              <ListItemText primary="Logout" />
-            </ListItem>
-          </List>
         </Box>
-      </Drawer>
-    </>
+
+        {/* Navigation Buttons */}
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <Button color="inherit" component={Link} to="/dashboard">
+            Dashboard
+          </Button>
+          <Button color="inherit" component={Link} to="/riders">
+            Riders
+          </Button>
+          <Button color="inherit" component={Link} to="/inspections">
+            Contrôles
+          </Button>
+          <Button color="inherit" component={Link} to="/inspection-form">
+            Ajouter un contrôle
+          </Button>
+          <Button
+            color="inherit"
+            variant="outlined"
+            sx={{
+              ml: 2,
+              borderColor: "#fff",
+              fontWeight: 700,
+              bgcolor: "rgba(255,255,255,0.08)",
+              "&:hover": { bgcolor: "rgba(255,255,255,0.15)" },
+            }}
+            onClick={handleLogout}
+          >
+            Logout
+          </Button>
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 }
 

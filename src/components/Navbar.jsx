@@ -88,10 +88,10 @@ function Navbar({ setIsAuthenticated }) {
             Riders
           </Button>
           <Button color="inherit" component={Link} to="/inspections">
-            Inspections
+            Contrôles
           </Button>
           <Button color="inherit" component={Link} to="/inspection-form">
-            Add Inspection
+            Ajouter un contrôle
           </Button>
           <Button
             color="inherit"
