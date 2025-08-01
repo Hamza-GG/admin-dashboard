@@ -5,25 +5,24 @@ import { Link, useNavigate } from "react-router-dom";
 function Navbar({ setIsAuthenticated }) {
   const navigate = useNavigate();
 
-const BASE_URL = "https://employee-inspection-backend.onrender.com";
+  const BASE_URL = "https://employee-inspection-backend.onrender.com";
 
-const handleLogout = async () => {
-  try {
-    await fetch(`${BASE_URL}/logout`, {
-      method: "POST",
-      credentials: "include", // ensures refresh_token is cleared
-    });
-  } catch (err) {
-    console.error("Failed to log out:", err);
-  }
+  const handleLogout = async () => {
+    try {
+      await fetch(`${BASE_URL}/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (err) {
+      console.error("Failed to log out:", err);
+    }
 
-  // Clean both for safety
-  localStorage.removeItem("token");
-  localStorage.removeItem("access_token");
+    localStorage.removeItem("token");
+    localStorage.removeItem("access_token");
 
-  setIsAuthenticated(false);
-  navigate("/login");
-};
+    setIsAuthenticated(false);
+    navigate("/login");
+  };
 
   return (
     <AppBar
@@ -42,7 +41,7 @@ const handleLogout = async () => {
       }}
       elevation={3}
     >
-    <Toolbar
+      <Toolbar
         sx={{
           display: "flex",
           justifyContent: "space-between",
@@ -63,7 +62,7 @@ const handleLogout = async () => {
           }}
         >
           <img
-            src="/rider.png" // replace with your own image path if needed
+            src="/rider.png" // make sure this exists in your public/ folder
             alt="logo"
             style={{ height: 32, marginRight: 10 }}
           />
@@ -77,7 +76,10 @@ const handleLogout = async () => {
             }}
           >
             MA OPS Watcher
-        </Typography>
+          </Typography>
+        </Box>
+
+        {/* Navigation Buttons */}
         <Box sx={{ display: "flex", gap: 2 }}>
           <Button color="inherit" component={Link} to="/dashboard">
             Dashboard
@@ -99,7 +101,7 @@ const handleLogout = async () => {
               borderColor: "#fff",
               fontWeight: 700,
               bgcolor: "rgba(255,255,255,0.08)",
-              "&:hover": { bgcolor: "rgba(255,255,255,0.15)" }
+              "&:hover": { bgcolor: "rgba(255,255,255,0.15)" },
             }}
             onClick={handleLogout}
           >
