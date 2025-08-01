@@ -11,7 +11,6 @@ import {
 import { Link } from "react-router-dom";
 import GroupIcon from "@mui/icons-material/Group";
 import FactCheckIcon from "@mui/icons-material/FactCheck";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { useEffect, useState } from "react";
 import { fetchWithAutoRefresh } from "../utils/api";
 
@@ -63,10 +62,11 @@ function Dashboard() {
           </Typography>
         )}
 
-        <Grid container spacing={6} justifyContent="center" alignItems="center">
-          <Grid item xs={12} md={6}>
+        <Grid container spacing={6} justifyContent="center" alignItems="stretch">
+          <Grid item xs={12} md={6} sx={{ height: "100%" }}>
             <Card
               sx={{
+                height: "100%",
                 minHeight: 220,
                 boxShadow: 6,
                 display: "flex",
@@ -107,9 +107,10 @@ function Dashboard() {
             </Card>
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={6} sx={{ height: "100%" }}>
             <Card
               sx={{
+                height: "100%",
                 minHeight: 220,
                 boxShadow: 6,
                 display: "flex",
@@ -135,33 +136,31 @@ function Dashboard() {
                   Afficher, modifier, rechercher ou supprimer des contrôles.
                 </Typography>
               </CardContent>
-            
-                <CardActions sx={{ flexDirection: "column", gap: 1, width: "100%" }}>
-  <Button
-    variant="contained"
-    color="success"
-    component={Link}
-    to="/inspections"
-    size="large"
-    fullWidth
-  >
-    Gérer les Contrôles
-  </Button>
-  <Button
-    variant="outlined"
-    color="success"
-    component={Link}
-    to="/inspection-form"
-    size="large"
-    fullWidth
-  >
-    Nouveau Contrôle
-  </Button>
-</CardActions>
-                
+
+              <CardActions sx={{ flexDirection: "column", gap: 1, width: "100%" }}>
+                <Button
+                  variant="contained"
+                  color="success"
+                  component={Link}
+                  to="/inspections"
+                  size="large"
+                  fullWidth
+                >
+                  Gérer les Contrôles
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="warning"
+                  component={Link}
+                  to="/inspection-form"
+                  size="large"
+                  fullWidth
+                >
+                  Nouveau Contrôle
+                </Button>
+              </CardActions>
             </Card>
           </Grid>
-         
         </Grid>
       </Container>
     </Box>
