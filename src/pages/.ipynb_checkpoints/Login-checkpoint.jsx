@@ -1,8 +1,9 @@
+// src/pages/Login.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import authAxios from "../utils/authAxios";
 
-function Login() {
+function Login({ setIsAuthenticated }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -25,6 +26,7 @@ function Login() {
       });
 
       localStorage.setItem("access_token", res.data.access_token);
+      setIsAuthenticated(true); // <-- Fix: update state so Navbar appears
       navigate("/dashboard");
     } catch (err) {
       if (err.response?.data?.detail) {
@@ -40,7 +42,7 @@ function Login() {
     setResetMsg("");
     setResetErr("");
     try {
-      await authAxios.post("/password-reset", { email: resetEmail });
+      await authAxios.post("/forgot-password", { email: resetEmail });
       setResetMsg("Reset link sent to your email.");
     } catch (err) {
       setResetErr("Failed to send reset email.");

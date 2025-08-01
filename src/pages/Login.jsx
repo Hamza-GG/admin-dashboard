@@ -42,7 +42,7 @@ function Login({ setIsAuthenticated }) {
     setResetMsg("");
     setResetErr("");
     try {
-      await authAxios.post("/password-reset", { email: resetEmail });
+      await authAxios.post("/forgot-password", { email: resetEmail });
       setResetMsg("Reset link sent to your email.");
     } catch (err) {
       setResetErr("Failed to send reset email.");
