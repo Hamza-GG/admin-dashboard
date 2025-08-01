@@ -26,6 +26,7 @@ function Login({ setIsAuthenticated }) {
       });
 
       localStorage.setItem("token", res.data.access_token); // ✅ match what authAxios expects
+      localStorage.setItem("refresh_token", res.data.refresh_token);
       setIsAuthenticated(true); // <-- Fix: update state so Navbar appears
       navigate("/dashboard");
     } catch (err) {
