@@ -25,7 +25,7 @@ function Login({ setIsAuthenticated }) {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       });
 
-      localStorage.setItem("access_token", res.data.access_token);
+      localStorage.setItem("token", res.data.access_token); // ✅ match what authAxios expects
       setIsAuthenticated(true); // <-- Fix: update state so Navbar appears
       navigate("/dashboard");
     } catch (err) {
