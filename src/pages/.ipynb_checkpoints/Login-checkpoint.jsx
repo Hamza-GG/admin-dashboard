@@ -42,7 +42,13 @@ function Login({ setIsAuthenticated }) {
     setResetMsg("");
     setResetErr("");
     try {
-      await authAxios.post("/forgot-password", { email: resetEmail });
+      // Use form data (URLSearchParams) as backend expects Form(...) not JSON!
+      const formData = new URLSearchParams();
+      formData.append("email", resetEmail);
+
+      await authAxios.post("/forgot-password", formData, {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      });
       setResetMsg("Reset link sent to your email.");
     } catch (err) {
       setResetErr("Failed to send reset email.");
