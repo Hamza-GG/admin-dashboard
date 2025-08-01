@@ -11,8 +11,9 @@ import {
 import { Link } from "react-router-dom";
 import GroupIcon from "@mui/icons-material/Group";
 import FactCheckIcon from "@mui/icons-material/FactCheck";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { useEffect, useState } from "react";
-import { fetchWithAutoRefresh } from "../utils/api"; // 👈 make sure this exists
+import { fetchWithAutoRefresh } from "../utils/api";
 
 function Dashboard() {
   const [user, setUser] = useState(null);
@@ -39,7 +40,13 @@ function Dashboard() {
     >
       <Container
         maxWidth="md"
-        sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%" }}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100%",
+        }}
       >
         <Typography
           variant="h3"
@@ -70,7 +77,12 @@ function Dashboard() {
               }}
             >
               <CardContent
-                sx={{ flexGrow: 1, display: "flex", flexDirection: "column", alignItems: "center" }}
+                sx={{
+                  flexGrow: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
               >
                 <GroupIcon color="primary" sx={{ fontSize: 60, mb: 2 }} />
                 <Typography variant="h5" gutterBottom>
@@ -94,6 +106,7 @@ function Dashboard() {
               </CardActions>
             </Card>
           </Grid>
+
           <Grid item xs={12} md={6}>
             <Card
               sx={{
@@ -107,7 +120,12 @@ function Dashboard() {
               }}
             >
               <CardContent
-                sx={{ flexGrow: 1, display: "flex", flexDirection: "column", alignItems: "center" }}
+                sx={{
+                  flexGrow: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
               >
                 <FactCheckIcon color="success" sx={{ fontSize: 60, mb: 2 }} />
                 <Typography variant="h5" gutterBottom>
@@ -127,6 +145,50 @@ function Dashboard() {
                   fullWidth
                 >
                   Manage Inspections
+                </Button>
+              </CardActions>
+            </Card>
+          </Grid>
+
+          {/* ➕ Add Inspection Card */}
+          <Grid item xs={12} md={6}>
+            <Card
+              sx={{
+                minHeight: 220,
+                boxShadow: 6,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                transition: "transform 0.2s",
+                "&:hover": { transform: "scale(1.03)", boxShadow: 12 },
+              }}
+            >
+              <CardContent
+                sx={{
+                  flexGrow: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
+                <AddCircleOutlineIcon color="info" sx={{ fontSize: 60, mb: 2 }} />
+                <Typography variant="h5" gutterBottom>
+                  Add Inspection
+                </Typography>
+                <Typography color="text.secondary" align="center">
+                  Create a new inspection entry.
+                </Typography>
+              </CardContent>
+              <CardActions>
+                <Button
+                  variant="contained"
+                  color="info"
+                  component={Link}
+                  to="/inspectionForm"
+                  size="large"
+                  fullWidth
+                >
+                  New Inspection
                 </Button>
               </CardActions>
             </Card>
