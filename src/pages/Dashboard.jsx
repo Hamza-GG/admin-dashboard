@@ -13,18 +13,17 @@ import GroupIcon from "@mui/icons-material/Group";
 import FactCheckIcon from "@mui/icons-material/FactCheck";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { useEffect, useState } from "react";
-import { fetchWithAutoRefresh } from "../utils/api";
+import authAxios from "../utils/authAxios";
 
 function Dashboard() {
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    fetchWithAutoRefresh("/users/me")
-      .then((res) => res.json())
-      .then((data) => setUser(data))
-      .catch((err) => console.error("Failed to fetch user info:", err));
-  }, []);
-
+useEffect(() => {
+  authAxios
+    .get("/users/me")
+    .then((res) => setUser(res.data))
+    .catch((err) => console.error("Failed to fetch user info:", err));
+}, []);
   return (
     <Box
       minHeight="100vh"

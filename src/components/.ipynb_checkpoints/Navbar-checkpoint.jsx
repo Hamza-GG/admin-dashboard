@@ -1,27 +1,25 @@
 // src/components/Navbar.jsx
 import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
+import authAxios from "../utils/authAxios";
 
 function Navbar({ setIsAuthenticated }) {
   const navigate = useNavigate();
 
   const BASE_URL = "https://employee-inspection-backend.onrender.com";
 
-  const handleLogout = async () => {
-    try {
-      await fetch(`${BASE_URL}/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
-    } catch (err) {
-      console.error("Failed to log out:", err);
-    }
 
-    localStorage.removeItem("access_token");
+const handleLogout = async () => {
+  try {
+    await authAxios.post("/logout");
+  } catch (err) {
+    console.error("Failed to log out:", err);
+  }
 
-    setIsAuthenticated(false);
-    navigate("/login");
-  };
+  localStorage.removeItem("token"); // Match key used in authAxios
+  setIsAuthenticated(false);
+  navigate("/login");
+};
 
   return (
     <AppBar

@@ -40,19 +40,27 @@ export default function Inspections() {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
 
-  useEffect(() => {
-    async function fetchInspections() {
-      try {
-        const res = await authAxios.get("/inspections");
-        setInspections(res.data);
-      } catch (error) {
-        alert("Failed to fetch inspections.");
-      } finally {
-        setLoading(false);
+useEffect(() => {
+  const fetchInspections = async () => {
+    try {
+      const res = await authAxios.get("/inspections");
+      setInspections(res.data);
+    } catch (error) {
+      if (error.response?.status === 401) {
+        // Token refresh likely failed in the interceptor
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+      } else {
+        alert("Failed to fetch inspections. Please try again.");
+        console.error("Fetch inspections error:", error);
       }
+    } finally {
+      setLoading(false);
     }
-    fetchInspections();
-  }, []);
+  };
+
+  fetchInspections();
+}, []);
 
   const filtered = inspections.filter((insp) => {
     const textMatch =

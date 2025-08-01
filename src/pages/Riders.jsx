@@ -47,19 +47,27 @@ export default function Riders() {
   };
   const [form, setForm] = useState(emptyForm);
 
-  useEffect(() => {
-    async function fetchRiders() {
-      try {
-        const res = await authAxios.get("/riders");
-        setRiders(res.data);
-      } catch (error) {
-        alert("Failed to fetch riders.");
-      } finally {
-        setLoading(false);
+useEffect(() => {
+  const fetchRiders = async () => {
+    try {
+      const res = await authAxios.get("/riders");
+      setRiders(res.data);
+    } catch (error) {
+      if (error.response?.status === 401) {
+        // Access token refresh failed
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+      } else {
+        alert("Failed to fetch riders. Please try again.");
+        console.error("Fetch riders error:", error);
       }
+    } finally {
+      setLoading(false);
     }
-    fetchRiders();
-  }, []);
+  };
+
+  fetchRiders();
+}, []);
 
   const filtered = riders.filter((r) =>
     [r.rider_id, r.first_name, r.first_last_name, r.id_number, r.city_code, r.vehicle_type, r.plate_number, r.box_serial_number]
