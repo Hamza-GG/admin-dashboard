@@ -256,7 +256,7 @@ export default function InspectionForm() {
             <Grid container spacing={2}>
               <Grid item xs={12} sm={4}>
                 <TextField
-                  label="Rider ID (optional)"
+                  label="Rider ID"
                   name="rider_id"
                   value={form.rider_id}
                   onChange={handleChange}
@@ -268,7 +268,7 @@ export default function InspectionForm() {
               </Grid>
               <Grid item xs={12} sm={4}>
                 <TextField
-                  label="Box Serial Number"
+                  label="Numéro de série de la Box"
                   name="box_serial_number"
                   value={form.box_serial_number}
                   onChange={handleChange}
@@ -280,7 +280,7 @@ export default function InspectionForm() {
               </Grid>
               <Grid item xs={12} sm={4}>
                 <TextField
-                  label="Plate Number"
+                  label="Numéro d’immatriculation"
                   name="plate_number"
                   value={form.plate_number}
                   onChange={handleChange}
@@ -292,7 +292,7 @@ export default function InspectionForm() {
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
-                  label="Rider ID Number (optional)"
+                  label="CIN"
                   name="id_number"
                   value={form.id_number}
                   onChange={handleChange}
@@ -311,7 +311,7 @@ export default function InspectionForm() {
                     id="city"
                     name="city"
                     value={form.city}
-                    label="City"
+                    label="Ville"
                     onChange={handleChange}
                     displayEmpty
                   >
@@ -332,7 +332,7 @@ export default function InspectionForm() {
               <Grid item xs={12} sm={12}>
                 <Box display="flex" alignItems="center">
                   <TextField
-                    label="Location (describe if no rider ID, e.g. store, street...)"
+                    label="Emplacement"
                     name="location"
                     value={form.location}
                     onChange={handleChange}
@@ -370,7 +370,7 @@ export default function InspectionForm() {
         id="helmet"
         name="helmet"
         value={form.helmet}
-        label="Helmet"
+        label="Casque"
         onChange={handleChange}
       >
         <MenuItem value=""><em>None</em></MenuItem>
@@ -401,7 +401,7 @@ export default function InspectionForm() {
         id="account"
         name="account"
         value={form.account}
-        label="Account"
+        label="Compte Glovo"
         onChange={handleChange}
       >
         <MenuItem value=""><em>None</em></MenuItem>
@@ -417,7 +417,7 @@ export default function InspectionForm() {
         id="parking"
         name="parking"
         value={form.parking}
-        label="Parking"
+        label="Emplacement de stationnement"
         onChange={handleChange}
       >
         <MenuItem value=""><em>None</em></MenuItem>
@@ -432,7 +432,7 @@ export default function InspectionForm() {
         id="appearance"
         name="appearance"
         value={form.appearance}
-        label="Appearance"
+        label="Apparence"
         onChange={handleChange}
       >
         <MenuItem value=""><em>None</em></MenuItem>
@@ -448,7 +448,7 @@ export default function InspectionForm() {
         id="driving"
         name="driving"
         value={form.driving}
-        label="Driving"
+        label="Conduite"
         onChange={handleChange}
       >
         <MenuItem value=""><em>None</em></MenuItem>
@@ -465,7 +465,7 @@ export default function InspectionForm() {
         id="mfc_status"
         name="mfc_status"
         value={form.mfc_status}
-        label="MFC Status"
+        label="MFC"
         onChange={handleChange}
       >
         <MenuItem value=""><em>None</em></MenuItem>
@@ -480,7 +480,7 @@ export default function InspectionForm() {
         id="courier_behavior"
         name="courier_behavior"
         value={form.courier_behavior}
-        label="Courier Behavior"
+        label="Comportement du coursier"
         onChange={handleChange}
       >
         <MenuItem value=""><em>None</em></MenuItem>
@@ -497,7 +497,7 @@ export default function InspectionForm() {
               variant="outlined"
               startIcon={<ImageIcon />}
             >
-              {form.image ? "Change Image" : "Upload Image (optional)"}
+              {form.image ? "Change Image" : "Ajouter une image (optionnel)"}
               <input
                 type="file"
                 name="image"
@@ -511,7 +511,7 @@ export default function InspectionForm() {
               name="comments"
               value={form.comments}
               onChange={handleChange}
-              placeholder="Enter any comments or observations here"
+              placeholder="Saisissez ici vos commentaires ou observations"
               fullWidth
               size="small"
               multiline
@@ -530,7 +530,7 @@ export default function InspectionForm() {
                 ":hover": { bgcolor: "#122e57" }
               }}
             >
-              {submitting ? <CircularProgress size={22} /> : "Submit Inspection"}
+              {submitting ? <CircularProgress size={22} /> : "Valider l’inspection"}
             </Button>
           </Stack>
         </form>

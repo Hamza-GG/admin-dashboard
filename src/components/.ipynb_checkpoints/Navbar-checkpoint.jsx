@@ -105,7 +105,7 @@ function Navbar({ setIsAuthenticated }) {
             }}
             onClick={handleLogout}
           >
-            Logout
+            Déconnexion
           </Button>
         </Box>
       </Toolbar>
