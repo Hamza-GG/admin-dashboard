@@ -89,7 +89,7 @@ function Dashboard() {
                   Riders
                 </Typography>
                 <Typography color="text.secondary" align="center">
-                  View, edit, search, or delete riders.
+                  Afficher, modifier ou rechercher des riders
                 </Typography>
               </CardContent>
               <CardActions>
@@ -101,7 +101,7 @@ function Dashboard() {
                   size="large"
                   fullWidth
                 >
-                  Manage Riders
+                  Gérer les Riders
                 </Button>
               </CardActions>
             </Card>
@@ -129,10 +129,10 @@ function Dashboard() {
               >
                 <FactCheckIcon color="success" sx={{ fontSize: 60, mb: 2 }} />
                 <Typography variant="h5" gutterBottom>
-                  Inspections
+                  Contrôles
                 </Typography>
                 <Typography color="text.secondary" align="center">
-                  View, edit, search, or delete inspections.
+                  Afficher, modifier, rechercher ou supprimer des contrôles.
                 </Typography>
               </CardContent>
               <CardActions>
@@ -144,7 +144,7 @@ function Dashboard() {
                   size="large"
                   fullWidth
                 >
-                  Manage Inspections
+                  Gérer les Contrôles
                 </Button>
               </CardActions>
             </Card>
@@ -173,10 +173,10 @@ function Dashboard() {
               >
                 <AddCircleOutlineIcon color="info" sx={{ fontSize: 60, mb: 2 }} />
                 <Typography variant="h5" gutterBottom>
-                  Add Inspection
+                  Ajouter un Contrôle
                 </Typography>
                 <Typography color="text.secondary" align="center">
-                  Create a new inspection entry.
+                  Ajouter un nouveau contrôle.
                 </Typography>
               </CardContent>
               <CardActions>
