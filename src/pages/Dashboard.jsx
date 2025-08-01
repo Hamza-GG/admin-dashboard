@@ -63,6 +63,7 @@ function Dashboard() {
         )}
 
         <Grid container spacing={6} justifyContent="center" alignItems="stretch">
+          {/* Riders */}
           <Grid item xs={12} md={6} sx={{ height: "100%" }}>
             <Card
               sx={{
@@ -71,6 +72,7 @@ function Dashboard() {
                 boxShadow: 6,
                 display: "flex",
                 flexDirection: "column",
+                justifyContent: "space-between",
                 alignItems: "center",
                 transition: "transform 0.2s",
                 "&:hover": { transform: "scale(1.03)", boxShadow: 12 },
@@ -92,7 +94,7 @@ function Dashboard() {
                   Afficher, modifier ou rechercher des riders
                 </Typography>
               </CardContent>
-              <CardActions>
+              <CardActions sx={{ width: "100%" }}>
                 <Button
                   variant="contained"
                   color="primary"
@@ -101,12 +103,13 @@ function Dashboard() {
                   size="large"
                   fullWidth
                 >
-                  Gérer les Riders
+                  GÉRER LES RIDERS
                 </Button>
               </CardActions>
             </Card>
           </Grid>
 
+          {/* Contrôles */}
           <Grid item xs={12} md={6} sx={{ height: "100%" }}>
             <Card
               sx={{
@@ -115,6 +118,7 @@ function Dashboard() {
                 boxShadow: 6,
                 display: "flex",
                 flexDirection: "column",
+                justifyContent: "space-between",
                 alignItems: "center",
                 transition: "transform 0.2s",
                 "&:hover": { transform: "scale(1.03)", boxShadow: 12 },
@@ -146,17 +150,17 @@ function Dashboard() {
                   size="large"
                   fullWidth
                 >
-                  Gérer les Contrôles
+                  GÉRER LES CONTRÔLES
                 </Button>
                 <Button
-                  variant="outlined"
+                  variant="contained"
                   color="warning"
                   component={Link}
                   to="/inspection-form"
                   size="large"
                   fullWidth
                 >
-                  Nouveau Contrôle
+                  NOUVEAU CONTRÔLE
                 </Button>
               </CardActions>
             </Card>
