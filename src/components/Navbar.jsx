@@ -42,7 +42,7 @@ const handleLogout = async () => {
       }}
       elevation={3}
     >
-      <Toolbar
+    <Toolbar
         sx={{
           display: "flex",
           justifyContent: "space-between",
@@ -52,19 +52,31 @@ const handleLogout = async () => {
           maxWidth: "100vw",
         }}
       >
-        <Typography
-          variant="h6"
+        {/* Logo and Title */}
+        <Box
           component={Link}
           to="/dashboard"
           sx={{
-            color: "#fff",
+            display: "flex",
+            alignItems: "center",
             textDecoration: "none",
-            fontWeight: 700,
-            letterSpacing: 1,
-            fontSize: 22,
           }}
         >
-          INSPECTION ADMIN
+          <img
+            src="/rider.png" // replace with your own image path if needed
+            alt="logo"
+            style={{ height: 32, marginRight: 10 }}
+          />
+          <Typography
+            variant="h6"
+            sx={{
+              color: "#fff",
+              fontWeight: 700,
+              letterSpacing: 1,
+              fontSize: 22,
+            }}
+          >
+            MA OPS Watcher
         </Typography>
         <Box sx={{ display: "flex", gap: 2 }}>
           <Button color="inherit" component={Link} to="/dashboard">
