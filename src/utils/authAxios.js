@@ -3,13 +3,13 @@ import axios from "axios";
 
 const BASE_URL = "https://employee-inspection-backend.onrender.com";
 
-// Create an Axios instance
+// Create Axios instance
 const authAxios = axios.create({
   baseURL: BASE_URL,
-  withCredentials: true, // Needed to send cookies like refresh token
+  withCredentials: false, // ❌ No longer needed, no cookies used
 });
 
-// Intercept each request and attach the access token
+// Request interceptor: attach access token
 authAxios.interceptors.request.use(
   async (config) => {
     const token = localStorage.getItem("token");
@@ -21,28 +21,48 @@ authAxios.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor to auto-refresh token if access token is expired
+// Response interceptor: auto-refresh access token if expired
 authAxios.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+
     if (
       error.response?.status === 401 &&
       !originalRequest._retry
     ) {
       originalRequest._retry = true;
+
       try {
-        const res = await axios.post(`${BASE_URL}/refresh`, {}, { withCredentials: true });
-        const newToken = res.data.access_token;
-        localStorage.setItem("token", newToken);
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        const refreshToken = localStorage.getItem("refresh_token");
+        if (!refreshToken) throw new Error("No refresh token available");
+
+        // Send refresh token in Authorization header
+        const res = await axios.post(
+          `${BASE_URL}/refresh`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${refreshToken}`,
+            },
+          }
+        );
+
+        const newAccessToken = res.data.access_token;
+        localStorage.setItem("token", newAccessToken);
+
+        // Retry original request with new token
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return authAxios(originalRequest);
       } catch (refreshError) {
+        // Clear both tokens on failure and redirect
         localStorage.removeItem("token");
+        localStorage.removeItem("refresh_token");
         window.location.href = "/login";
         return Promise.reject(refreshError);
       }
     }
+
     return Promise.reject(error);
   }
 );
