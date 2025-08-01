@@ -63,37 +63,29 @@ function Dashboard() {
           </Typography>
         )}
 
-        <Grid container spacing={6} justifyContent="center" alignItems="stretch">
+        <Grid container spacing={4} justifyContent="center">
           {/* Riders Card */}
           <Grid item xs={12} md={6} sx={{ display: "flex" }}>
             <Card
               sx={{
-                flexGrow: 1,
-                boxShadow: 6,
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "center",
-                transition: "transform 0.2s",
-                "&:hover": { transform: "scale(1.03)", boxShadow: 12 },
+                justifyContent: "space-between",
+                flex: 1,
+                boxShadow: 6,
+                p: 2,
               }}
             >
-              <CardContent
-                sx={{
-                  flexGrow: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                }}
-              >
+              <CardContent sx={{ textAlign: "center", flexGrow: 1 }}>
                 <GroupIcon color="primary" sx={{ fontSize: 60, mb: 2 }} />
                 <Typography variant="h5" gutterBottom>
                   Riders
                 </Typography>
-                <Typography color="text.secondary" align="center">
+                <Typography color="text.secondary">
                   Afficher, modifier ou rechercher des riders
                 </Typography>
               </CardContent>
-              <CardActions sx={{ width: "100%" }}>
+              <CardActions>
                 <Button
                   variant="contained"
                   color="primary"
@@ -112,38 +104,24 @@ function Dashboard() {
           <Grid item xs={12} md={6} sx={{ display: "flex" }}>
             <Card
               sx={{
-                flexGrow: 1,
-                boxShadow: 6,
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "center",
-                transition: "transform 0.2s",
-                "&:hover": { transform: "scale(1.03)", boxShadow: 12 },
+                justifyContent: "space-between",
+                flex: 1,
+                boxShadow: 6,
+                p: 2,
               }}
             >
-              <CardContent
-                sx={{
-                  flexGrow: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                }}
-              >
+              <CardContent sx={{ textAlign: "center", flexGrow: 1 }}>
                 <FactCheckIcon color="success" sx={{ fontSize: 60, mb: 2 }} />
                 <Typography variant="h5" gutterBottom>
                   Contrôles
                 </Typography>
-                <Typography color="text.secondary" align="center">
+                <Typography color="text.secondary">
                   Afficher, modifier, rechercher ou supprimer des contrôles.
                 </Typography>
               </CardContent>
-              <CardActions
-                sx={{
-                  flexDirection: "column",
-                  gap: 1,
-                  width: "100%",
-                }}
-              >
+              <CardActions sx={{ flexDirection: "column", gap: 1, width: "100%" }}>
                 <Button
                   variant="contained"
                   color="success"
@@ -156,12 +134,18 @@ function Dashboard() {
                 </Button>
                 <Button
                   variant="contained"
-                  sx={{ bgcolor: "orange", color: "#fff", "&:hover": { bgcolor: "#ff9800" } }}
                   component={Link}
                   to="/inspection-form"
                   size="large"
                   fullWidth
                   startIcon={<AddCircleOutlineIcon />}
+                  sx={{
+                    bgcolor: "orange",
+                    color: "#fff",
+                    "&:hover": {
+                      bgcolor: "#ff9800",
+                    },
+                  }}
                 >
                   NOUVEAU CONTRÔLE
                 </Button>
