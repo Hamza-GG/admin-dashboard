@@ -12,15 +12,15 @@ import Navbar from "./components/Navbar";
 const theme = createTheme();
 
 function ProtectedRoute({ children }) {
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem("token");
   return token ? children : <Navigate to="/login" replace />;
 }
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("access_token"));
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("token"));
 
   useEffect(() => {
-    const onStorage = () => setIsAuthenticated(!!localStorage.getItem("access_token"));
+    const onStorage = () => setIsAuthenticated(!!localStorage.getItem("token"));
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
   }, []);
