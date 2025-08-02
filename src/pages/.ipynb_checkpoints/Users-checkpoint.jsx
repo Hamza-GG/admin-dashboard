@@ -77,7 +77,7 @@ export default function Users() {
       const formData = new FormData();
       formData.append("role", form.role);
       formData.append("is_verified", form.is_verified);
-      if (form.password) formData.append("password", form.password);
+      if (form.password) formData.append("new_password", form.password);
 
       await authAxios.put(`/users/by-username/${selectedUser.username}`, formData);
       window.location.reload();
