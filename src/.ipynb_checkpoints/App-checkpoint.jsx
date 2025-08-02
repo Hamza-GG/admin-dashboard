@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import Navbar from "./components/Navbar";
 import ResetPassword from "./pages/ResetPassword";
 import VerifyEmail from "./pages/VerifyEmail";
+import Users from "./pages/Users";
 
 const theme = createTheme();
 
@@ -45,6 +46,14 @@ export default function App() {
       </ProtectedRoute>
     }
   />
+              <Route
+  path="/users"
+  element={
+    <ProtectedRoute>
+      <Users />
+    </ProtectedRoute>
+  }
+/>
   <Route
     path="/riders"
     element={

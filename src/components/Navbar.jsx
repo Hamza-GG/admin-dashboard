@@ -85,11 +85,14 @@ const handleLogout = async () => {
             Riders
           </Button>
           <Button color="inherit" component={Link} to="/inspections">
-            Contrôles
-          </Button>
-          <Button color="inherit" component={Link} to="/inspection-form">
-            Ajouter un contrôle
-          </Button>
+  Contrôles
+</Button>
+<Button color="inherit" component={Link} to="/users">
+  Utilisateurs
+</Button>
+<Button color="inherit" component={Link} to="/inspection-form">
+  Ajouter un contrôle
+</Button>
           <Button
             color="inherit"
             variant="outlined"
