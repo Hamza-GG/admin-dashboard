@@ -24,6 +24,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
+import UploadFileIcon from "@mui/icons-material/UploadFile";
 import SearchIcon from "@mui/icons-material/Search";
 
 export default function Riders() {
@@ -47,27 +48,26 @@ export default function Riders() {
   };
   const [form, setForm] = useState(emptyForm);
 
-useEffect(() => {
-  const fetchRiders = async () => {
-    try {
-      const res = await authAxios.get("/riders");
-      setRiders(res.data);
-    } catch (error) {
-      if (error.response?.status === 401) {
-        // Access token refresh failed
-        localStorage.removeItem("token");
-        window.location.href = "/login";
-      } else {
-        alert("Failed to fetch riders. Please try again.");
-        console.error("Fetch riders error:", error);
+  useEffect(() => {
+    const fetchRiders = async () => {
+      try {
+        const res = await authAxios.get("/riders");
+        setRiders(res.data);
+      } catch (error) {
+        if (error.response?.status === 401) {
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+        } else {
+          alert("Failed to fetch riders. Please try again.");
+          console.error("Fetch riders error:", error);
+        }
+      } finally {
+        setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  fetchRiders();
-}, []);
+    fetchRiders();
+  }, []);
 
   const filtered = riders.filter((r) =>
     [r.rider_id, r.first_name, r.first_last_name, r.id_number, r.city_code, r.vehicle_type, r.plate_number, r.box_serial_number]
@@ -81,13 +81,11 @@ useEffect(() => {
   }
 
   function handleAddOpen() {
-    console.log("Opening add rider dialog");
     setForm(emptyForm);
     setOpenAdd(true);
   }
 
   function handleEditOpen(rider) {
-    console.log("Opening edit rider dialog", rider);
     setSelectedRider(rider);
     setForm({ ...rider, joined_at: rider.joined_at?.slice(0, 10) || "" });
     setOpenEdit(true);
@@ -95,7 +93,6 @@ useEffect(() => {
 
   async function handleAddSubmit(e) {
     e.preventDefault();
-    console.log("Submitting new rider", form);
     try {
       const data = { ...form };
       if (!data.rider_id) delete data.rider_id;
@@ -109,7 +106,6 @@ useEffect(() => {
 
   async function handleEditSubmit(e) {
     e.preventDefault();
-    console.log("Updating rider", form);
     try {
       const data = { ...form };
       if (data.rider_id) data.rider_id = Number(data.rider_id);
@@ -127,6 +123,21 @@ useEffect(() => {
       setRiders((prev) => prev.filter((r) => r.rider_id !== rider_id));
     } catch (error) {
       alert("Failed to delete rider.");
+    }
+  }
+
+  async function handleCSVUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      await authAxios.post("/riders/upload-csv", formData);
+      window.location.reload();
+    } catch (error) {
+      alert("CSV upload failed.");
     }
   }
 
@@ -152,9 +163,25 @@ useEffect(() => {
       <Box sx={{ width: "100%", maxWidth: 1200, mx: "auto", py: 6 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
           <Typography variant="h4" fontWeight="bold">Riders</Typography>
-          <Button variant="contained" startIcon={<AddIcon />} onClick={handleAddOpen} sx={{ bgcolor: "#17417e", ":hover": { bgcolor: "#122e57" } }}>
-            Add Rider
-          </Button>
+          <Box>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleAddOpen}
+              sx={{ bgcolor: "#17417e", ":hover": { bgcolor: "#122e57" } }}
+            >
+              Add Rider
+            </Button>
+            <Button
+              component="label"
+              variant="outlined"
+              startIcon={<UploadFileIcon />}
+              sx={{ ml: 2 }}
+            >
+              Upload CSV
+              <input type="file" accept=".csv" hidden onChange={handleCSVUpload} />
+            </Button>
+          </Box>
         </Stack>
         <Paper sx={{ p: 2, mb: 3 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
