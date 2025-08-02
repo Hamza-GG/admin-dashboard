@@ -8,6 +8,7 @@ import Inspections from "./pages/Inspections";
 import InspectionForm from "./pages/InspectionForm";
 import Login from "./pages/Login";
 import Navbar from "./components/Navbar";
+import ResetPassword from "./pages/ResetPassword";
 
 const theme = createTheme();
 
@@ -32,44 +33,45 @@ export default function App() {
         {isAuthenticated && <Navbar setIsAuthenticated={setIsAuthenticated} />}
         <Box sx={{ mt: isAuthenticated ? 8 : 0 }}>
           <Routes>
-            <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/riders"
-              element={
-                <ProtectedRoute>
-                  <Riders />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/inspections"
-              element={
-                <ProtectedRoute>
-                  <Inspections />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/inspection-form"
-              element={
-                <ProtectedRoute>
-                  <InspectionForm />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="*"
-              element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />}
-            />
-          </Routes>
+  <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
+  <Route path="/reset-password" element={<ResetPassword />} />
+  <Route
+    path="/dashboard"
+    element={
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    }
+  />
+  <Route
+    path="/riders"
+    element={
+      <ProtectedRoute>
+        <Riders />
+      </ProtectedRoute>
+    }
+  />
+  <Route
+    path="/inspections"
+    element={
+      <ProtectedRoute>
+        <Inspections />
+      </ProtectedRoute>
+    }
+  />
+  <Route
+    path="/inspection-form"
+    element={
+      <ProtectedRoute>
+        <InspectionForm />
+      </ProtectedRoute>
+    }
+  />
+  <Route
+    path="*"
+    element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />}
+  />
+</Routes>
         </Box>
       </Router>
     </ThemeProvider>
