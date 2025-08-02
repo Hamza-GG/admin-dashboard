@@ -9,6 +9,7 @@ import InspectionForm from "./pages/InspectionForm";
 import Login from "./pages/Login";
 import Navbar from "./components/Navbar";
 import ResetPassword from "./pages/ResetPassword";
+import VerifyEmail from "./pages/VerifyEmail";
 
 const theme = createTheme();
 
@@ -35,6 +36,7 @@ export default function App() {
           <Routes>
   <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
   <Route path="/reset-password" element={<ResetPassword />} />
+<Route path="/verify-email" element={<VerifyEmail />} />
   <Route
     path="/dashboard"
     element={
@@ -51,6 +53,7 @@ export default function App() {
       </ProtectedRoute>
     }
   />
+        
   <Route
     path="/inspections"
     element={
