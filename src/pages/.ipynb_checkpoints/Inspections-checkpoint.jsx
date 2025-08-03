@@ -119,16 +119,26 @@ export default function InspectionsDashboard() {
     setEditOpen(true);
   };
 
-  const handleSaveEdit = async () => {
-    try {
-      const { id, helmet } = currentEdit;
-      await authAxios.put(`/inspections/${id}`, { helmet });
-      setInspections(prev => prev.map(i => (i.id === id ? { ...i, helmet } : i)));
-      setEditOpen(false);
-    } catch (err) {
-      alert("Failed to save changes.");
+const handleSaveEdit = async () => {
+  try {
+    const formData = new FormData();
+    for (let key in currentEdit) {
+      if (currentEdit[key] !== null && currentEdit[key] !== undefined) {
+        formData.append(key, currentEdit[key]);
+      }
     }
-  };
+
+    await authAxios.patch(`/inspections/${currentEdit.id}`, formData);  // ✅ PATCH instead of PUT
+
+    setInspections(prev =>
+      prev.map(i => (i.id === currentEdit.id ? currentEdit : i))
+    );
+    setEditOpen(false);
+  } catch (err) {
+    alert("Failed to save changes.");
+    console.error(err);
+  }
+};
 
   return (
     <Box sx={{ p: 4, background: "#f7fafd", minHeight: "100vh" }}>
