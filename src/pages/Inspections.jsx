@@ -84,7 +84,7 @@ export default function InspectionsDashboard() {
     const counts = {};
     filtered.forEach((i) => {
       const val = i[field];
-      if (val && val !== "—") {
+      if (val !== null && val !== undefined && val !== "—") {
         counts[val] = (counts[val] || 0) + 1;
       }
     });
@@ -107,7 +107,7 @@ export default function InspectionsDashboard() {
       </Typography>
 
       {/* Filters */}
-      <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3 }}>
+      <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3, flexWrap: "wrap" }}>
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <DatePicker label="Start Date" value={startDate} onChange={setStartDate} />
           <DatePicker label="End Date" value={endDate} onChange={setEndDate} />
@@ -159,31 +159,31 @@ export default function InspectionsDashboard() {
       </Stack>
 
       {/* Charts */}
-<Grid container spacing={3} sx={{ mb: 4 }}>
-  {FIELDS_TO_CHART.map((field, idx) => {
-    const data = getDonutData(field);
-    if (data.length === 0) return null; // Skip empty charts
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {FIELDS_TO_CHART.map((field) => {
+          const data = getDonutData(field);
+          if (data.length === 0) return null;
 
-    return (
-      <Grid item xs={12} sm={6} md={3} key={field}>
-        <Paper sx={{ p: 2, height: 300 }}>
-          <Typography variant="subtitle2" gutterBottom>{field.replace(/_/g, " ").toUpperCase()}</Typography>
-          <ResponsiveContainer width="100%" height="80%">
-            <PieChart>
-              <Pie data={data} dataKey="value" nameKey="name" outerRadius={60} label>
-                {data.map((entry, i) => (
-                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                ))}
-              </Pie>
-              <ReTooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </Paper>
+          return (
+            <Grid item xs={12} sm={6} md={3} key={field}>
+              <Paper sx={{ p: 2, height: 300 }}>
+                <Typography variant="subtitle2" gutterBottom>{field.replace(/_/g, " ").toUpperCase()}</Typography>
+                <ResponsiveContainer width="100%" height="80%">
+                  <PieChart>
+                    <Pie data={data} dataKey="value" nameKey="name" outerRadius={60} label>
+                      {data.map((entry, i) => (
+                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <ReTooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </Paper>
+            </Grid>
+          );
+        })}
       </Grid>
-    );
-  })}
-</Grid>
 
       {/* Inspection List */}
       <Box mt={6}>
