@@ -51,6 +51,8 @@ export default function InspectionsDashboard() {
   const [riderFilter, setRiderFilter] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [editOpen, setEditOpen] = useState(false);
+  const [currentEdit, setCurrentEdit] = useState(null);
 
   useEffect(() => {
     const fetchInspections = async () => {
@@ -98,6 +100,34 @@ export default function InspectionsDashboard() {
     ];
     const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
     saveAs(blob, "inspections.csv");
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this inspection?")) return;
+    try {
+      await authAxios.delete(`/inspections/${id}`);
+      setInspections(prev => prev.filter(i => i.id !== id));
+      alert("Inspection deleted.");
+    } catch (err) {
+      alert("Failed to delete inspection.");
+      console.error(err);
+    }
+  };
+
+  const handleEdit = (row) => {
+    setCurrentEdit(row);
+    setEditOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      const { id, helmet } = currentEdit;
+      await authAxios.put(`/inspections/${id}`, { helmet });
+      setInspections(prev => prev.map(i => (i.id === id ? { ...i, helmet } : i)));
+      setEditOpen(false);
+    } catch (err) {
+      alert("Failed to save changes.");
+    }
   };
 
   return (
@@ -159,40 +189,39 @@ export default function InspectionsDashboard() {
       </Stack>
 
       {/* Charts */}
-{/* Donut Charts */}
-<Grid container spacing={3}>
-  {FIELDS_TO_CHART.map((field, idx) => {
-    const data = getDonutData(field).filter(d => d.name !== "—");
-    if (data.length === 0) return null;
+      <Grid container spacing={3}>
+        {FIELDS_TO_CHART.map((field, idx) => {
+          const data = getDonutData(field).filter(d => d.name !== "—");
+          if (data.length === 0) return null;
 
-    return (
-      <Grid item xs={12} sm={6} md={3} key={field}>
-        <Paper sx={{ p: 2, height: 320, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <Typography variant="subtitle2" gutterBottom>
-            {field.replace(/_/g, " ").toUpperCase()}
-          </Typography>
-          <Box sx={{ width: 200, height: 200 }}>
-            <PieChart width={200} height={200}>
-              <Pie
-                data={data}
-                dataKey="value"
-                nameKey="name"
-                outerRadius={80}
-                label
-              >
-                {data.map((entry, i) => (
-                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                ))}
-              </Pie>
-              <ReTooltip />
-              <Legend layout="horizontal" verticalAlign="bottom" />
-            </PieChart>
-          </Box>
-        </Paper>
+          return (
+            <Grid item xs={12} sm={6} md={3} key={field}>
+              <Paper sx={{ p: 2, height: 320, display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <Typography variant="subtitle2" gutterBottom>
+                  {field.replace(/_/g, " ").toUpperCase()}
+                </Typography>
+                <Box sx={{ width: 200, height: 200 }}>
+                  <PieChart width={200} height={200}>
+                    <Pie
+                      data={data}
+                      dataKey="value"
+                      nameKey="name"
+                      outerRadius={80}
+                      label
+                    >
+                      {data.map((entry, i) => (
+                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <ReTooltip />
+                    <Legend layout="horizontal" verticalAlign="bottom" />
+                  </PieChart>
+                </Box>
+              </Paper>
+            </Grid>
+          );
+        })}
       </Grid>
-    );
-  })}
-</Grid>
 
       {/* Inspection List */}
       <Box mt={6}>
@@ -224,10 +253,10 @@ export default function InspectionsDashboard() {
                     {FIELDS_TO_CHART.map(f => <TableCell key={f}>{row[f] || "—"}</TableCell>)}
                     <TableCell>
                       <Tooltip title="Edit">
-                        <IconButton size="small" onClick={() => alert("Inline edit coming soon!")}><EditIcon fontSize="small" /></IconButton>
+                        <IconButton size="small" onClick={() => handleEdit(row)}><EditIcon fontSize="small" /></IconButton>
                       </Tooltip>
                       <Tooltip title="Delete">
-                        <IconButton size="small" color="error" onClick={() => alert("Delete logic TBD")}> <DeleteIcon fontSize="small" /></IconButton>
+                        <IconButton size="small" color="error" onClick={() => handleDelete(row.id)}> <DeleteIcon fontSize="small" /></IconButton>
                       </Tooltip>
                     </TableCell>
                   </TableRow>
@@ -246,6 +275,24 @@ export default function InspectionsDashboard() {
           </TableContainer>
         )}
       </Box>
+
+      {/* Edit Dialog */}
+      <Dialog open={editOpen} onClose={() => setEditOpen(false)}>
+        <DialogTitle>Edit Inspection</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Helmet"
+            fullWidth
+            value={currentEdit?.helmet || ""}
+            onChange={(e) => setCurrentEdit({ ...currentEdit, helmet: e.target.value })}
+            sx={{ mt: 2 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditOpen(false)}>Cancel</Button>
+          <Button onClick={handleSaveEdit} variant="contained">Save</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
