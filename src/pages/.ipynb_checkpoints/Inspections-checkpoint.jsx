@@ -159,31 +159,40 @@ export default function InspectionsDashboard() {
       </Stack>
 
       {/* Charts */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {FIELDS_TO_CHART.map((field) => {
-          const data = getDonutData(field);
-          if (data.length === 0) return null;
+{/* Donut Charts */}
+<Grid container spacing={3}>
+  {FIELDS_TO_CHART.map((field, idx) => {
+    const data = getDonutData(field).filter(d => d.name !== "—"); // Exclude nulls
+    if (data.length === 0) return null;
 
-          return (
-            <Grid item xs={12} sm={6} md={3} key={field}>
-              <Paper sx={{ p: 2, height: 300 }}>
-                <Typography variant="subtitle2" gutterBottom>{field.replace(/_/g, " ").toUpperCase()}</Typography>
-                <ResponsiveContainer width="100%" height="80%">
-                  <PieChart>
-                    <Pie data={data} dataKey="value" nameKey="name" outerRadius={60} label>
-                      {data.map((entry, i) => (
-                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <ReTooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </Paper>
-            </Grid>
-          );
-        })}
+    return (
+      <Grid item xs={12} sm={6} md={3} key={field}>
+        <Paper sx={{ p: 2, height: 300, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+          <Typography variant="subtitle2" gutterBottom>
+            {field.replace(/_/g, " ").toUpperCase()}
+          </Typography>
+          <ResponsiveContainer width="100%" height={200}>
+            <PieChart>
+              <Pie
+                data={data}
+                dataKey="value"
+                nameKey="name"
+                outerRadius={70}
+                label
+              >
+                {data.map((entry, i) => (
+                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                ))}
+              </Pie>
+              <ReTooltip />
+              <Legend layout="horizontal" verticalAlign="bottom" />
+            </PieChart>
+          </ResponsiveContainer>
+        </Paper>
       </Grid>
+    );
+  })}
+</Grid>
 
       {/* Inspection List */}
       <Box mt={6}>
