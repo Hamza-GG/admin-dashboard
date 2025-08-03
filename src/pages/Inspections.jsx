@@ -159,28 +159,31 @@ export default function InspectionsDashboard() {
       </Stack>
 
       {/* Charts */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {FIELDS_TO_CHART.map((field, idx) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={field}>
-            <Paper sx={{ p: 2 }}>
-              <Typography variant="subtitle2" align="center" gutterBottom>
-                {field.replace(/_/g, " ").toUpperCase()}
-              </Typography>
-              <ResponsiveContainer width="100%" height={200}>
-                <PieChart>
-                  <Pie data={getDonutData(field)} dataKey="value" nameKey="name" outerRadius={60} label>
-                    {getDonutData(field).map((entry, i) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <ReTooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </Paper>
-          </Grid>
-        ))}
+<Grid container spacing={3} sx={{ mb: 4 }}>
+  {FIELDS_TO_CHART.map((field, idx) => {
+    const data = getDonutData(field);
+    if (data.length === 0) return null; // Skip empty charts
+
+    return (
+      <Grid item xs={12} sm={6} md={3} key={field}>
+        <Paper sx={{ p: 2, height: 300 }}>
+          <Typography variant="subtitle2" gutterBottom>{field.replace(/_/g, " ").toUpperCase()}</Typography>
+          <ResponsiveContainer width="100%" height="80%">
+            <PieChart>
+              <Pie data={data} dataKey="value" nameKey="name" outerRadius={60} label>
+                {data.map((entry, i) => (
+                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                ))}
+              </Pie>
+              <ReTooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </Paper>
       </Grid>
+    );
+  })}
+</Grid>
 
       {/* Inspection List */}
       <Box mt={6}>
