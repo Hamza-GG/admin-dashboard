@@ -79,7 +79,7 @@ const handleLogout = async () => {
         {/* Navigation Buttons */}
         <Box sx={{ display: "flex", gap: 2 }}>
           <Button color="inherit" component={Link} to="/dashboard">
-            Dashboard
+            Home
           </Button>
             <Button color="inherit" component={Link} to="/users">
   Utilisateurs
