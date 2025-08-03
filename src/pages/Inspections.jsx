@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Grid } from "@mui/material";
 import authAxios from "../utils/authAxios";
 import {
   Box,
@@ -162,22 +163,22 @@ export default function InspectionsDashboard() {
 {/* Donut Charts */}
 <Grid container spacing={3}>
   {FIELDS_TO_CHART.map((field, idx) => {
-    const data = getDonutData(field).filter(d => d.name !== "—"); // Exclude nulls
+    const data = getDonutData(field).filter(d => d.name !== "—");
     if (data.length === 0) return null;
 
     return (
       <Grid item xs={12} sm={6} md={3} key={field}>
-        <Paper sx={{ p: 2, height: 300, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+        <Paper sx={{ p: 2, height: 320, display: "flex", flexDirection: "column", alignItems: "center" }}>
           <Typography variant="subtitle2" gutterBottom>
             {field.replace(/_/g, " ").toUpperCase()}
           </Typography>
-          <ResponsiveContainer width="100%" height={200}>
-            <PieChart>
+          <Box sx={{ width: 200, height: 200 }}>
+            <PieChart width={200} height={200}>
               <Pie
                 data={data}
                 dataKey="value"
                 nameKey="name"
-                outerRadius={70}
+                outerRadius={80}
                 label
               >
                 {data.map((entry, i) => (
@@ -187,7 +188,7 @@ export default function InspectionsDashboard() {
               <ReTooltip />
               <Legend layout="horizontal" verticalAlign="bottom" />
             </PieChart>
-          </ResponsiveContainer>
+          </Box>
         </Paper>
       </Grid>
     );
