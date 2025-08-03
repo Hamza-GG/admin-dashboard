@@ -27,6 +27,7 @@ import {
   Chip,
   OutlinedInput,
   TablePagination,
+  Grid,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SearchIcon from "@mui/icons-material/Search";
@@ -82,8 +83,10 @@ export default function InspectionsDashboard() {
   const getDonutData = (field) => {
     const counts = {};
     filtered.forEach((i) => {
-      const val = i[field] || "—";
-      counts[val] = (counts[val] || 0) + 1;
+      const val = i[field];
+      if (val && val !== "—") {
+        counts[val] = (counts[val] || 0) + 1;
+      }
     });
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
   };
@@ -156,24 +159,28 @@ export default function InspectionsDashboard() {
       </Stack>
 
       {/* Charts */}
-      <Stack direction="row" spacing={4} flexWrap="wrap">
+      <Grid container spacing={3} sx={{ mb: 4 }}>
         {FIELDS_TO_CHART.map((field, idx) => (
-          <Paper key={field} sx={{ width: 320, height: 300, p: 2 }}>
-            <Typography variant="subtitle2" gutterBottom>{field.replace(/_/g, " ").toUpperCase()}</Typography>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={getDonutData(field)} dataKey="value" nameKey="name" outerRadius={80} label>
-                  {getDonutData(field).map((entry, i) => (
-                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                  ))}
-                </Pie>
-                <ReTooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </Paper>
+          <Grid item xs={12} sm={6} md={4} lg={3} key={field}>
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="subtitle2" align="center" gutterBottom>
+                {field.replace(/_/g, " ").toUpperCase()}
+              </Typography>
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie data={getDonutData(field)} dataKey="value" nameKey="name" outerRadius={60} label>
+                    {getDonutData(field).map((entry, i) => (
+                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <ReTooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </Paper>
+          </Grid>
         ))}
-      </Stack>
+      </Grid>
 
       {/* Inspection List */}
       <Box mt={6}>
