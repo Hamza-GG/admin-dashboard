@@ -96,14 +96,51 @@ export default function Users() {
     }
   }
 
-  const renderFormFields = () => (
-    <>
-      <TextField name="username" label="Email" value={form.username} onChange={handleChange} fullWidth disabled={!!selectedUser} />
-      <TextField name="role" label="Role" value={form.role} onChange={handleChange} fullWidth />
-      <TextField name="password" label="Password" type="password" value={form.password} onChange={handleChange} fullWidth />
-      <TextField name="is_verified" label="Is Verified" value={form.is_verified} onChange={handleChange} fullWidth />
-    </>
-  );
+const renderFormFields = () => (
+  <>
+    <TextField
+      name="username"
+      label="Email"
+      value={form.username}
+      onChange={handleChange}
+      fullWidth
+      disabled={!!selectedUser}
+    />
+
+    <TextField
+      name="password"
+      label="Password"
+      type="password"
+      value={form.password}
+      onChange={handleChange}
+      fullWidth
+    />
+
+    <TextField
+      select
+      name="role"
+      label="Role"
+      value={form.role}
+      onChange={handleChange}
+      fullWidth
+    >
+      <MenuItem value="admin">Admin</MenuItem>
+      <MenuItem value="supervisor">Supervisor</MenuItem>
+    </TextField>
+
+    <TextField
+      select
+      name="is_verified"
+      label="Is Verified"
+      value={form.is_verified ? "true" : "false"}
+      onChange={(e) => setForm(prev => ({ ...prev, is_verified: e.target.value === "true" }))}
+      fullWidth
+    >
+      <MenuItem value="true">True</MenuItem>
+      <MenuItem value="false">False</MenuItem>
+    </TextField>
+  </>
+);
 
   return (
     <Box sx={{ minHeight: "100vh", width: "100vw", backgroundColor: "#f7fafd" }}>
