@@ -29,7 +29,7 @@ const handleLogout = async () => {
         top: 0,
         right: 0,
         boxShadow: 2,
-        backgroundColor: "#1976d2",
+        backgroundColor: "#00A082",
         zIndex: 1300,
         width: "100%",
         minHeight: 64,
