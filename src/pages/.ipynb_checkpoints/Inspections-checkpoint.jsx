@@ -277,22 +277,31 @@ export default function InspectionsDashboard() {
       </Box>
 
       {/* Edit Dialog */}
-      <Dialog open={editOpen} onClose={() => setEditOpen(false)}>
-        <DialogTitle>Edit Inspection</DialogTitle>
-        <DialogContent>
-          <TextField
-            label="Helmet"
-            fullWidth
-            value={currentEdit?.helmet || ""}
-            onChange={(e) => setCurrentEdit({ ...currentEdit, helmet: e.target.value })}
-            sx={{ mt: 2 }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setEditOpen(false)}>Cancel</Button>
-          <Button onClick={handleSaveEdit} variant="contained">Save</Button>
-        </DialogActions>
-      </Dialog>
+   <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="sm" fullWidth>
+  <DialogTitle>Edit Inspection</DialogTitle>
+  <DialogContent>
+    {[
+      "rider_id", "id_number", "plate_number", "box_serial_number", "helmet", "box",
+      "account", "parking", "appearance", "driving", "mfc_status",
+      "courier_behavior", "location", "city", "comments"
+    ].map((field) => (
+      <TextField
+        key={field}
+        label={field.replace(/_/g, " ").toUpperCase()}
+        fullWidth
+        sx={{ mt: 2 }}
+        value={currentEdit?.[field] ?? ""}
+        onChange={(e) =>
+          setCurrentEdit((prev) => ({ ...prev, [field]: e.target.value }))
+        }
+      />
+    ))}
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setEditOpen(false)}>Cancel</Button>
+    <Button onClick={handleSaveEdit} variant="contained">Save</Button>
+  </DialogActions>
+</Dialog>
     </Box>
   );
 }
