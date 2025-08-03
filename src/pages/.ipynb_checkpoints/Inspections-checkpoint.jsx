@@ -128,7 +128,14 @@ const handleSaveEdit = async () => {
       }
     }
 
-    await authAxios.patch(`/inspections/${currentEdit.id}`, formData);  // ✅ PATCH instead of PUT
+    await authAxios({
+      method: "patch",
+      url: `/inspections/${currentEdit.id}`,
+      data: formData,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
     setInspections(prev =>
       prev.map(i => (i.id === currentEdit.id ? currentEdit : i))
