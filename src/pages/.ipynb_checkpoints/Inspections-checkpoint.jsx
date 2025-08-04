@@ -355,7 +355,8 @@ const handleSaveEdit = async () => {
       <Button onClick={() => setEditOpen(false)}>Cancel</Button>
       <Button onClick={handleSaveEdit} variant="contained">Save</Button>
     </DialogActions>
-  </Dialog>
+</Dialog>
 </Box>
+             </>
   );
 }
