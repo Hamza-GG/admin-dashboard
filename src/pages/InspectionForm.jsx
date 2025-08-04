@@ -305,7 +305,7 @@ export default function InspectionForm() {
           
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth size="small" sx={{ minWidth: 240 }}>
-                  <InputLabel id="city-label">City</InputLabel>
+                  <InputLabel id="city-label">Ville</InputLabel>
                   <Select
                     labelId="city-label"
                     id="city"
@@ -350,7 +350,7 @@ export default function InspectionForm() {
                     {gettingLocation ? (
                       <CircularProgress size={18} sx={{ mr: 1 }} />
                     ) : (
-                      "Usiliser ma localisation"
+                      "Ma localisation"
                     )}
                   </Button>
                 </Box>
@@ -388,8 +388,7 @@ export default function InspectionForm() {
         label="Box"
         onChange={handleChange}
       >
-        <MenuItem value=""><em>None</em></MenuItem>
-        <MenuItem value="Bon état">Bon état</MenuItem>
+        <MenuItem value="Bon état"><em>Bon état</em></MenuItem>
         <MenuItem value="Mauvais état">Mauvais état</MenuItem>
         <MenuItem value="N'a pas de box">N'a pas de box</MenuItem>
       </Select>
@@ -404,10 +403,10 @@ export default function InspectionForm() {
         label="Compte Glovo"
         onChange={handleChange}
       >
-        <MenuItem value=""><em>None</em></MenuItem>
-        <MenuItem value="Valid">Valid</MenuItem>
-        <MenuItem value="Rented">Rented</MenuItem>
-        <MenuItem value="Refused to provide account or CIN.">Refused to provide account or CIN.</MenuItem>
+        <MenuItem value="Non Vérifié"><em>Non Vérifié</em></MenuItem>
+        <MenuItem value="Vérifié et Validé">Vérifié et Validé</MenuItem>
+        <MenuItem value="Compte loué">Compte loué</MenuItem>
+        <MenuItem value="A refusé de fournir les informations">A refusé de fournir les informations</MenuItem>
       </Select>
     </FormControl>
     <FormControl fullWidth size="small">
@@ -420,9 +419,9 @@ export default function InspectionForm() {
         label="Emplacement de stationnement"
         onChange={handleChange}
       >
-        <MenuItem value=""><em>None</em></MenuItem>
-        <MenuItem value="Valid - in a dedicated area">Valid - in a dedicated area</MenuItem>
-        <MenuItem value="Not valid - in a prohibited area">Not valid - in a prohibited area</MenuItem>
+        <MenuItem value="Non Vérifié"><em>Non Vérifié</em></MenuItem>
+        <MenuItem value="Stationement dans une zone dédiée">Stationement dans une zone dédiée</MenuItem>
+        <MenuItem value="Stationement Interdit">Stationement Interdit</MenuItem>
       </Select>
     </FormControl>
     <FormControl fullWidth size="small">
@@ -435,10 +434,10 @@ export default function InspectionForm() {
         label="Apparence"
         onChange={handleChange}
       >
-        <MenuItem value=""><em>None</em></MenuItem>
-        <MenuItem value="Valid - Decent attire with gilet">Valid - Decent attire with gilet</MenuItem>
-        <MenuItem value="Valid - Decent attire sans gilet">Valid - Decent attire sans gilet</MenuItem>
-        <MenuItem value="Not valid - wearing pyjama, Sandals, sabots etc">Not valid - wearing pyjama, Sandals, sabots etc</MenuItem>
+        <MenuItem value="Non Vérifié"><em>Non Vérifié</em></MenuItem>
+        <MenuItem value="Tenue correcte avec gilet Glovo">Tenue correcte avec gilet Glovo</MenuItem>
+        <MenuItem value="Tenue correcte sans gilet Glovo">Tenue correcte sans gilet Glovo</MenuItem>
+        <MenuItem value="Tenue non correcte: Porte un pyjama, des sandales, des sabots, etc.">Tenue non correcte: Porte un pyjama, des sandales, des sabots, etc.</MenuItem>
       </Select>
     </FormControl>
     <FormControl fullWidth size="small">
@@ -451,26 +450,26 @@ export default function InspectionForm() {
         label="Conduite"
         onChange={handleChange}
       >
-        <MenuItem value=""><em>None</em></MenuItem>
-        <MenuItem value="Reckless driving">Reckless driving</MenuItem>
-        <MenuItem value="Overspeed">Overspeed</MenuItem>
-        <MenuItem value="One way driving">One way driving</MenuItem>
-        <MenuItem value="Good Behavior">Good Behavior</MenuItem>
+        <MenuItem value="Non Vérifié"><em>Non Vérifié</em></MenuItem>
+        <MenuItem value="Conduite dangereuse">Conduite dangereuse</MenuItem>
+        <MenuItem value="Excès de vitesse">Excès de vitesse</MenuItem>
+        <MenuItem value="Conduite en sens interdit">Conduite en sens interdit</MenuItem>
+        <MenuItem value="Bonne conduite">Bonne conduite</MenuItem>
       </Select>
     </FormControl>
     <FormControl fullWidth size="small">
-      <InputLabel id="mfc_status-label">MFC</InputLabel>
+      <InputLabel id="mfc_status-label">Glovo Market</InputLabel>
       <Select
         labelId="mfc_status-label"
         id="mfc_status"
         name="mfc_status"
         value={form.mfc_status}
-        label="MFC"
+        label="Glovo Market"
         onChange={handleChange}
       >
-        <MenuItem value=""><em>None</em></MenuItem>
-        <MenuItem value="Ongoing order - waiting for pick up">Ongoing order - waiting for pick up</MenuItem>
-        <MenuItem value="Not ongoing order - waiting for new order">Not ongoing order - waiting for new order</MenuItem>
+        <MenuItem value="Non Vérifié"><em>Non Vérifié</em></MenuItem>
+        <MenuItem value="Commande en cours">Commande en cours</MenuItem>
+        <MenuItem value="Attente sans commande en cours">Attente sans commande en cours</MenuItem>
       </Select>
     </FormControl>
     <FormControl fullWidth size="small">
@@ -483,9 +482,8 @@ export default function InspectionForm() {
         label="Comportement du coursier"
         onChange={handleChange}
       >
-        <MenuItem value=""><em>None</em></MenuItem>
-        <MenuItem value="Valid - Collaborative, respectful">Valid - Collaborative, respectful</MenuItem>
-        <MenuItem value="Not valid - Not collaborative">Not valid - Not collaborative</MenuItem>
+        <MenuItem value="Collaboratif"><em>Collaboratif</em></MenuItem>
+        <MenuItem value="Non Collaboratif">Non Collaboratif</MenuItem>
       </Select>
     </FormControl>
   </Stack>
