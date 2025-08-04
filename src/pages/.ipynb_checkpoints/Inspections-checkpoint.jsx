@@ -148,15 +148,7 @@ const handleSaveEdit = async () => {
 };
 
   return (
-    <Box sx={{ 
-      p: 4, 
-      background: "#f7fafd", 
-      minHeight: "100vh",
-      height: "100vh",
-      overflow: "hidden",
-      display: "flex",
-      flexDirection: "column"
-    }}>
+    <Box sx={{ p: 4, background: "#f7fafd", minHeight: "100vh" }}>
       <Typography variant="h4" fontWeight="bold" gutterBottom>
         Inspection Dashboard
       </Typography>
@@ -214,133 +206,112 @@ const handleSaveEdit = async () => {
       </Stack>
 
       {/* Charts */}
-      <Box sx={{ flex: 1, overflow: "auto", mb: 3 }}>
-        <Grid container spacing={3}>
-          {FIELDS_TO_CHART.map((field, idx) => {
-            const data = getDonutData(field).filter(d => d.name !== "—");
-            if (data.length === 0) return null;
+      <Grid container spacing={3}>
+        {FIELDS_TO_CHART.map((field, idx) => {
+          const data = getDonutData(field).filter(d => d.name !== "—");
+          if (data.length === 0) return null;
 
-            return (
-              <Grid item xs={12} sm={6} md={3} key={field}>
-                <Paper sx={{ 
-                  p: 2, 
-                  height: 400, 
-                  display: "flex", 
-                  flexDirection: "column", 
-                  alignItems: "center"
-                }}>
-                  <Typography variant="subtitle2" gutterBottom sx={{ mb: 2 }}>
-                    {field.replace(/_/g, " ").toUpperCase()}
-                  </Typography>
-                  <Box sx={{ width: "100%", height: 320, display: "flex", justifyContent: "center", alignItems: "center" }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={data}
-                          dataKey="value"
-                          nameKey="name"
-                          outerRadius={100}
-                          innerRadius={40}
-                          startAngle={0}
-                          endAngle={360}
-                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                          labelLine={false}
-                        >
-                          {data.map((entry, i) => (
-                            <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <ReTooltip />
-                        <Legend 
-                          layout="vertical" 
-                          verticalAlign="middle" 
-                          align="right"
-                          wrapperStyle={{ fontSize: '12px' }}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </Box>
-                </Paper>
-              </Grid>
-            );
-          })}
-        </Grid>
-      </Box>
+          return (
+            <Grid item xs={12} sm={6} md={3} key={field}>
+              <Paper sx={{ p: 2, height: 320, display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <Typography variant="subtitle2" gutterBottom>
+                  {field.replace(/_/g, " ").toUpperCase()}
+                </Typography>
+                <Box sx={{ width: 200, height: 200 }}>
+                  <PieChart width={200} height={200}>
+                    <Pie
+                      data={data}
+                      dataKey="value"
+                      nameKey="name"
+                      outerRadius={80}
+                      label
+                    >
+                      {data.map((entry, i) => (
+                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <ReTooltip />
+                    <Legend layout="horizontal" verticalAlign="bottom" />
+                  </PieChart>
+                </Box>
+              </Paper>
+            </Grid>
+          );
+        })}
+      </Grid>
 
       {/* Inspection List */}
-      <Box sx={{ height: "35vh", display: "flex", flexDirection: "column" }}>
+      <Box mt={6}>
         <Typography variant="h5" mb={2}>Inspection Records</Typography>
         {loading ? (
           <CircularProgress />
         ) : (
-          <Box sx={{ flex: 1, overflow: "hidden" }}>
-            <TableContainer component={Paper} sx={{ height: "100%", overflow: "auto" }}>
-              <Table size="small" stickyHeader>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ minWidth: 60, backgroundColor: "#f5f5f5" }}>ID</TableCell>
-                    <TableCell sx={{ minWidth: 100, backgroundColor: "#f5f5f5" }}>Rider ID</TableCell>
-                    <TableCell sx={{ minWidth: 150, backgroundColor: "#f5f5f5" }}>Inspected By</TableCell>
-                    <TableCell sx={{ minWidth: 150, backgroundColor: "#f5f5f5" }}>Location</TableCell>
-                    <TableCell sx={{ minWidth: 100, backgroundColor: "#f5f5f5" }}>City</TableCell>
-                    <TableCell sx={{ minWidth: 80, backgroundColor: "#f5f5f5" }}>Image</TableCell>
-                    <TableCell sx={{ minWidth: 120, backgroundColor: "#f5f5f5" }}>Comments</TableCell>
-                    <TableCell sx={{ minWidth: 100, backgroundColor: "#f5f5f5" }}>ID Number</TableCell>
-                    <TableCell sx={{ minWidth: 150, backgroundColor: "#f5f5f5" }}>Timestamp</TableCell>
-                    <TableCell sx={{ minWidth: 80, backgroundColor: "#f5f5f5" }}>Helmet</TableCell>
-                    <TableCell sx={{ minWidth: 80, backgroundColor: "#f5f5f5" }}>Box</TableCell>
-                    <TableCell sx={{ minWidth: 80, backgroundColor: "#f5f5f5" }}>Account</TableCell>
-                    <TableCell sx={{ minWidth: 80, backgroundColor: "#f5f5f5" }}>Parking</TableCell>
-                    <TableCell sx={{ minWidth: 100, backgroundColor: "#f5f5f5" }}>Appearance</TableCell>
-                    <TableCell sx={{ minWidth: 80, backgroundColor: "#f5f5f5" }}>Driving</TableCell>
-                    <TableCell sx={{ minWidth: 100, backgroundColor: "#f5f5f5" }}>MFC Status</TableCell>
-                    <TableCell sx={{ minWidth: 120, backgroundColor: "#f5f5f5" }}>Courier Behavior</TableCell>
-                    <TableCell sx={{ minWidth: 100, backgroundColor: "#f5f5f5" }}>Box Serial</TableCell>
-                    <TableCell sx={{ minWidth: 100, backgroundColor: "#f5f5f5" }}>Plate Number</TableCell>
-                    <TableCell sx={{ minWidth: 120, backgroundColor: "#f5f5f5" }}>MFC Location</TableCell>
-                    <TableCell sx={{ minWidth: 100, backgroundColor: "#f5f5f5" }}>Actions</TableCell>
+          <TableContainer component={Paper}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>ID</TableCell>
+                  <TableCell>Rider ID</TableCell>
+                  <TableCell>Inspected By</TableCell>
+                  <TableCell>Location</TableCell>
+                  <TableCell>City</TableCell>
+                  <TableCell>Image</TableCell>
+                  <TableCell>Comments</TableCell>
+                  <TableCell>ID Number</TableCell>
+                  <TableCell>Timestamp</TableCell>
+                  <TableCell>Helmet</TableCell>
+                  <TableCell>Box</TableCell>
+                  <TableCell>Account</TableCell>
+                  <TableCell>Parking</TableCell>
+                  <TableCell>Appearance</TableCell>
+                  <TableCell>Driving</TableCell>
+                  <TableCell>MFC Status</TableCell>
+                  <TableCell>Courier Behavior</TableCell>
+                  <TableCell>Box Serial</TableCell>
+                  <TableCell>Plate Number</TableCell>
+                  <TableCell>MFC Location</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                  <TableRow key={row.id}>
+                    <TableCell>{row.id}</TableCell>
+                    <TableCell>{row.rider_id}</TableCell>
+                    <TableCell>{row.inspected_by}</TableCell>
+                    <TableCell>{row.location || "—"}</TableCell>
+                    <TableCell>{row.city}</TableCell>
+                    <TableCell>
+                      {row.image_url ? (
+                        <img src={row.image_url} alt="preview" style={{ width: 40, height: 40, borderRadius: "50%" }} />
+                      ) : "—"}
+                    </TableCell>
+                    <TableCell>{row.comments || "—"}</TableCell>
+                    <TableCell>{row.id_number || "—"}</TableCell>
+                    <TableCell>{row.timestamp?.slice(0, 19).replace("T", " ")}</TableCell>
+                    <TableCell>{row.helmet || "—"}</TableCell>
+                    <TableCell>{row.box || "—"}</TableCell>
+                    <TableCell>{row.account || "—"}</TableCell>
+                    <TableCell>{row.parking || "—"}</TableCell>
+                    <TableCell>{row.appearance || "—"}</TableCell>
+                    <TableCell>{row.driving || "—"}</TableCell>
+                    <TableCell>{row.mfc_status || "—"}</TableCell>
+                    <TableCell>{row.courier_behavior || "—"}</TableCell>
+                    <TableCell>{row.box_serial_number || "—"}</TableCell>
+                    <TableCell>{row.plate_number || "—"}</TableCell>
+                    <TableCell>{row.mfc_location || "—"}</TableCell>
+                    <TableCell>
+                      <Tooltip title="Edit">
+                        <IconButton size="small" onClick={() => handleEdit(row)}><EditIcon fontSize="small" /></IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete">
+                        <IconButton size="small" color="error" onClick={() => handleDelete(row.id)}> <DeleteIcon fontSize="small" /></IconButton>
+                      </Tooltip>
+                    </TableCell>
                   </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                    <TableRow key={row.id}>
-                      <TableCell>{row.id}</TableCell>
-                      <TableCell>{row.rider_id}</TableCell>
-                      <TableCell>{row.inspected_by}</TableCell>
-                      <TableCell>{row.location || "—"}</TableCell>
-                      <TableCell>{row.city}</TableCell>
-                      <TableCell>
-                        {row.image_url ? (
-                          <img src={row.image_url} alt="preview" style={{ width: 40, height: 40, borderRadius: "50%" }} />
-                        ) : "—"}
-                      </TableCell>
-                      <TableCell>{row.comments || "—"}</TableCell>
-                      <TableCell>{row.id_number || "—"}</TableCell>
-                      <TableCell>{row.timestamp?.slice(0, 19).replace("T", " ")}</TableCell>
-                      <TableCell>{row.helmet || "—"}</TableCell>
-                      <TableCell>{row.box || "—"}</TableCell>
-                      <TableCell>{row.account || "—"}</TableCell>
-                      <TableCell>{row.parking || "—"}</TableCell>
-                      <TableCell>{row.appearance || "—"}</TableCell>
-                      <TableCell>{row.driving || "—"}</TableCell>
-                      <TableCell>{row.mfc_status || "—"}</TableCell>
-                      <TableCell>{row.courier_behavior || "—"}</TableCell>
-                      <TableCell>{row.box_serial_number || "—"}</TableCell>
-                      <TableCell>{row.plate_number || "—"}</TableCell>
-                      <TableCell>{row.mfc_location || "—"}</TableCell>
-                      <TableCell>
-                        <Tooltip title="Edit">
-                          <IconButton size="small" onClick={() => handleEdit(row)}><EditIcon fontSize="small" /></IconButton>
-                        </Tooltip>
-                        <Tooltip title="Delete">
-                          <IconButton size="small" color="error" onClick={() => handleDelete(row.id)}> <DeleteIcon fontSize="small" /></IconButton>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                ))}
+              </TableBody>
+            </Table>
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
@@ -350,7 +321,7 @@ const handleSaveEdit = async () => {
               onPageChange={(e, newPage) => setPage(newPage)}
               onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
             />
-          </Box>
+          </TableContainer>
         )}
       </Box>
 
