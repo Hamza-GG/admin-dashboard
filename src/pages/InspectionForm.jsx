@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import ImageIcon from "@mui/icons-material/Image";
-
+/*
 const dropdownOptions = {
   helmet: ["Yes", "No"],
   box: ["Clean", "Dirty or torn", "Does not have a box"],
@@ -45,7 +45,7 @@ const dropdownOptions = {
     "Not valid - Not collaborative",
   ],
 };
-
+*/
 export default function InspectionForm() {
   const [form, setForm] = useState({
     rider_id: "",
@@ -482,7 +482,7 @@ export default function InspectionForm() {
         label="Comportement du coursier"
         onChange={handleChange}
       >
-        <MenuItem value="Collaboratif">sCollaboratif</MenuItem>
+        <MenuItem value="Collaboratif">Collaboratif</MenuItem>
         <MenuItem value="Non Collaboratif">Non Collaboratif</MenuItem>
       </Select>
     </FormControl>
