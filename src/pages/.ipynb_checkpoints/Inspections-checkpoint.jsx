@@ -355,8 +355,39 @@ const handleSaveEdit = async () => {
       <Button onClick={() => setEditOpen(false)}>Cancel</Button>
       <Button onClick={handleSaveEdit} variant="contained">Save</Button>
     </DialogActions>
-</Dialog>
-</Box>
-             </>
+return (
+  <>
+    <Box sx={{ p: 4, background: "#f7fafd", minHeight: "100vh" }}>
+      {/* All content inside the Box — filters, scorecards, charts, inspection table */}
+    </Box>
+
+    {/* Edit Dialog OUTSIDE the Box */}
+    <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="sm" fullWidth>
+      <DialogTitle>Edit Inspection</DialogTitle>
+      <DialogContent>
+        {[
+          "rider_id", "id_number", "plate_number", "box_serial_number", "helmet", "box",
+          "account", "parking", "appearance", "driving", "mfc_status",
+          "courier_behavior", "location", "city", "comments", "mfc_location"
+        ].map((field) => (
+          <TextField
+            key={field}
+            label={field.replace(/_/g, " ").toUpperCase()}
+            fullWidth
+            sx={{ mt: 2 }}
+            value={currentEdit?.[field] ?? ""}
+            onChange={(e) =>
+              setCurrentEdit((prev) => ({ ...prev, [field]: e.target.value }))
+            }
+          />
+        ))}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setEditOpen(false)}>Cancel</Button>
+        <Button onClick={handleSaveEdit} variant="contained">Save</Button>
+      </DialogActions>
+    </Dialog>
+  </>
+);
   );
 }
