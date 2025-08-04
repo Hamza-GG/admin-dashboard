@@ -47,24 +47,27 @@ const dropdownOptions = {
 };
 */
 export default function InspectionForm() {
-  const [form, setForm] = useState({
-    rider_id: "",
-    id_number: "",
-    box_serial_number: "",
-    plate_number: "",
-    city: "",
-    location: "",
-    helmet: "",
-    box: "",
-    account: "",
-    parking: "",
-    appearance: "",
-    driving: "",
-    mfc_status: "",
-    courier_behavior: "",
-    image: null,
-    comments: "",
-  });
+const [form, setForm] = useState({
+  rider_id: "",
+  id_number: "",
+  first_name: "",
+  last_name: "",
+  mfc_location: "",
+  box_serial_number: "",
+  plate_number: "",
+  city: "",
+  location: "",
+  helmet: "",
+  box: "",
+  account: "",
+  parking: "",
+  appearance: "",
+  driving: "",
+  mfc_status: "",
+  courier_behavior: "",
+  image: null,
+  comments: "",
+});
   const [submitting, setSubmitting] = useState(false);
   const [gettingLocation, setGettingLocation] = useState(false);
   const [success, setSuccess] = useState("");
@@ -103,7 +106,14 @@ export default function InspectionForm() {
       match = riders.find((r) => r.id_number && r.id_number.toLowerCase() === value.toLowerCase());
     } else if (field === "box_serial_number") {
       match = riders.find((r) => r.box_serial_number && r.box_serial_number.toLowerCase() === value.toLowerCase());
-    } else if (field === "plate_number") {
+    
+    } 
+      else if (field === "first_name") {
+  match = riders.find((r) => r.first_name?.toLowerCase() === value.toLowerCase());
+} else if (field === "last_name") {
+  match = riders.find((r) => r.last_name?.toLowerCase() === value.toLowerCase());
+}
+    else if (field === "plate_number") {
       match = riders.find((r) => r.plate_number && r.plate_number.toLowerCase() === value.toLowerCase());
     }
     if (match) {
@@ -111,6 +121,8 @@ export default function InspectionForm() {
         ...prev,
         rider_id: match.rider_id || "",
         id_number: match.id_number || "",
+        first_name: match.first_name || "",
+        last_name: match.last_name || "",
         box_serial_number: match.box_serial_number || "",
         plate_number: match.plate_number || "",
       }));
@@ -302,6 +314,47 @@ export default function InspectionForm() {
                   size="small"
                 />
               </Grid>
+                
+            <Grid item xs={12} sm={6}>
+  <TextField
+    label="Prénom"
+    name="first_name"
+    value={form.first_name}
+    onChange={handleChange}
+    onBlur={handleBlur}
+    placeholder="First Name"
+    fullWidth
+    size="small"
+  />
+</Grid>
+<Grid item xs={12} sm={6}>
+  <TextField
+    label="Nom de famille"
+    name="last_name"
+    value={form.last_name}
+    onChange={handleChange}
+    onBlur={handleBlur}
+    placeholder="Last Name"
+    fullWidth
+    size="small"
+  />
+</Grid>
+<Grid item xs={12} sm={6}>
+  <FormControl fullWidth size="small">
+    <InputLabel id="mfc_location-label">MFC</InputLabel>
+    <Select
+      labelId="mfc_location-label"
+      id="mfc_location"
+      name="mfc_location"
+      value={form.mfc_location}
+      label="MFC"
+      onChange={handleChange}
+    >
+      <MenuItem value="OASIS">OASIS</MenuItem>
+      <MenuItem value="YAAKOUB">YAAKOUB</MenuItem>
+    </Select>
+  </FormControl>
+</Grid>
           
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth size="small" sx={{ minWidth: 240 }}>
