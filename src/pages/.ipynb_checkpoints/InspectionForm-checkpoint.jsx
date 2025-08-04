@@ -261,7 +261,15 @@ const [form, setForm] = useState({
           Remplissez le formulaire. Les champs marqués comme (optionnel) peuvent être laissés vides.
         </Typography>
         <Divider sx={{ mb: 2 }} />
-        <form onSubmit={handleSubmit} encType="multipart/form-data">
+        <form
+  onSubmit={handleSubmit}
+  onKeyDown={(e) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // prevent accidental submission
+    }
+  }}
+  encType="multipart/form-data"
+>
           <Stack spacing={3}>
             {error && <Alert severity="error">{error}</Alert>}
             {success && <Alert severity="success">{success}</Alert>}
