@@ -54,7 +54,7 @@ function Navbar({ setIsAuthenticated }) {
           sx={{ display: "flex", alignItems: "center", textDecoration: "none" }}
         >
           <img
-            src="/rider.png"
+            src="/rider.gif"
             alt="logo"
             style={{ height: 52, marginRight: 30 }}
           />
