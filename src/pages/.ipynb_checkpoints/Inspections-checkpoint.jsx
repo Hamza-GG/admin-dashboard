@@ -224,31 +224,37 @@ const handleSaveEdit = async () => {
               <Grid item xs={12} sm={6} md={3} key={field}>
                 <Paper sx={{ 
                   p: 2, 
-                  height: 350, 
+                  height: 400, 
                   display: "flex", 
                   flexDirection: "column", 
-                  alignItems: "center",
-                  justifyContent: "space-between"
+                  alignItems: "center"
                 }}>
-                  <Typography variant="subtitle2" gutterBottom>
+                  <Typography variant="subtitle2" gutterBottom sx={{ mb: 2 }}>
                     {field.replace(/_/g, " ").toUpperCase()}
                   </Typography>
-                  <Box sx={{ width: "100%", height: 280, display: "flex", justifyContent: "center", alignItems: "center" }}>
+                  <Box sx={{ width: "100%", height: 320, display: "flex", justifyContent: "center", alignItems: "center" }}>
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
                           data={data}
                           dataKey="value"
                           nameKey="name"
-                          outerRadius={80}
+                          outerRadius={100}
+                          innerRadius={40}
                           label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                          labelLine={false}
                         >
                           {data.map((entry, i) => (
                             <Cell key={i} fill={COLORS[i % COLORS.length]} />
                           ))}
                         </Pie>
                         <ReTooltip />
-                        <Legend layout="horizontal" verticalAlign="bottom" align="center" />
+                        <Legend 
+                          layout="vertical" 
+                          verticalAlign="middle" 
+                          align="right"
+                          wrapperStyle={{ fontSize: '12px' }}
+                        />
                       </PieChart>
                     </ResponsiveContainer>
                   </Box>
@@ -260,7 +266,7 @@ const handleSaveEdit = async () => {
       </Box>
 
       {/* Inspection List */}
-      <Box sx={{ height: "40vh", display: "flex", flexDirection: "column" }}>
+      <Box sx={{ height: "35vh", display: "flex", flexDirection: "column" }}>
         <Typography variant="h5" mb={2}>Inspection Records</Typography>
         {loading ? (
           <CircularProgress />
@@ -269,27 +275,27 @@ const handleSaveEdit = async () => {
             <Table size="small" stickyHeader>
               <TableHead>
                 <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>Rider ID</TableCell>
-                  <TableCell>Inspected By</TableCell>
-                  <TableCell>Location</TableCell>
-                  <TableCell>City</TableCell>
-                  <TableCell>Image</TableCell>
-                  <TableCell>Comments</TableCell>
-                  <TableCell>ID Number</TableCell>
-                  <TableCell>Timestamp</TableCell>
-                  <TableCell>Helmet</TableCell>
-                  <TableCell>Box</TableCell>
-                  <TableCell>Account</TableCell>
-                  <TableCell>Parking</TableCell>
-                  <TableCell>Appearance</TableCell>
-                  <TableCell>Driving</TableCell>
-                  <TableCell>MFC Status</TableCell>
-                  <TableCell>Courier Behavior</TableCell>
-                  <TableCell>Box Serial</TableCell>
-                  <TableCell>Plate Number</TableCell>
-                  <TableCell>MFC Location</TableCell>
-                  <TableCell>Actions</TableCell>
+                  <TableCell sx={{ minWidth: 60 }}>ID</TableCell>
+                  <TableCell sx={{ minWidth: 100 }}>Rider ID</TableCell>
+                  <TableCell sx={{ minWidth: 150 }}>Inspected By</TableCell>
+                  <TableCell sx={{ minWidth: 150 }}>Location</TableCell>
+                  <TableCell sx={{ minWidth: 100 }}>City</TableCell>
+                  <TableCell sx={{ minWidth: 80 }}>Image</TableCell>
+                  <TableCell sx={{ minWidth: 120 }}>Comments</TableCell>
+                  <TableCell sx={{ minWidth: 100 }}>ID Number</TableCell>
+                  <TableCell sx={{ minWidth: 150 }}>Timestamp</TableCell>
+                  <TableCell sx={{ minWidth: 80 }}>Helmet</TableCell>
+                  <TableCell sx={{ minWidth: 80 }}>Box</TableCell>
+                  <TableCell sx={{ minWidth: 80 }}>Account</TableCell>
+                  <TableCell sx={{ minWidth: 80 }}>Parking</TableCell>
+                  <TableCell sx={{ minWidth: 100 }}>Appearance</TableCell>
+                  <TableCell sx={{ minWidth: 80 }}>Driving</TableCell>
+                  <TableCell sx={{ minWidth: 100 }}>MFC Status</TableCell>
+                  <TableCell sx={{ minWidth: 120 }}>Courier Behavior</TableCell>
+                  <TableCell sx={{ minWidth: 100 }}>Box Serial</TableCell>
+                  <TableCell sx={{ minWidth: 100 }}>Plate Number</TableCell>
+                  <TableCell sx={{ minWidth: 120 }}>MFC Location</TableCell>
+                  <TableCell sx={{ minWidth: 100 }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
