@@ -340,7 +340,7 @@ const [form, setForm] = useState({
   />
 </Grid>
 <Grid item xs={12} sm={6}>
-  <FormControl fullWidth size="small">
+  <FormControl fullWidth size="small" sx={{ minWidth: 240 }}>
     <InputLabel id="mfc_location-label">MFC</InputLabel>
     <Select
       labelId="mfc_location-label"
