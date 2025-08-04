@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import authAxios from "../utils/authAxios";
+import { Avatar } from "@mui/material";
 import {
   Box,
   Typography,
