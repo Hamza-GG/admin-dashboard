@@ -206,13 +206,13 @@ const handleSaveEdit = async () => {
       </Stack>
 
       {/* Charts */}
-      <Grid container spacing={3} justifyContent="center" sx={{ flexWrap: 'wrap', maxWidth: "100%", overflowX: "auto" }}>
+      <Grid container spacing={3}>
         {FIELDS_TO_CHART.map((field, idx) => {
           const data = getDonutData(field).filter(d => d.name !== "—");
           if (data.length === 0) return null;
 
           return (
-            <Grid item xs={12} sm={4} md={4} key={field}>
+            <Grid item xs={12} sm={6} md={4} key={field}>
               <Paper sx={{ p: 2, height: 320, display: "flex", flexDirection: "column", alignItems: "center" }}>
                 <Typography variant="subtitle2" gutterBottom sx={{ mb: 2 }}>
                   {field.replace(/_/g, " ").toUpperCase()}
@@ -246,7 +246,7 @@ const handleSaveEdit = async () => {
         {loading ? (
           <CircularProgress />
         ) : (
-          <Box sx={{ maxHeight: 400, overflowY: 'auto', overflowX: 'auto', width: '100%' }}>
+          <Box sx={{ maxHeight: 400, overflow: 'auto', width: '100%' }}>
             <TableContainer component={Paper}>
               <Table size="small">
                 <TableHead>
