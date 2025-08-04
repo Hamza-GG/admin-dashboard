@@ -243,10 +243,10 @@ export default function InspectionForm() {
           gutterBottom
           sx={{ color: "#17417e" }}
         >
-          Add New Inspection
+          Ajouter un nouveau contrôle
         </Typography>
         <Typography align="center" color="text.secondary" sx={{ mb: 3 }}>
-          Fill out the details of the inspection. Fields marked as (optional) can be left blank.
+          Remplissez le formulaire. Les champs marqués comme (optionnel) peuvent être laissés vides.
         </Typography>
         <Divider sx={{ mb: 2 }} />
         <form onSubmit={handleSubmit} encType="multipart/form-data">
@@ -350,7 +350,7 @@ export default function InspectionForm() {
                     {gettingLocation ? (
                       <CircularProgress size={18} sx={{ mr: 1 }} />
                     ) : (
-                      "Use my location"
+                      "Usiliser ma localisation"
                     )}
                   </Button>
                 </Box>
@@ -360,7 +360,7 @@ export default function InspectionForm() {
             
             <Box sx={{ width: "100%" }}>
   <Typography variant="subtitle1" sx={{ color: "#17417e", mt: 1, mb: 1 }}>
-    Inspection Details
+    Détails du contrôle
   </Typography>
   <Stack spacing={2}>
     <FormControl fullWidth size="small">
@@ -370,12 +370,12 @@ export default function InspectionForm() {
         id="helmet"
         name="helmet"
         value={form.helmet}
-        label="Casque"
+        label="Porte un Casque"
         onChange={handleChange}
       >
-        <MenuItem value=""><em>None</em></MenuItem>
-        <MenuItem value="Yes">Yes</MenuItem>
-        <MenuItem value="No">No</MenuItem>
+        <MenuItem value="Non Contrôlé"><em>Non Contrôlé</em></MenuItem>
+        <MenuItem value="Oui">Oui</MenuItem>
+        <MenuItem value="Non">Non</MenuItem>
       </Select>
     </FormControl>
     <FormControl fullWidth size="small">
@@ -389,9 +389,9 @@ export default function InspectionForm() {
         onChange={handleChange}
       >
         <MenuItem value=""><em>None</em></MenuItem>
-        <MenuItem value="Clean">Clean</MenuItem>
-        <MenuItem value="Dirty or torn">Dirty or torn</MenuItem>
-        <MenuItem value="Does not have a box">Does not have a box</MenuItem>
+        <MenuItem value="Bon état">Bon état</MenuItem>
+        <MenuItem value="Mauvais état">Mauvais état</MenuItem>
+        <MenuItem value="N'a pas de box">N'a pas de box</MenuItem>
       </Select>
     </FormControl>
     <FormControl fullWidth size="small">
@@ -530,7 +530,7 @@ export default function InspectionForm() {
                 ":hover": { bgcolor: "#122e57" }
               }}
             >
-              {submitting ? <CircularProgress size={22} /> : "Valider l’inspection"}
+              {submitting ? <CircularProgress size={22} /> : "Valider le contrôle"}
             </Button>
           </Stack>
         </form>
