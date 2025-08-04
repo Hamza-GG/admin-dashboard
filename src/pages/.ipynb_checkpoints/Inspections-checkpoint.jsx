@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import authAxios from "../utils/authAxios";
+import { Avatar } from "@mui/material";
 import {
   Box,
   Typography,
@@ -14,7 +15,6 @@ import {
   IconButton,
   CircularProgress,
   Tooltip,
-  Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
@@ -28,6 +28,7 @@ import {
   OutlinedInput,
   TablePagination,
   Grid,
+  Dialog,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SearchIcon from "@mui/icons-material/Search";
@@ -119,129 +120,40 @@ export default function InspectionsDashboard() {
     setEditOpen(true);
   };
 
-const handleSaveEdit = async () => {
-  try {
-    const formData = new FormData();
-    for (let key in currentEdit) {
-      if (currentEdit[key] !== null && currentEdit[key] !== undefined) {
-        formData.append(key, currentEdit[key]);
+  const handleSaveEdit = async () => {
+    try {
+      const formData = new FormData();
+      for (let key in currentEdit) {
+        if (currentEdit[key] !== null && currentEdit[key] !== undefined) {
+          formData.append(key, currentEdit[key]);
+        }
       }
+
+      await authAxios({
+        method: "patch",
+        url: `/inspections/${currentEdit.id}`,
+        data: formData,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setInspections(prev =>
+        prev.map(i => (i.id === currentEdit.id ? currentEdit : i))
+      );
+      setEditOpen(false);
+    } catch (err) {
+      alert("Failed to save changes.");
+      console.error(err);
     }
-
-    await authAxios({
-      method: "patch",
-      url: `/inspections/${currentEdit.id}`,
-      data: formData,
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-
-    setInspections(prev =>
-      prev.map(i => (i.id === currentEdit.id ? currentEdit : i))
-    );
-    setEditOpen(false);
-  } catch (err) {
-    alert("Failed to save changes.");
-    console.error(err);
-  }
-};
+  };
 
   return (
-    <Box sx={{ p: 4, background: "#f7fafd", minHeight: "100vh" }}>
-      <Typography variant="h4" fontWeight="bold" gutterBottom>
-        Inspection Dashboard
-      </Typography>
+    <>
+      <Box sx={{ p: 4, background: "#f7fafd", minHeight: "100vh" }}>
+        {/* Dashboard content (filters, charts, etc.) */}
 
-      {/* Filters */}
-      <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3, flexWrap: "wrap" }}>
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <DatePicker label="Start Date" value={startDate} onChange={setStartDate} />
-          <DatePicker label="End Date" value={endDate} onChange={setEndDate} />
-        </LocalizationProvider>
-
-        {[{
-          label: "City",
-          value: cityFilter,
-          onChange: setCityFilter,
-          options: [...new Set(inspections.map(i => i.city))]
-        }, {
-          label: "Inspected By",
-          value: inspectorFilter,
-          onChange: setInspectorFilter,
-          options: [...new Set(inspections.map(i => i.inspected_by))]
-        }, {
-          label: "Rider ID",
-          value: riderFilter,
-          onChange: setRiderFilter,
-          options: [...new Set(inspections.map(i => i.rider_id))]
-        }].map(({ label, value, onChange, options }) => (
-          <FormControl sx={{ minWidth: 160 }} size="small" key={label}>
-            <InputLabel>{label}</InputLabel>
-            <Select
-              multiple
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              input={<OutlinedInput label={label} />}
-              renderValue={(selected) => <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>{selected.map(val => <Chip key={val} label={val} />)}</Box>}
-            >
-              {options.map((opt) => (
-                <MenuItem key={opt} value={opt}>{opt}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        ))}
-
-        <Button variant="outlined" onClick={handleExportCSV}>Export CSV</Button>
-      </Stack>
-
-      {/* Scorecards */}
-      <Stack direction="row" spacing={3} sx={{ mb: 4 }}>
-        {Object.entries(scorecards).map(([label, val]) => (
-          <Paper key={label} sx={{ p: 2, minWidth: 150, textAlign: "center" }}>
-            <Typography variant="subtitle2" color="text.secondary">{label.replace("_", " ").toUpperCase()}</Typography>
-            <Typography variant="h6">{val}</Typography>
-          </Paper>
-        ))}
-      </Stack>
-
-      {/* Charts */}
-      <Grid container spacing={3}>
-        {FIELDS_TO_CHART.map((field, idx) => {
-          const data = getDonutData(field).filter(d => d.name !== "—");
-          if (data.length === 0) return null;
-
-          return (
-            <Grid item xs={12} sm={6} md={3} key={field}>
-              <Paper sx={{ p: 2, height: 320, display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <Typography variant="subtitle2" gutterBottom>
-                  {field.replace(/_/g, " ").toUpperCase()}
-                </Typography>
-                <Box sx={{ width: 200, height: 200 }}>
-                  <PieChart width={200} height={200}>
-                    <Pie
-                      data={data}
-                      dataKey="value"
-                      nameKey="name"
-                      outerRadius={80}
-                      label
-                    >
-                      {data.map((entry, i) => (
-                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <ReTooltip />
-                    <Legend layout="horizontal" verticalAlign="bottom" />
-                  </PieChart>
-                </Box>
-              </Paper>
-            </Grid>
-          );
-        })}
-      </Grid>
-          
-
-      {/* Inspection List */}
+        {/* Inspection List */}
         <Box mt={6}>
           <Typography variant="h5" mb={2}>Inspection Records</Typography>
           {loading ? (
@@ -281,7 +193,7 @@ const handleSaveEdit = async () => {
                         <TableCell>
                           {row.image_url ? (
                             <a href={row.image_url} target="_blank" rel="noopener noreferrer">
-                 <Avatar src={row.image_url} alt="img" sx={{ width: 32, height: 32 }} />
+                              <Avatar src={row.image_url} alt="img" sx={{ width: 32, height: 32 }} />
                             </a>
                           ) : (
                             "—"
@@ -330,32 +242,31 @@ const handleSaveEdit = async () => {
             </TableContainer>
           )}
         </Box>
+        <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="sm" fullWidth>
+          <DialogTitle>Edit Inspection</DialogTitle>
+          <DialogContent>
+            {["rider_id", "id_number", "plate_number", "box_serial_number", "helmet", "box",
+              "account", "parking", "appearance", "driving", "mfc_status",
+              "courier_behavior", "location", "city", "comments", "mfc_location"
+            ].map((field) => (
+              <TextField
+                key={field}
+                label={field.replace(/_/g, " ").toUpperCase()}
+                fullWidth
+                sx={{ mt: 2 }}
+                value={currentEdit?.[field] ?? ""}
+                onChange={(e) =>
+                  setCurrentEdit((prev) => ({ ...prev, [field]: e.target.value }))
+                }
+              />
+            ))}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setEditOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveEdit} variant="contained">Save</Button>
+          </DialogActions>
+        </Dialog>
       </Box>
-
-      <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Edit Inspection</DialogTitle>
-        <DialogContent>
-          {["rider_id", "id_number", "plate_number", "box_serial_number", "helmet", "box",
-            "account", "parking", "appearance", "driving", "mfc_status",
-            "courier_behavior", "location", "city", "comments", "mfc_location"
-          ].map((field) => (
-            <TextField
-              key={field}
-              label={field.replace(/_/g, " ").toUpperCase()}
-              fullWidth
-              sx={{ mt: 2 }}
-              value={currentEdit?.[field] ?? ""}
-              onChange={(e) =>
-                setCurrentEdit((prev) => ({ ...prev, [field]: e.target.value }))
-              }
-            />
-          ))}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setEditOpen(false)}>Cancel</Button>
-          <Button onClick={handleSaveEdit} variant="contained">Save</Button>
-        </DialogActions>
-      </Dialog>
     </>
   );
 }
