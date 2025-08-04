@@ -53,11 +53,12 @@ function Navbar({ setIsAuthenticated }) {
           to="/dashboard"
           sx={{ display: "flex", alignItems: "center", textDecoration: "none" }}
         >
-          <img
-            src="/rider.gif"
-            alt="logo"
-            style={{ height: 52, marginRight: 30 }}
-          />
+         <img
+  src="/rider.gif"
+  alt="logo"
+  style={{ height: 52, marginRight: 30 }}
+  type="image/gif"
+/>
           <Typography variant="h6" sx={{ color: "#fff", fontWeight: 700 }}>
             OPS Watcher
           </Typography>
