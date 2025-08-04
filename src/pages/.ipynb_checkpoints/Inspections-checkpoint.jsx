@@ -206,41 +206,39 @@ const handleSaveEdit = async () => {
       </Stack>
 
       {/* Charts */}
-      {Array.from({ length: Math.ceil(FIELDS_TO_CHART.length / 3) }).map((_, groupIdx) => (
-        <Grid container spacing={3} key={groupIdx}>
-          {FIELDS_TO_CHART.slice(groupIdx * 3, groupIdx * 3 + 3).map((field, idx) => {
-            const data = getDonutData(field).filter(d => d.name !== "—");
-            if (data.length === 0) return null;
+      <Grid container spacing={3}>
+        {FIELDS_TO_CHART.map((field, idx) => {
+          const data = getDonutData(field).filter(d => d.name !== "—");
+          if (data.length === 0) return null;
 
-            return (
-              <Grid item xs={12} sm={6} md={4} key={field}>
-                <Paper sx={{ p: 2, pt: 6, height: 320, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                  <Box sx={{ width: 200, height: 200 }}>
-                    <PieChart width={200} height={200}>
-                      <Pie
-                        data={data}
-                        dataKey="value"
-                        nameKey="name"
-                        outerRadius={70}
-                        label
-                      >
-                        {data.map((entry, i) => (
-                          <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <ReTooltip />
-                      <Legend layout="horizontal" verticalAlign="bottom" />
-                    </PieChart>
-                  </Box>
-                  <Typography variant="subtitle2" sx={{ mt: 2 }} align="center">
-                    {field.replace(/_/g, " ").toUpperCase()}
-                  </Typography>
-                </Paper>
-              </Grid>
-            );
-          })}
-        </Grid>
-      ))}
+          return (
+            <Grid item xs={12} sm={6} md={3} key={field}>
+              <Paper sx={{ p: 2, height: 320, display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <Typography variant="subtitle2" gutterBottom>
+                  {field.replace(/_/g, " ").toUpperCase()}
+                </Typography>
+                <Box sx={{ width: 200, height: 200 }}>
+                  <PieChart width={200} height={200}>
+                    <Pie
+                      data={data}
+                      dataKey="value"
+                      nameKey="name"
+                      outerRadius={80}
+                      label
+                    >
+                      {data.map((entry, i) => (
+                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <ReTooltip />
+                    <Legend layout="horizontal" verticalAlign="bottom" />
+                  </PieChart>
+                </Box>
+              </Paper>
+            </Grid>
+          );
+        })}
+      </Grid>
 
       {/* Inspection List */}
       <Box mt={6}>
@@ -248,75 +246,82 @@ const handleSaveEdit = async () => {
         {loading ? (
           <CircularProgress />
         ) : (
-          <Box sx={{ overflowX: 'auto' }}>
-            <TableContainer component={Paper} sx={{ maxHeight: 500, overflow: 'auto' }}>
-              <Table size="small" stickyHeader sx={{ minWidth: 1500 }}>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>ID</TableCell>
-                    <TableCell>Rider ID</TableCell>
-                    <TableCell>Inspected By</TableCell>
-                    <TableCell>Location</TableCell>
-                    <TableCell>City</TableCell>
-                    <TableCell>Image</TableCell>
-                    <TableCell>Comments</TableCell>
-                    <TableCell>ID Number</TableCell>
-                    <TableCell>Timestamp</TableCell>
-                    <TableCell>Helmet</TableCell>
-                    <TableCell>Box</TableCell>
-                    <TableCell>Account</TableCell>
-                    <TableCell>Parking</TableCell>
-                    <TableCell>Appearance</TableCell>
-                    <TableCell>Driving</TableCell>
-                    <TableCell>MFC Status</TableCell>
-                    <TableCell>Courier Behavior</TableCell>
-                    <TableCell>Box Serial</TableCell>
-                    <TableCell>Plate Number</TableCell>
-                    <TableCell>MFC Location</TableCell>
-                    <TableCell>Actions</TableCell>
+          <TableContainer component={Paper}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>ID</TableCell>
+                  <TableCell>Rider ID</TableCell>
+                  <TableCell>Inspected By</TableCell>
+                  <TableCell>Location</TableCell>
+                  <TableCell>City</TableCell>
+                  <TableCell>Image</TableCell>
+                  <TableCell>Comments</TableCell>
+                  <TableCell>ID Number</TableCell>
+                  <TableCell>Timestamp</TableCell>
+                  <TableCell>Helmet</TableCell>
+                  <TableCell>Box</TableCell>
+                  <TableCell>Account</TableCell>
+                  <TableCell>Parking</TableCell>
+                  <TableCell>Appearance</TableCell>
+                  <TableCell>Driving</TableCell>
+                  <TableCell>MFC Status</TableCell>
+                  <TableCell>Courier Behavior</TableCell>
+                  <TableCell>Box Serial</TableCell>
+                  <TableCell>Plate Number</TableCell>
+                  <TableCell>MFC Location</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                  <TableRow key={row.id}>
+                    <TableCell>{row.id}</TableCell>
+                    <TableCell>{row.rider_id}</TableCell>
+                    <TableCell>{row.inspected_by}</TableCell>
+                    <TableCell>{row.location || "—"}</TableCell>
+                    <TableCell>{row.city}</TableCell>
+                    <TableCell>
+                      {row.image_url ? (
+                        <img src={row.image_url} alt="preview" style={{ width: 40, height: 40, borderRadius: "50%" }} />
+                      ) : "—"}
+                    </TableCell>
+                    <TableCell>{row.comments || "—"}</TableCell>
+                    <TableCell>{row.id_number || "—"}</TableCell>
+                    <TableCell>{row.timestamp?.slice(0, 19).replace("T", " ")}</TableCell>
+                    <TableCell>{row.helmet || "—"}</TableCell>
+                    <TableCell>{row.box || "—"}</TableCell>
+                    <TableCell>{row.account || "—"}</TableCell>
+                    <TableCell>{row.parking || "—"}</TableCell>
+                    <TableCell>{row.appearance || "—"}</TableCell>
+                    <TableCell>{row.driving || "—"}</TableCell>
+                    <TableCell>{row.mfc_status || "—"}</TableCell>
+                    <TableCell>{row.courier_behavior || "—"}</TableCell>
+                    <TableCell>{row.box_serial_number || "—"}</TableCell>
+                    <TableCell>{row.plate_number || "—"}</TableCell>
+                    <TableCell>{row.mfc_location || "—"}</TableCell>
+                    <TableCell>
+                      <Tooltip title="Edit">
+                        <IconButton size="small" onClick={() => handleEdit(row)}><EditIcon fontSize="small" /></IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete">
+                        <IconButton size="small" color="error" onClick={() => handleDelete(row.id)}> <DeleteIcon fontSize="small" /></IconButton>
+                      </Tooltip>
+                    </TableCell>
                   </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                    <TableRow key={row.id}>
-                      <TableCell>{row.id}</TableCell>
-                      <TableCell>{row.rider_id}</TableCell>
-                      <TableCell>{row.inspected_by}</TableCell>
-                      <TableCell>{row.location || "—"}</TableCell>
-                      <TableCell>{row.city}</TableCell>
-                      <TableCell>
-                        {row.image_url ? (
-                          <img src={row.image_url} alt="preview" style={{ width: 40, height: 40, borderRadius: "50%" }} />
-                        ) : "—"}
-                      </TableCell>
-                      <TableCell>{row.comments || "—"}</TableCell>
-                      <TableCell>{row.id_number || "—"}</TableCell>
-                      <TableCell>{row.timestamp?.slice(0, 19).replace("T", " ")}</TableCell>
-                      <TableCell>{row.helmet || "—"}</TableCell>
-                      <TableCell>{row.box || "—"}</TableCell>
-                      <TableCell>{row.account || "—"}</TableCell>
-                      <TableCell>{row.parking || "—"}</TableCell>
-                      <TableCell>{row.appearance || "—"}</TableCell>
-                      <TableCell>{row.driving || "—"}</TableCell>
-                      <TableCell>{row.mfc_status || "—"}</TableCell>
-                      <TableCell>{row.courier_behavior || "—"}</TableCell>
-                      <TableCell>{row.box_serial_number || "—"}</TableCell>
-                      <TableCell>{row.plate_number || "—"}</TableCell>
-                      <TableCell>{row.mfc_location || "—"}</TableCell>
-                      <TableCell>
-                        <Tooltip title="Edit">
-                          <IconButton size="small" onClick={() => handleEdit(row)}><EditIcon fontSize="small" /></IconButton>
-                        </Tooltip>
-                        <Tooltip title="Delete">
-                          <IconButton size="small" color="error" onClick={() => handleDelete(row.id)}> <DeleteIcon fontSize="small" /></IconButton>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
+                ))}
+              </TableBody>
+            </Table>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={filtered.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={(e, newPage) => setPage(newPage)}
+              onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+            />
+          </TableContainer>
         )}
       </Box>
 
