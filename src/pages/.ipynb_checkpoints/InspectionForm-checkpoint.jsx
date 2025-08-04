@@ -261,11 +261,15 @@ const [form, setForm] = useState({
           Remplissez le formulaire. Les champs marqués comme (optionnel) peuvent être laissés vides.
         </Typography>
         <Divider sx={{ mb: 2 }} />
-        <form
+<form
   onSubmit={handleSubmit}
   onKeyDown={(e) => {
-    if (e.key === "Enter") {
-      e.preventDefault(); // prevent accidental submission
+    const tag = e.target.tagName.toLowerCase();
+    const type = e.target.type;
+
+    // Prevent Enter key in inputs that are not multiline or buttons
+    if (e.key === "Enter" && tag !== "textarea" && type !== "submit") {
+      e.preventDefault();
     }
   }}
   encType="multipart/form-data"
