@@ -148,7 +148,15 @@ const handleSaveEdit = async () => {
 };
 
   return (
-    <Box sx={{ p: 4, background: "#f7fafd", minHeight: "100vh" }}>
+    <Box sx={{ 
+      p: 4, 
+      background: "#f7fafd", 
+      minHeight: "100vh",
+      height: "100vh",
+      overflow: "hidden",
+      display: "flex",
+      flexDirection: "column"
+    }}>
       <Typography variant="h4" fontWeight="bold" gutterBottom>
         Inspection Dashboard
       </Typography>
@@ -206,48 +214,59 @@ const handleSaveEdit = async () => {
       </Stack>
 
       {/* Charts */}
-      <Grid container spacing={3}>
-        {FIELDS_TO_CHART.map((field, idx) => {
-          const data = getDonutData(field).filter(d => d.name !== "—");
-          if (data.length === 0) return null;
+      <Box sx={{ flex: 1, overflow: "auto", mb: 3 }}>
+        <Grid container spacing={3}>
+          {FIELDS_TO_CHART.map((field, idx) => {
+            const data = getDonutData(field).filter(d => d.name !== "—");
+            if (data.length === 0) return null;
 
-          return (
-            <Grid item xs={12} sm={6} md={3} key={field}>
-              <Paper sx={{ p: 2, height: 320, display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <Typography variant="subtitle2" gutterBottom>
-                  {field.replace(/_/g, " ").toUpperCase()}
-                </Typography>
-                <Box sx={{ width: 200, height: 200 }}>
-                  <PieChart width={200} height={200}>
-                    <Pie
-                      data={data}
-                      dataKey="value"
-                      nameKey="name"
-                      outerRadius={80}
-                      label
-                    >
-                      {data.map((entry, i) => (
-                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <ReTooltip />
-                    <Legend layout="horizontal" verticalAlign="bottom" />
-                  </PieChart>
-                </Box>
-              </Paper>
-            </Grid>
-          );
-        })}
-      </Grid>
+            return (
+              <Grid item xs={12} sm={6} md={3} key={field}>
+                <Paper sx={{ 
+                  p: 2, 
+                  height: 350, 
+                  display: "flex", 
+                  flexDirection: "column", 
+                  alignItems: "center",
+                  justifyContent: "space-between"
+                }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    {field.replace(/_/g, " ").toUpperCase()}
+                  </Typography>
+                  <Box sx={{ width: "100%", height: 280, display: "flex", justifyContent: "center", alignItems: "center" }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={data}
+                          dataKey="value"
+                          nameKey="name"
+                          outerRadius={80}
+                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        >
+                          {data.map((entry, i) => (
+                            <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <ReTooltip />
+                        <Legend layout="horizontal" verticalAlign="bottom" align="center" />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </Box>
+                </Paper>
+              </Grid>
+            );
+          })}
+        </Grid>
+      </Box>
 
       {/* Inspection List */}
-      <Box mt={6}>
+      <Box sx={{ height: "40vh", display: "flex", flexDirection: "column" }}>
         <Typography variant="h5" mb={2}>Inspection Records</Typography>
         {loading ? (
           <CircularProgress />
         ) : (
-          <TableContainer component={Paper}>
-            <Table size="small">
+          <TableContainer component={Paper} sx={{ flex: 1, overflow: "auto" }}>
+            <Table size="small" stickyHeader>
               <TableHead>
                 <TableRow>
                   <TableCell>ID</TableCell>
