@@ -217,8 +217,8 @@ const handleSaveEdit = async () => {
                 <Typography variant="subtitle2" gutterBottom>
                   {field.replace(/_/g, " ").toUpperCase()}
                 </Typography>
-                <Box sx={{ width: 300, height: 350 }}>
-                  <PieChart width={300} height={300}>
+                <Box sx={{ width: 200, height: 200 }}>
+                  <PieChart width={200} height={200}>
                     <Pie
                       data={data}
                       dataKey="value"
