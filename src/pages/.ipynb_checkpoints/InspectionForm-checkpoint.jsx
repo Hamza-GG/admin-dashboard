@@ -51,7 +51,7 @@ const [form, setForm] = useState({
   rider_id: "",
   id_number: "",
   first_name: "",
-  last_name: "",
+  first_last_name: "",
   mfc_location: "",
   box_serial_number: "",
   plate_number: "",
@@ -110,8 +110,8 @@ const [form, setForm] = useState({
     } 
       else if (field === "first_name") {
   match = riders.find((r) => r.first_name?.toLowerCase() === value.toLowerCase());
-} else if (field === "last_name") {
-  match = riders.find((r) => r.last_name?.toLowerCase() === value.toLowerCase());
+} else if (field === "first_last_name") {
+  match = riders.find((r) => r.first_last_name?.toLowerCase() === value.toLowerCase());
 }
     else if (field === "plate_number") {
       match = riders.find((r) => r.plate_number && r.plate_number.toLowerCase() === value.toLowerCase());
@@ -122,7 +122,7 @@ const [form, setForm] = useState({
         rider_id: match.rider_id || "",
         id_number: match.id_number || "",
         first_name: match.first_name || "",
-        last_name: match.last_name || "",
+        first_last_name: match.first_last_name || "",
         box_serial_number: match.box_serial_number || "",
         plate_number: match.plate_number || "",
       }));
@@ -330,8 +330,8 @@ const [form, setForm] = useState({
 <Grid item xs={12} sm={6}>
   <TextField
     label="Nom de famille"
-    name="last_name"
-    value={form.last_name}
+    name="first_last_name"
+    value={form.first_last_name}
     onChange={handleChange}
     onBlur={handleBlur}
     placeholder="Last Name"
