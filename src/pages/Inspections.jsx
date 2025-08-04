@@ -241,6 +241,8 @@ const handleSaveEdit = async () => {
                           nameKey="name"
                           outerRadius={100}
                           innerRadius={40}
+                          startAngle={0}
+                          endAngle={360}
                           label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                           labelLine={false}
                         >
@@ -271,72 +273,74 @@ const handleSaveEdit = async () => {
         {loading ? (
           <CircularProgress />
         ) : (
-          <TableContainer component={Paper} sx={{ flex: 1, overflow: "auto" }}>
-            <Table size="small" stickyHeader>
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ minWidth: 60 }}>ID</TableCell>
-                  <TableCell sx={{ minWidth: 100 }}>Rider ID</TableCell>
-                  <TableCell sx={{ minWidth: 150 }}>Inspected By</TableCell>
-                  <TableCell sx={{ minWidth: 150 }}>Location</TableCell>
-                  <TableCell sx={{ minWidth: 100 }}>City</TableCell>
-                  <TableCell sx={{ minWidth: 80 }}>Image</TableCell>
-                  <TableCell sx={{ minWidth: 120 }}>Comments</TableCell>
-                  <TableCell sx={{ minWidth: 100 }}>ID Number</TableCell>
-                  <TableCell sx={{ minWidth: 150 }}>Timestamp</TableCell>
-                  <TableCell sx={{ minWidth: 80 }}>Helmet</TableCell>
-                  <TableCell sx={{ minWidth: 80 }}>Box</TableCell>
-                  <TableCell sx={{ minWidth: 80 }}>Account</TableCell>
-                  <TableCell sx={{ minWidth: 80 }}>Parking</TableCell>
-                  <TableCell sx={{ minWidth: 100 }}>Appearance</TableCell>
-                  <TableCell sx={{ minWidth: 80 }}>Driving</TableCell>
-                  <TableCell sx={{ minWidth: 100 }}>MFC Status</TableCell>
-                  <TableCell sx={{ minWidth: 120 }}>Courier Behavior</TableCell>
-                  <TableCell sx={{ minWidth: 100 }}>Box Serial</TableCell>
-                  <TableCell sx={{ minWidth: 100 }}>Plate Number</TableCell>
-                  <TableCell sx={{ minWidth: 120 }}>MFC Location</TableCell>
-                  <TableCell sx={{ minWidth: 100 }}>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                  <TableRow key={row.id}>
-                    <TableCell>{row.id}</TableCell>
-                    <TableCell>{row.rider_id}</TableCell>
-                    <TableCell>{row.inspected_by}</TableCell>
-                    <TableCell>{row.location || "—"}</TableCell>
-                    <TableCell>{row.city}</TableCell>
-                    <TableCell>
-                      {row.image_url ? (
-                        <img src={row.image_url} alt="preview" style={{ width: 40, height: 40, borderRadius: "50%" }} />
-                      ) : "—"}
-                    </TableCell>
-                    <TableCell>{row.comments || "—"}</TableCell>
-                    <TableCell>{row.id_number || "—"}</TableCell>
-                    <TableCell>{row.timestamp?.slice(0, 19).replace("T", " ")}</TableCell>
-                    <TableCell>{row.helmet || "—"}</TableCell>
-                    <TableCell>{row.box || "—"}</TableCell>
-                    <TableCell>{row.account || "—"}</TableCell>
-                    <TableCell>{row.parking || "—"}</TableCell>
-                    <TableCell>{row.appearance || "—"}</TableCell>
-                    <TableCell>{row.driving || "—"}</TableCell>
-                    <TableCell>{row.mfc_status || "—"}</TableCell>
-                    <TableCell>{row.courier_behavior || "—"}</TableCell>
-                    <TableCell>{row.box_serial_number || "—"}</TableCell>
-                    <TableCell>{row.plate_number || "—"}</TableCell>
-                    <TableCell>{row.mfc_location || "—"}</TableCell>
-                    <TableCell>
-                      <Tooltip title="Edit">
-                        <IconButton size="small" onClick={() => handleEdit(row)}><EditIcon fontSize="small" /></IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete">
-                        <IconButton size="small" color="error" onClick={() => handleDelete(row.id)}> <DeleteIcon fontSize="small" /></IconButton>
-                      </Tooltip>
-                    </TableCell>
+          <Box sx={{ flex: 1, overflow: "hidden" }}>
+            <TableContainer component={Paper} sx={{ height: "100%", overflow: "auto" }}>
+              <Table size="small" stickyHeader>
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ minWidth: 60, backgroundColor: "#f5f5f5" }}>ID</TableCell>
+                    <TableCell sx={{ minWidth: 100, backgroundColor: "#f5f5f5" }}>Rider ID</TableCell>
+                    <TableCell sx={{ minWidth: 150, backgroundColor: "#f5f5f5" }}>Inspected By</TableCell>
+                    <TableCell sx={{ minWidth: 150, backgroundColor: "#f5f5f5" }}>Location</TableCell>
+                    <TableCell sx={{ minWidth: 100, backgroundColor: "#f5f5f5" }}>City</TableCell>
+                    <TableCell sx={{ minWidth: 80, backgroundColor: "#f5f5f5" }}>Image</TableCell>
+                    <TableCell sx={{ minWidth: 120, backgroundColor: "#f5f5f5" }}>Comments</TableCell>
+                    <TableCell sx={{ minWidth: 100, backgroundColor: "#f5f5f5" }}>ID Number</TableCell>
+                    <TableCell sx={{ minWidth: 150, backgroundColor: "#f5f5f5" }}>Timestamp</TableCell>
+                    <TableCell sx={{ minWidth: 80, backgroundColor: "#f5f5f5" }}>Helmet</TableCell>
+                    <TableCell sx={{ minWidth: 80, backgroundColor: "#f5f5f5" }}>Box</TableCell>
+                    <TableCell sx={{ minWidth: 80, backgroundColor: "#f5f5f5" }}>Account</TableCell>
+                    <TableCell sx={{ minWidth: 80, backgroundColor: "#f5f5f5" }}>Parking</TableCell>
+                    <TableCell sx={{ minWidth: 100, backgroundColor: "#f5f5f5" }}>Appearance</TableCell>
+                    <TableCell sx={{ minWidth: 80, backgroundColor: "#f5f5f5" }}>Driving</TableCell>
+                    <TableCell sx={{ minWidth: 100, backgroundColor: "#f5f5f5" }}>MFC Status</TableCell>
+                    <TableCell sx={{ minWidth: 120, backgroundColor: "#f5f5f5" }}>Courier Behavior</TableCell>
+                    <TableCell sx={{ minWidth: 100, backgroundColor: "#f5f5f5" }}>Box Serial</TableCell>
+                    <TableCell sx={{ minWidth: 100, backgroundColor: "#f5f5f5" }}>Plate Number</TableCell>
+                    <TableCell sx={{ minWidth: 120, backgroundColor: "#f5f5f5" }}>MFC Location</TableCell>
+                    <TableCell sx={{ minWidth: 100, backgroundColor: "#f5f5f5" }}>Actions</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHead>
+                <TableBody>
+                  {filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                    <TableRow key={row.id}>
+                      <TableCell>{row.id}</TableCell>
+                      <TableCell>{row.rider_id}</TableCell>
+                      <TableCell>{row.inspected_by}</TableCell>
+                      <TableCell>{row.location || "—"}</TableCell>
+                      <TableCell>{row.city}</TableCell>
+                      <TableCell>
+                        {row.image_url ? (
+                          <img src={row.image_url} alt="preview" style={{ width: 40, height: 40, borderRadius: "50%" }} />
+                        ) : "—"}
+                      </TableCell>
+                      <TableCell>{row.comments || "—"}</TableCell>
+                      <TableCell>{row.id_number || "—"}</TableCell>
+                      <TableCell>{row.timestamp?.slice(0, 19).replace("T", " ")}</TableCell>
+                      <TableCell>{row.helmet || "—"}</TableCell>
+                      <TableCell>{row.box || "—"}</TableCell>
+                      <TableCell>{row.account || "—"}</TableCell>
+                      <TableCell>{row.parking || "—"}</TableCell>
+                      <TableCell>{row.appearance || "—"}</TableCell>
+                      <TableCell>{row.driving || "—"}</TableCell>
+                      <TableCell>{row.mfc_status || "—"}</TableCell>
+                      <TableCell>{row.courier_behavior || "—"}</TableCell>
+                      <TableCell>{row.box_serial_number || "—"}</TableCell>
+                      <TableCell>{row.plate_number || "—"}</TableCell>
+                      <TableCell>{row.mfc_location || "—"}</TableCell>
+                      <TableCell>
+                        <Tooltip title="Edit">
+                          <IconButton size="small" onClick={() => handleEdit(row)}><EditIcon fontSize="small" /></IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete">
+                          <IconButton size="small" color="error" onClick={() => handleDelete(row.id)}> <DeleteIcon fontSize="small" /></IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
@@ -346,7 +350,7 @@ const handleSaveEdit = async () => {
               onPageChange={(e, newPage) => setPage(newPage)}
               onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
             />
-          </TableContainer>
+          </Box>
         )}
       </Box>
 
