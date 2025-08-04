@@ -366,7 +366,7 @@ const [form, setForm] = useState({
                     value={form.city}
                     label="Ville"
                     onChange={handleChange}
-                    displayEmpty
+                    //displayEmpty
                   >
                     <MenuItem value="" />
                     {[
