@@ -214,10 +214,7 @@ const handleSaveEdit = async () => {
 
             return (
               <Grid item xs={12} sm={6} md={4} key={field}>
-                <Paper sx={{ p: 2, height: 320, display: "flex", flexDirection: "column", alignItems: "center" }}>
-                  <Typography variant="subtitle2" gutterBottom sx={{ mb: 2 }}>
-                    {field.replace(/_/g, " ").toUpperCase()}
-                  </Typography>
+                <Paper sx={{ p: 2, pt: 4, height: 320, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
                   <Box sx={{ width: 200, height: 200 }}>
                     <PieChart width={200} height={200}>
                       <Pie
@@ -235,6 +232,9 @@ const handleSaveEdit = async () => {
                       <Legend layout="horizontal" verticalAlign="bottom" />
                     </PieChart>
                   </Box>
+                  <Typography variant="subtitle2" sx={{ mt: 2 }} align="center">
+                    {field.replace(/_/g, " ").toUpperCase()}
+                  </Typography>
                 </Paper>
               </Grid>
             );
@@ -248,74 +248,76 @@ const handleSaveEdit = async () => {
         {loading ? (
           <CircularProgress />
         ) : (
-          <Box sx={{ overflowX: 'auto', width: '100%' }}>
-            <TableContainer component={Paper}>
-              <Box sx={{ minWidth: '1500px' }}>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>ID</TableCell>
-                      <TableCell>Rider ID</TableCell>
-                      <TableCell>Inspected By</TableCell>
-                      <TableCell>Location</TableCell>
-                      <TableCell>City</TableCell>
-                      <TableCell>Image</TableCell>
-                      <TableCell>Comments</TableCell>
-                      <TableCell>ID Number</TableCell>
-                      <TableCell>Timestamp</TableCell>
-                      <TableCell>Helmet</TableCell>
-                      <TableCell>Box</TableCell>
-                      <TableCell>Account</TableCell>
-                      <TableCell>Parking</TableCell>
-                      <TableCell>Appearance</TableCell>
-                      <TableCell>Driving</TableCell>
-                      <TableCell>MFC Status</TableCell>
-                      <TableCell>Courier Behavior</TableCell>
-                      <TableCell>Box Serial</TableCell>
-                      <TableCell>Plate Number</TableCell>
-                      <TableCell>MFC Location</TableCell>
-                      <TableCell>Actions</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                      <TableRow key={row.id}>
-                        <TableCell>{row.id}</TableCell>
-                        <TableCell>{row.rider_id}</TableCell>
-                        <TableCell>{row.inspected_by}</TableCell>
-                        <TableCell>{row.location || "—"}</TableCell>
-                        <TableCell>{row.city}</TableCell>
-                        <TableCell>
-                          {row.image_url ? (
-                            <img src={row.image_url} alt="preview" style={{ width: 40, height: 40, borderRadius: "50%" }} />
-                          ) : "—"}
-                        </TableCell>
-                        <TableCell>{row.comments || "—"}</TableCell>
-                        <TableCell>{row.id_number || "—"}</TableCell>
-                        <TableCell>{row.timestamp?.slice(0, 19).replace("T", " ")}</TableCell>
-                        <TableCell>{row.helmet || "—"}</TableCell>
-                        <TableCell>{row.box || "—"}</TableCell>
-                        <TableCell>{row.account || "—"}</TableCell>
-                        <TableCell>{row.parking || "—"}</TableCell>
-                        <TableCell>{row.appearance || "—"}</TableCell>
-                        <TableCell>{row.driving || "—"}</TableCell>
-                        <TableCell>{row.mfc_status || "—"}</TableCell>
-                        <TableCell>{row.courier_behavior || "—"}</TableCell>
-                        <TableCell>{row.box_serial_number || "—"}</TableCell>
-                        <TableCell>{row.plate_number || "—"}</TableCell>
-                        <TableCell>{row.mfc_location || "—"}</TableCell>
-                        <TableCell>
-                          <Tooltip title="Edit">
-                            <IconButton size="small" onClick={() => handleEdit(row)}><EditIcon fontSize="small" /></IconButton>
-                          </Tooltip>
-                          <Tooltip title="Delete">
-                            <IconButton size="small" color="error" onClick={() => handleDelete(row.id)}> <DeleteIcon fontSize="small" /></IconButton>
-                          </Tooltip>
-                        </TableCell>
+          <Box sx={{ maxWidth: '100%', overflow: 'hidden' }}>
+            <TableContainer component={Paper} sx={{ maxHeight: 500 }}>
+              <Box sx={{ overflowX: "auto" }}>
+                <Box sx={{ minWidth: 1500 }}>
+                  <Table size="small" stickyHeader>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>ID</TableCell>
+                        <TableCell>Rider ID</TableCell>
+                        <TableCell>Inspected By</TableCell>
+                        <TableCell>Location</TableCell>
+                        <TableCell>City</TableCell>
+                        <TableCell>Image</TableCell>
+                        <TableCell>Comments</TableCell>
+                        <TableCell>ID Number</TableCell>
+                        <TableCell>Timestamp</TableCell>
+                        <TableCell>Helmet</TableCell>
+                        <TableCell>Box</TableCell>
+                        <TableCell>Account</TableCell>
+                        <TableCell>Parking</TableCell>
+                        <TableCell>Appearance</TableCell>
+                        <TableCell>Driving</TableCell>
+                        <TableCell>MFC Status</TableCell>
+                        <TableCell>Courier Behavior</TableCell>
+                        <TableCell>Box Serial</TableCell>
+                        <TableCell>Plate Number</TableCell>
+                        <TableCell>MFC Location</TableCell>
+                        <TableCell>Actions</TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHead>
+                    <TableBody>
+                      {filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                        <TableRow key={row.id}>
+                          <TableCell>{row.id}</TableCell>
+                          <TableCell>{row.rider_id}</TableCell>
+                          <TableCell>{row.inspected_by}</TableCell>
+                          <TableCell>{row.location || "—"}</TableCell>
+                          <TableCell>{row.city}</TableCell>
+                          <TableCell>
+                            {row.image_url ? (
+                              <img src={row.image_url} alt="preview" style={{ width: 40, height: 40, borderRadius: "50%" }} />
+                            ) : "—"}
+                          </TableCell>
+                          <TableCell>{row.comments || "—"}</TableCell>
+                          <TableCell>{row.id_number || "—"}</TableCell>
+                          <TableCell>{row.timestamp?.slice(0, 19).replace("T", " ")}</TableCell>
+                          <TableCell>{row.helmet || "—"}</TableCell>
+                          <TableCell>{row.box || "—"}</TableCell>
+                          <TableCell>{row.account || "—"}</TableCell>
+                          <TableCell>{row.parking || "—"}</TableCell>
+                          <TableCell>{row.appearance || "—"}</TableCell>
+                          <TableCell>{row.driving || "—"}</TableCell>
+                          <TableCell>{row.mfc_status || "—"}</TableCell>
+                          <TableCell>{row.courier_behavior || "—"}</TableCell>
+                          <TableCell>{row.box_serial_number || "—"}</TableCell>
+                          <TableCell>{row.plate_number || "—"}</TableCell>
+                          <TableCell>{row.mfc_location || "—"}</TableCell>
+                          <TableCell>
+                            <Tooltip title="Edit">
+                              <IconButton size="small" onClick={() => handleEdit(row)}><EditIcon fontSize="small" /></IconButton>
+                            </Tooltip>
+                            <Tooltip title="Delete">
+                              <IconButton size="small" color="error" onClick={() => handleDelete(row.id)}> <DeleteIcon fontSize="small" /></IconButton>
+                            </Tooltip>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Box>
               </Box>
             </TableContainer>
           </Box>
