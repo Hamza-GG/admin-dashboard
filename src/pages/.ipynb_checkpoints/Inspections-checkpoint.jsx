@@ -223,7 +223,7 @@ const handleSaveEdit = async () => {
                       data={data}
                       dataKey="value"
                       nameKey="name"
-                      outerRadius={80}
+                      outerRadius={60}
                       label
                     >
                       {data.map((entry, i) => (
