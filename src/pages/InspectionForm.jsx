@@ -364,7 +364,7 @@ export default function InspectionForm() {
   </Typography>
   <Stack spacing={2}>
     <FormControl fullWidth size="small">
-      <InputLabel id="helmet-label">Casque</InputLabel>
+      <InputLabel id="helmet-label">Porte un Casque</InputLabel>
       <Select
         labelId="helmet-label"
         id="helmet"
@@ -373,7 +373,7 @@ export default function InspectionForm() {
         label="Porte un Casque"
         onChange={handleChange}
       >
-        <MenuItem value="Non Contrôlé"><em>Non Contrôlé</em></MenuItem>
+        <MenuItem value="Non Contrôlé">Non Contrôlé</MenuItem>
         <MenuItem value="Oui">Oui</MenuItem>
         <MenuItem value="Non">Non</MenuItem>
       </Select>
@@ -388,7 +388,7 @@ export default function InspectionForm() {
         label="Box"
         onChange={handleChange}
       >
-        <MenuItem value="Bon état"><em>Bon état</em></MenuItem>
+        <MenuItem value="Bon état">Bon état</MenuItem>
         <MenuItem value="Mauvais état">Mauvais état</MenuItem>
         <MenuItem value="N'a pas de box">N'a pas de box</MenuItem>
       </Select>
@@ -403,7 +403,7 @@ export default function InspectionForm() {
         label="Compte Glovo"
         onChange={handleChange}
       >
-        <MenuItem value="Non Vérifié"><em>Non Vérifié</em></MenuItem>
+        <MenuItem value="Non Vérifié">Non Vérifié</MenuItem>
         <MenuItem value="Vérifié et Validé">Vérifié et Validé</MenuItem>
         <MenuItem value="Compte loué">Compte loué</MenuItem>
         <MenuItem value="A refusé de fournir les informations">A refusé de fournir les informations</MenuItem>
@@ -419,7 +419,7 @@ export default function InspectionForm() {
         label="Emplacement de stationnement"
         onChange={handleChange}
       >
-        <MenuItem value="Non Vérifié"><em>Non Vérifié</em></MenuItem>
+        <MenuItem value="Non Vérifié">Non Vérifié</MenuItem>
         <MenuItem value="Stationement dans une zone dédiée">Stationement dans une zone dédiée</MenuItem>
         <MenuItem value="Stationement Interdit">Stationement Interdit</MenuItem>
       </Select>
@@ -434,7 +434,7 @@ export default function InspectionForm() {
         label="Apparence"
         onChange={handleChange}
       >
-        <MenuItem value="Non Vérifié"><em>Non Vérifié</em></MenuItem>
+        <MenuItem value="Non Vérifié">Non Vérifié</MenuItem>
         <MenuItem value="Tenue correcte avec gilet Glovo">Tenue correcte avec gilet Glovo</MenuItem>
         <MenuItem value="Tenue correcte sans gilet Glovo">Tenue correcte sans gilet Glovo</MenuItem>
         <MenuItem value="Tenue non correcte: Porte un pyjama, des sandales, des sabots, etc.">Tenue non correcte: Porte un pyjama, des sandales, des sabots, etc.</MenuItem>
@@ -450,7 +450,7 @@ export default function InspectionForm() {
         label="Conduite"
         onChange={handleChange}
       >
-        <MenuItem value="Non Vérifié"><em>Non Vérifié</em></MenuItem>
+        <MenuItem value="Non Vérifié">Non Vérifié</MenuItem>
         <MenuItem value="Conduite dangereuse">Conduite dangereuse</MenuItem>
         <MenuItem value="Excès de vitesse">Excès de vitesse</MenuItem>
         <MenuItem value="Conduite en sens interdit">Conduite en sens interdit</MenuItem>
@@ -467,7 +467,7 @@ export default function InspectionForm() {
         label="Glovo Market"
         onChange={handleChange}
       >
-        <MenuItem value="Non Vérifié"><em>Non Vérifié</em></MenuItem>
+        <MenuItem value="Non Vérifié">Non Vérifié</MenuItem>
         <MenuItem value="Commande en cours">Commande en cours</MenuItem>
         <MenuItem value="Attente sans commande en cours">Attente sans commande en cours</MenuItem>
       </Select>
@@ -482,7 +482,7 @@ export default function InspectionForm() {
         label="Comportement du coursier"
         onChange={handleChange}
       >
-        <MenuItem value="Collaboratif"><em>Collaboratif</em></MenuItem>
+        <MenuItem value="Collaboratif">sCollaboratif</MenuItem>
         <MenuItem value="Non Collaboratif">Non Collaboratif</MenuItem>
       </Select>
     </FormControl>
