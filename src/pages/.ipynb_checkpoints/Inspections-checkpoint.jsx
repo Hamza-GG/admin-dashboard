@@ -231,7 +231,7 @@ const handleSaveEdit = async () => {
                       ))}
                     </Pie>
                     <ReTooltip />
-                    <Legend layout="horizontal" verticalAlign="bottom" />
+                      {/* <Legend layout="horizontal" verticalAlign="bottom" /> */}
                   </PieChart>
                 </Box>
               </Paper>
