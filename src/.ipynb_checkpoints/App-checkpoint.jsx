@@ -14,6 +14,47 @@ import Users from "./pages/Users";
 
 const theme = createTheme();
 
+
+// Capture supervisors location 
+
+function LocationTracker() {
+  useEffect(() => {
+    const sendLocation = async () => {
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const { latitude, longitude } = position.coords;
+            try {
+              await fetch("/api/locations", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ latitude, longitude }),
+              });
+            } catch (error) {
+              console.error("Failed to send location:", error);
+            }
+          },
+          (error) => {
+            console.warn("Location error:", error);
+          },
+          { enableHighAccuracy: true }
+        );
+      }
+    };
+
+    sendLocation(); // Send immediately on load
+    const intervalId = setInterval(sendLocation, 5 * 60 * 1000); // every 5 minutes
+
+    return () => clearInterval(intervalId); // cleanup on unmount
+  }, []);
+
+  return null;
+}
+
+export default LocationTracker;
+
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
   return token ? children : <Navigate to="/login" replace />;
