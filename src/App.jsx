@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ThemeProvider, CssBaseline, Box } from "@mui/material";
 import { createTheme } from "@mui/material/styles";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+
 import Dashboard from "./pages/Dashboard";
 import Riders from "./pages/Riders";
 import Inspections from "./pages/Inspections";
@@ -14,9 +15,7 @@ import Users from "./pages/Users";
 
 const theme = createTheme();
 
-
-// Capture supervisors location 
-
+// ✅ Location tracking component
 function LocationTracker() {
   useEffect(() => {
     const sendLocation = async () => {
@@ -29,6 +28,7 @@ function LocationTracker() {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
+                  "Authorization": `Bearer ${localStorage.getItem("token")}`,
                 },
                 body: JSON.stringify({ latitude, longitude }),
               });
@@ -44,22 +44,22 @@ function LocationTracker() {
       }
     };
 
-    sendLocation(); // Send immediately on load
+    sendLocation(); // Send immediately
     const intervalId = setInterval(sendLocation, 5 * 60 * 1000); // every 5 minutes
 
-    return () => clearInterval(intervalId); // cleanup on unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   return null;
 }
 
-export default LocationTracker;
-
+// ✅ Protected route wrapper
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
   return token ? children : <Navigate to="/login" replace />;
 }
 
+// ✅ Main App Component
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem("token"));
 
@@ -74,57 +74,57 @@ export default function App() {
       <CssBaseline />
       <Router>
         {isAuthenticated && <Navbar setIsAuthenticated={setIsAuthenticated} />}
+        {isAuthenticated && <LocationTracker />}
         <Box sx={{ mt: isAuthenticated ? 8 : 0 }}>
           <Routes>
-  <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
-  <Route path="/reset-password" element={<ResetPassword />} />
-<Route path="/verify-email" element={<VerifyEmail />} />
-  <Route
-    path="/dashboard"
-    element={
-      <ProtectedRoute>
-        <Dashboard />
-      </ProtectedRoute>
-    }
-  />
-              <Route
-  path="/users"
-  element={
-    <ProtectedRoute>
-      <Users />
-    </ProtectedRoute>
-  }
-/>
-  <Route
-    path="/riders"
-    element={
-      <ProtectedRoute>
-        <Riders />
-      </ProtectedRoute>
-    }
-  />
-        
-  <Route
-    path="/inspections"
-    element={
-      <ProtectedRoute>
-        <Inspections />
-      </ProtectedRoute>
-    }
-  />
-  <Route
-    path="/inspection-form"
-    element={
-      <ProtectedRoute>
-        <InspectionForm />
-      </ProtectedRoute>
-    }
-  />
-  <Route
-    path="*"
-    element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />}
-  />
-</Routes>
+            <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/users"
+              element={
+                <ProtectedRoute>
+                  <Users />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/riders"
+              element={
+                <ProtectedRoute>
+                  <Riders />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/inspections"
+              element={
+                <ProtectedRoute>
+                  <Inspections />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/inspection-form"
+              element={
+                <ProtectedRoute>
+                  <InspectionForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="*"
+              element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />}
+            />
+          </Routes>
         </Box>
       </Router>
     </ThemeProvider>
