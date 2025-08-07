@@ -45,7 +45,7 @@ function LocationTracker() {
     };
 
     sendLocation(); // Send immediately
-    const intervalId = setInterval(sendLocation, 5 * 60 * 1000); // every 5 minutes
+    const intervalId = setInterval(sendLocation, 1 * 60 * 1000); // every 1 minute
 
     return () => clearInterval(intervalId);
   }, []);
