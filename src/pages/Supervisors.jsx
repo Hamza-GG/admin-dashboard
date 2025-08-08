@@ -49,7 +49,7 @@ export default function SupervisorsMap() {
   const center = [33.5899, -7.6039]; // Casablanca
 
   return (
-    <Box sx={{ height: "calc(100vh - 64px)", width: "100%", position: "relative" }}>
+    <Box sx={{ height: "calc(100vh - 64px)", minHeight: "500px", width: "100%", position: "relative" }}>
       {/* Filter Box */}
       <Box
         sx={{
