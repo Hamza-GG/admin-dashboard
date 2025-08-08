@@ -32,16 +32,12 @@ export default function SupervisorsMap() {
     }
   };
 
-  // Fetch on load + every 60 seconds
   useEffect(() => {
     fetchLocations();
-    const interval = setInterval(fetchLocations, 60000);
+    const interval = setInterval(fetchLocations, 60000); // every 60s
     return () => clearInterval(interval);
   }, []);
 
-  const center = [33.5899, -7.6039]; // Casablanca
-
-  // Update filteredLocations based on selected user
   useEffect(() => {
     if (selectedUser) {
       setFilteredLocations(locations.filter(loc => loc.username === selectedUser));
@@ -50,20 +46,44 @@ export default function SupervisorsMap() {
     }
   }, [selectedUser, locations]);
 
+  const center = [33.5899, -7.6039]; // Casablanca
+
   return (
-    <Box sx={{ height: "100vh", width: "100%", position: "relative" }}>
-      <Box sx={{ position: "absolute", top: 20, left: 20, zIndex: 1000, background: "white", p: 2, borderRadius: 2, boxShadow: 3 }}>
-        <Typography variant="h6" gutterBottom>📍 Dernières localisations des superviseurs</Typography>
+    <Box sx={{ height: "calc(100vh - 64px)", width: "100%", position: "relative" }}>
+      {/* Filter Box */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: 16,
+          left: 16,
+          zIndex: 1000,
+          backgroundColor: "white",
+          padding: 2,
+          borderRadius: 2,
+          boxShadow: 3,
+          minWidth: 300,
+        }}
+      >
+        <Typography variant="subtitle1" sx={{ mb: 1 }}>
+          📍 Dernières localisations des superviseurs
+        </Typography>
         <Autocomplete
           options={[...new Set(locations.map(loc => loc.username))]}
           value={selectedUser}
           onChange={(e, newValue) => setSelectedUser(newValue)}
-          renderInput={(params) => <TextField {...params} label="Inspected By" size="small" />}
+          renderInput={(params) => (
+            <TextField {...params} label="Inspected By" size="small" />
+          )}
           clearOnEscape
         />
       </Box>
 
-      <MapContainer center={center} zoom={12} style={{ height: "100%", width: "100%" }}>
+      {/* Map */}
+      <MapContainer
+        center={center}
+        zoom={12}
+        style={{ height: "100%", width: "100%", zIndex: 1 }}
+      >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; OpenStreetMap contributors'
@@ -75,11 +95,12 @@ export default function SupervisorsMap() {
             icon={defaultIcon}
           >
             <Popup>
-              <strong>{loc.username}</strong><br />
+              <strong>{loc.username}</strong>
+              <br />
               {new Date(loc.timestamp).toLocaleString("fr-MA", {
                 timeZone: "Africa/Casablanca",
                 dateStyle: "short",
-                timeStyle: "short"
+                timeStyle: "short",
               })}
             </Popup>
           </Marker>
