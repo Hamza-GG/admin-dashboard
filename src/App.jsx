@@ -15,8 +15,6 @@ import Users from "./pages/Users";
 const theme = createTheme();
 
 // ✅ Location tracking component
-
-import { useEffect } from "react";
 import authAxios from "../utils/authAxios";
 
 function LocationTracker() {
