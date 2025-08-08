@@ -79,11 +79,7 @@ export default function SupervisorsMap() {
       </Box>
 
       {/* Map */}
-      <MapContainer
-        center={center}
-        zoom={12}
-        style={{ height: "100%", width: "100%", zIndex: 1 }}
-      >
+     <MapContainer style={{ height: "600px", width: "100%" }}>
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; OpenStreetMap contributors'
