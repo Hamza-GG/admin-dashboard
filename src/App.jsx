@@ -13,7 +13,7 @@ import ResetPassword from "./pages/ResetPassword";
 import VerifyEmail from "./pages/VerifyEmail";
 import Users from "./pages/Users";
 const theme = createTheme();
-
+/*
 // ✅ Location tracking component
 import authAxios from "../utils/authAxios";
 
@@ -60,7 +60,7 @@ function LocationTracker() {
 
 export default LocationTracker;
 
-
+*/
 
 // ✅ Protected route wrapper
 function ProtectedRoute({ children }) {
