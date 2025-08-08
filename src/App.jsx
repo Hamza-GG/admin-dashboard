@@ -15,7 +15,7 @@ import Users from "./pages/Users";
 const theme = createTheme();
 import LocationTracker from "./components/LocationTracker";
 import Supervisors from "./pages/Supervisors";
-import 'leaflet/dist/leaflet.css';
+
 
 // ✅ Protected route wrapper
 function ProtectedRoute({ children }) {
