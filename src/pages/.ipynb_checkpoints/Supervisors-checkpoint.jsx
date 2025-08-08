@@ -87,7 +87,7 @@ export default function SupervisorsMap() {
         <MapContainer
           center={center}
           zoom={12}
-          style={{ height: "80vh", width: "100%" }}
+          style={{ minHeight: "100vh", width: "100vw" }}
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
