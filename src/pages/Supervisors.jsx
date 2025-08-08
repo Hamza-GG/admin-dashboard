@@ -66,10 +66,10 @@ export default function SupervisorsMap() {
 
       {/* MUI Dropdown Filter */}
       <FormControl size="small" sx={{ minWidth: 250, mb: 2 }}>
-        <InputLabel>Inspected By</InputLabel>
+        <InputLabel>Superviseur</InputLabel>
         <Select
           value={selectedUser}
-          label="Inspected By"
+          label="I"
           onChange={(e) => setSelectedUser(e.target.value)}
         >
           <MenuItem value="">All supervisors</MenuItem>
@@ -87,7 +87,7 @@ export default function SupervisorsMap() {
         <MapContainer
           center={center}
           zoom={12}
-          style={{ minHeight: "80vh", width: "100vw" }}
+          style={{ minHeight: "80vh", width: "80vw" }}
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
