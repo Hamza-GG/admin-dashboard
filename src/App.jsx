@@ -12,14 +12,12 @@ import Navbar from "./components/Navbar";
 import ResetPassword from "./pages/ResetPassword";
 import VerifyEmail from "./pages/VerifyEmail";
 import Users from "./pages/Users";
-import authAxios from "../utils/authAxios";
-
 const theme = createTheme();
 
 // ✅ Location tracking component
 
 import { useEffect } from "react";
-import authAxios from "../utils/authAxios"; // Adjust the path if needed
+import authAxios from "../utils/authAxios";
 
 function LocationTracker() {
   useEffect(() => {
