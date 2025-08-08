@@ -42,6 +42,7 @@ function Navbar({ setIsAuthenticated }) {
     { label: "Home", to: "/dashboard" },
     { label: "Utilisateurs", to: "/users" },
     { label: "Riders", to: "/riders" },
+    { label: "Superviseurs", to: "/supervisors" } ,
     { label: "Contrôles", to: "/inspections" },
     { label: "Ajouter un contrôle", to: "/inspection-form" },
   ];

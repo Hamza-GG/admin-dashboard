@@ -14,7 +14,7 @@ import VerifyEmail from "./pages/VerifyEmail";
 import Users from "./pages/Users";
 const theme = createTheme();
 import LocationTracker from "./components/LocationTracker";
-
+import Supervisors from "./pages/Supervisors";
 
 
 // ✅ Protected route wrapper
@@ -68,6 +68,14 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+              <Route
+  path="/supervisors"
+  element={
+    <ProtectedRoute>
+      <Supervisors />
+    </ProtectedRoute>
+  }
+/>
             <Route
               path="/inspections"
               element={
