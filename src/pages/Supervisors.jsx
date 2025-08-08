@@ -79,32 +79,33 @@ export default function Supervisors() {
       }}
     >
       {/* Floating filter card */}
-      <Box
-        sx={{
-          position: "absolute",
-          top: 16,
-          left: 16,
-          zIndex: 1000,
-          bgcolor: "white",
-          p: 2,
-          borderRadius: 2,
-          boxShadow: 3,
-          minWidth: 300,
-        }}
-      >
-        <Typography variant="subtitle1" sx={{ mb: 1 }}>
-          📍 Dernières localisations des superviseurs
-        </Typography>
+    <Box
+  sx={{
+    position: "absolute",
+    top: 16,
+    left: "50%",
+    transform: "translateX(-50%)",
+    zIndex: 1000,
+    bgcolor: "white",
+    p: 2,
+    borderRadius: 2,
+    boxShadow: 3,
+    minWidth: 300,
+  }}
+>
+  <Typography variant="subtitle1" sx={{ mb: 1 }}>
+    📍 Dernières localisations des superviseurs
+  </Typography>
 
-        <Autocomplete
-          size="small"
-          options={usernames}
-          value={selectedUser}
-          onChange={(_, v) => setSelectedUser(v)}
-          renderInput={(params) => <TextField {...params} label="Superviseur" />}
-          clearOnEscape
-        />
-      </Box>
+  <Autocomplete
+    size="small"
+    options={usernames}
+    value={selectedUser}
+    onChange={(_, v) => setSelectedUser(v)}
+    renderInput={(params) => <TextField {...params} label="Superviseur" />}
+    clearOnEscape
+  />
+</Box>
 
       {/* The Map */}
       <MapContainer
