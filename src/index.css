@@ -73,5 +73,9 @@ html, body, #root {
 }
 
 body {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  background-color: #ffffff;
+  color: #213547;
 }
