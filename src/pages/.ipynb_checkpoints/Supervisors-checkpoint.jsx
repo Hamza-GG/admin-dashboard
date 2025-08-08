@@ -1,16 +1,10 @@
 import { useEffect, useState } from "react";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Popup,
-} from "react-leaflet";
-import "leaflet/dist/leaflet.css";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import authAxios from "../utils/authAxios";
 import { Box, Typography, Autocomplete, TextField } from "@mui/material";
 
-// Fix Leaflet's default icon paths in Vite
+// --- Fix Leaflet's icon URLs under Vite ---
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: new URL("leaflet/dist/images/marker-icon-2x.png", import.meta.url).href,
@@ -26,9 +20,9 @@ export default function SupervisorsMap() {
   const fetchLocations = async () => {
     try {
       const res = await authAxios.get("/api/last-locations");
+      console.log("Fetched locations:", res.data);
       setLocations(res.data);
       setFilteredLocations(res.data);
-      console.log("Fetched locations:", res.data);
     } catch (err) {
       console.error("Failed to fetch supervisor locations", err);
     }
@@ -36,7 +30,7 @@ export default function SupervisorsMap() {
 
   useEffect(() => {
     fetchLocations();
-    const interval = setInterval(fetchLocations, 60000);
+    const interval = setInterval(fetchLocations, 60_000);
     return () => clearInterval(interval);
   }, []);
 
@@ -48,11 +42,13 @@ export default function SupervisorsMap() {
     }
   }, [selectedUser, locations]);
 
+  // **IMPORTANT**: Map needs a center + zoom
   const mapCenter = [33.5899, -7.6039]; // Casablanca
+  const mapZoom = 12;
 
   return (
     <Box sx={{ width: "100%", height: "calc(100vh - 64px)", position: "relative" }}>
-      {/* Dropdown filter */}
+      {/* Floating filter card */}
       <Box
         sx={{
           position: "absolute",
@@ -60,7 +56,7 @@ export default function SupervisorsMap() {
           left: 16,
           zIndex: 1000,
           backgroundColor: "white",
-          padding: 2,
+          p: 2,
           borderRadius: 2,
           boxShadow: 3,
           minWidth: 300,
@@ -73,24 +69,35 @@ export default function SupervisorsMap() {
           options={[...new Set(locations.map((loc) => loc.username))]}
           value={selectedUser}
           onChange={(e, newValue) => setSelectedUser(newValue)}
-          renderInput={(params) => (
-            <TextField {...params} label="Inspected By" size="small" />
-          )}
+          renderInput={(params) => <TextField {...params} label="Inspected By" size="small" />}
           clearOnEscape
         />
       </Box>
 
       {/* Map */}
-      <MapContainer center={mapCenter} zoom={12} style={{ height: "100%", width: "100%", zIndex: 0 }}>
+      <MapContainer
+        center={mapCenter}
+        zoom={mapZoom}
+        style={{ height: "100%", width: "100%", zIndex: 0, background: "#eaeaea" }} // bg helps you see the container
+        whenCreated={(map) => {
+          console.log("Leaflet map created:", map);
+          // Optional: if you want to fit to markers when present
+          // setTimeout(() => {
+          //   if (filteredLocations.length) {
+          //     const bounds = L.latLngBounds(
+          //       filteredLocations.map((l) => [l.latitude, l.longitude])
+          //     );
+          //     map.fitBounds(bounds, { padding: [40, 40] });
+          //   }
+          // }, 0);
+        }}
+      >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; OpenStreetMap contributors'
+          attribution="&copy; OpenStreetMap contributors"
         />
         {filteredLocations.map((loc) => (
-          <Marker
-            key={loc.user_id}
-            position={[loc.latitude, loc.longitude]}
-          >
+          <Marker key={loc.user_id} position={[loc.latitude, loc.longitude]}>
             <Popup>
               <strong>{loc.username}</strong>
               <br />
