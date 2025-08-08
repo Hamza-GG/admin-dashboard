@@ -10,11 +10,12 @@ import L from "leaflet";
 import authAxios from "../utils/authAxios";
 import { Box, Typography, Autocomplete, TextField } from "@mui/material";
 
-const defaultIcon = new L.Icon({
-  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
+// Fix Leaflet's default icon paths in Vite
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: new URL("leaflet/dist/images/marker-icon-2x.png", import.meta.url).href,
+  iconUrl: new URL("leaflet/dist/images/marker-icon.png", import.meta.url).href,
+  shadowUrl: new URL("leaflet/dist/images/marker-shadow.png", import.meta.url).href,
 });
 
 export default function SupervisorsMap() {
@@ -27,6 +28,7 @@ export default function SupervisorsMap() {
       const res = await authAxios.get("/api/last-locations");
       setLocations(res.data);
       setFilteredLocations(res.data);
+      console.log("Fetched locations:", res.data);
     } catch (err) {
       console.error("Failed to fetch supervisor locations", err);
     }
@@ -40,17 +42,17 @@ export default function SupervisorsMap() {
 
   useEffect(() => {
     if (selectedUser) {
-      setFilteredLocations(locations.filter(loc => loc.username === selectedUser));
+      setFilteredLocations(locations.filter((loc) => loc.username === selectedUser));
     } else {
       setFilteredLocations(locations);
     }
   }, [selectedUser, locations]);
 
-  const center = [33.5899, -7.6039];
+  const mapCenter = [33.5899, -7.6039]; // Casablanca
 
   return (
     <Box sx={{ width: "100%", height: "calc(100vh - 64px)", position: "relative" }}>
-      {/* Filter Dropdown */}
+      {/* Dropdown filter */}
       <Box
         sx={{
           position: "absolute",
@@ -68,7 +70,7 @@ export default function SupervisorsMap() {
           📍 Dernières localisations des superviseurs
         </Typography>
         <Autocomplete
-          options={[...new Set(locations.map(loc => loc.username))]}
+          options={[...new Set(locations.map((loc) => loc.username))]}
           value={selectedUser}
           onChange={(e, newValue) => setSelectedUser(newValue)}
           renderInput={(params) => (
@@ -78,31 +80,29 @@ export default function SupervisorsMap() {
         />
       </Box>
 
-      {/* Map Container */}
-      <Box sx={{ width: "100%", height: "100%" }}>
-        <MapContainer center={center} zoom={12} style={{ height: "100%", width: "100%", zIndex: 0 }}>
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; OpenStreetMap contributors'
-          />
-          {filteredLocations.map((loc) => (
-            <Marker
-              key={loc.user_id}
-              position={[loc.latitude, loc.longitude]}
-              icon={defaultIcon}
-            >
-              <Popup>
-                <strong>{loc.username}</strong><br />
-                {new Date(loc.timestamp).toLocaleString("fr-MA", {
-                  timeZone: "Africa/Casablanca",
-                  dateStyle: "short",
-                  timeStyle: "short"
-                })}
-              </Popup>
-            </Marker>
-          ))}
-        </MapContainer>
-      </Box>
+      {/* Map */}
+      <MapContainer center={mapCenter} zoom={12} style={{ height: "100%", width: "100%", zIndex: 0 }}>
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; OpenStreetMap contributors'
+        />
+        {filteredLocations.map((loc) => (
+          <Marker
+            key={loc.user_id}
+            position={[loc.latitude, loc.longitude]}
+          >
+            <Popup>
+              <strong>{loc.username}</strong>
+              <br />
+              {new Date(loc.timestamp).toLocaleString("fr-MA", {
+                timeZone: "Africa/Casablanca",
+                dateStyle: "short",
+                timeStyle: "short",
+              })}
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
     </Box>
   );
 }
