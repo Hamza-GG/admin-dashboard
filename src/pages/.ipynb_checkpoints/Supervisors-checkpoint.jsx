@@ -10,15 +10,7 @@ import L from "leaflet";
 import authAxios from "../utils/authAxios";
 import { Box, Typography, Autocomplete, TextField } from "@mui/material";
 
-// Fix missing marker icons when using Vite
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
-  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
-});
-
-// Optional: use a custom icon if needed (you can remove if using default above)
+// Default marker icon fix for Leaflet
 const defaultIcon = new L.Icon({
   iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
   iconSize: [25, 41],
@@ -41,12 +33,14 @@ export default function SupervisorsMap() {
     }
   };
 
+  // Fetch data on load and every 60 seconds
   useEffect(() => {
     fetchLocations();
-    const interval = setInterval(fetchLocations, 60000); // every 60s
+    const interval = setInterval(fetchLocations, 60000);
     return () => clearInterval(interval);
   }, []);
 
+  // Update filtered locations when a user is selected
   useEffect(() => {
     if (selectedUser) {
       setFilteredLocations(locations.filter(loc => loc.username === selectedUser));
@@ -57,9 +51,16 @@ export default function SupervisorsMap() {
 
   const center = [33.5899, -7.6039]; // Casablanca
 
+  // ✅ Map style
+  const mapStyles = {
+    width: "100%",
+    height: "calc(100vh - 64px)", // minus navbar
+    zIndex: 0,
+  };
+
   return (
-    <Box sx={{ height: "calc(100vh - 64px)", minHeight: "500px", width: "100%", position: "relative" }}>
-      {/* Filter Box */}
+    <Box sx={{ height: "calc(100vh - 64px)", width: "100%", position: "relative" }}>
+      {/* Dropdown Filter */}
       <Box
         sx={{
           position: "absolute",
@@ -81,19 +82,14 @@ export default function SupervisorsMap() {
           value={selectedUser}
           onChange={(e, newValue) => setSelectedUser(newValue)}
           renderInput={(params) => (
-            <TextField {...params} label="Inspected By" size="small" />
+            <TextField {...params} label="Superviseur" size="small" />
           )}
           clearOnEscape
         />
       </Box>
 
-      {/* Map */}
-      <MapContainer
-        center={center}
-        zoom={13}
-        scrollWheelZoom={true}
-        style={{ height: "100%", width: "100%", zIndex: 0 }}
-      >
+      {/* Map Container */}
+      <MapContainer center={center} zoom={13} style={mapStyles}>
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; OpenStreetMap contributors'
