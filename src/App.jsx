@@ -12,10 +12,15 @@ import Navbar from "./components/Navbar";
 import ResetPassword from "./pages/ResetPassword";
 import VerifyEmail from "./pages/VerifyEmail";
 import Users from "./pages/Users";
+import authAxios from "../utils/authAxios";
 
 const theme = createTheme();
 
 // ✅ Location tracking component
+
+import { useEffect } from "react";
+import authAxios from "../utils/authAxios"; // Adjust the path if needed
+
 function LocationTracker() {
   useEffect(() => {
     const sendLocation = async () => {
@@ -28,21 +33,12 @@ function LocationTracker() {
             console.log("📍 Got location:", latitude, longitude);
 
             try {
-              const res = await fetch("/api/locations", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "Authorization": `Bearer ${localStorage.getItem("token")}`,
-                },
-                body: JSON.stringify({ latitude, longitude }),
-              });
+              const res = await authAxios.post(
+                "https://employee-inspection-backend.onrender.com/api/locations",
+                { latitude, longitude }
+              );
 
-              const resText = await res.text();
-              console.log("✅ Location sent, status:", res.status, resText);
-
-              if (!res.ok) {
-                console.error("⚠️ Server rejected the request:", res.status);
-              }
+              console.log("✅ Location sent, status:", res.status, res.data);
             } catch (error) {
               console.error("❌ Failed to send location:", error);
             }
@@ -57,14 +53,18 @@ function LocationTracker() {
       }
     };
 
-    sendLocation();
-    const intervalId = setInterval(sendLocation, 60000);
+    sendLocation(); // Send once on load
+    const intervalId = setInterval(sendLocation, 60_000); // Every 1 minute
 
     return () => clearInterval(intervalId);
   }, []);
 
   return null;
 }
+
+export default LocationTracker;
+
+
 
 // ✅ Protected route wrapper
 function ProtectedRoute({ children }) {
