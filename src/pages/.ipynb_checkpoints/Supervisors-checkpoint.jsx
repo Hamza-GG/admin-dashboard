@@ -1,125 +1,131 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+// src/pages/Supervisors.jsx
+import { useEffect, useMemo, useState } from "react";
+import { Box, Typography, Autocomplete, TextField } from "@mui/material";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import authAxios from "../utils/authAxios";
-import { Box, Typography, Autocomplete, TextField } from "@mui/material";
 
+// Fallback Leaflet marker (keeps default look)
 const defaultIcon = new L.Icon({
   iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
+  shadowSize: [41, 41],
 });
 
-function FitToMarkers({ points }) {
+// Helper to fit bounds to markers when data/filters change
+function FitBounds({ points }) {
   const map = useMap();
 
   useEffect(() => {
-    if (!map) return;
-    if (points.length === 0) {
-      // Default center (Casa)
-      map.setView([33.5899, -7.6039], 12, { animate: false });
-      return;
-    }
+    if (!points || points.length === 0) return;
     if (points.length === 1) {
-      map.setView(points[0], 14, { animate: false });
-      return;
+      // single point: set view with a nice zoom
+      map.setView([points[0].latitude, points[0].longitude], 13, { animate: true });
+    } else {
+      const bounds = L.latLngBounds(points.map(p => [p.latitude, p.longitude]));
+      map.fitBounds(bounds, { padding: [40, 40] });
     }
-    const bounds = L.latLngBounds(points);
-    map.fitBounds(bounds, { padding: [40, 40] });
-  }, [map, points]);
+  }, [points, map]);
 
   return null;
 }
 
-export default function SupervisorsMap() {
+export default function Supervisors() {
   const [locations, setLocations] = useState([]);
-  const [filteredLocations, setFilteredLocations] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
 
   const fetchLocations = async () => {
     try {
       const res = await authAxios.get("/api/last-locations");
-      setLocations(res.data);
-      setFilteredLocations(
-        selectedUser ? res.data.filter((l) => l.username === selectedUser) : res.data
-      );
+      setLocations(res.data || []);
     } catch (err) {
       console.error("Failed to fetch supervisor locations", err);
     }
   };
 
+  // initial + poll every 60s
   useEffect(() => {
     fetchLocations();
-    const t = setInterval(fetchLocations, 60000);
-    return () => clearInterval(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedUser]);
+    const id = setInterval(fetchLocations, 60_000);
+    return () => clearInterval(id);
+  }, []);
 
-  const userOptions = useMemo(
-    () => Array.from(new Set(locations.map((l) => l.username))).sort(),
+  const usernames = useMemo(
+    () => Array.from(new Set(locations.map(l => l.username))).sort(),
     [locations]
   );
 
-  const points = useMemo(
-    () => filteredLocations.map((l) => [l.latitude, l.longitude]),
-    [filteredLocations]
-  );
+  const filtered = useMemo(() => {
+    return selectedUser ? locations.filter(l => l.username === selectedUser) : locations;
+  }, [locations, selectedUser]);
+
+  // Casablanca fallback center
+  const fallbackCenter = [33.5899, -7.6039];
 
   return (
     <Box
       sx={{
-        // Fill the viewport height minus your AppBar (64px default on desktop)
+        // full viewport width (ignores any layout padding)
+        width: "100vw",
+        // full height minus app bar (64 desktop / 56 mobile)
         height: { xs: "calc(100vh - 56px)", md: "calc(100vh - 64px)" },
-        width: "100%",           // <-- no 100vw, avoids off-center scrollbars
         position: "relative",
+        overflowX: "hidden",
       }}
     >
-      {/* Filter panel */}
+      {/* Floating filter card */}
       <Box
         sx={{
           position: "absolute",
           top: 16,
           left: 16,
           zIndex: 1000,
-          backgroundColor: "white",
+          bgcolor: "white",
           p: 2,
           borderRadius: 2,
           boxShadow: 3,
-          minWidth: 280,
+          minWidth: 300,
         }}
       >
         <Typography variant="subtitle1" sx={{ mb: 1 }}>
           📍 Dernières localisations des superviseurs
         </Typography>
+
         <Autocomplete
-          options={userOptions}
+          size="small"
+          options={usernames}
           value={selectedUser}
-          onChange={(_e, val) => setSelectedUser(val)}
-          renderInput={(params) => (
-            <TextField {...params} label="Superviseur" size="small" />
-          )}
+          onChange={(_, v) => setSelectedUser(v)}
+          renderInput={(params) => <TextField {...params} label="Superviseur" />}
           clearOnEscape
         />
       </Box>
 
-      {/* Map */}
+      {/* The Map */}
       <MapContainer
-        // Any initial center/zoom — FitToMarkers will adjust it
-        center={[33.5899, -7.6039]}
+        center={fallbackCenter}
         zoom={12}
-        style={{ height: "100%", width: "100%" }}  // <-- fills the Box without overflow
+        style={{ height: "100%", width: "100%" }}
+        // avoids tiny “white strip” glitches on some browsers when resizing
+        preferCanvas
       >
         <TileLayer
+          // OSM standard tiles
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; OpenStreetMap contributors'
         />
-        <FitToMarkers points={points} />
 
-        {filteredLocations.map((loc) => (
+        {/* Center/fit to the visible markers */}
+        <FitBounds points={filtered} />
+
+        {filtered.map((loc) => (
           <Marker
-            key={loc.user_id}
+            key={`${loc.user_id}-${loc.timestamp}`}
             position={[loc.latitude, loc.longitude]}
             icon={defaultIcon}
           >
