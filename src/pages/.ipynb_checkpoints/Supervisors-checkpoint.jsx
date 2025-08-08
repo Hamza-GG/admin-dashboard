@@ -10,6 +10,15 @@ import L from "leaflet";
 import authAxios from "../utils/authAxios";
 import { Box, Typography, Autocomplete, TextField } from "@mui/material";
 
+// Fix missing marker icons when using Vite
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+});
+
+// Optional: use a custom icon if needed (you can remove if using default above)
 const defaultIcon = new L.Icon({
   iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
   iconSize: [25, 41],
@@ -79,7 +88,12 @@ export default function SupervisorsMap() {
       </Box>
 
       {/* Map */}
-     <MapContainer style={{ height: "600px", width: "100%" }}>
+      <MapContainer
+        center={center}
+        zoom={13}
+        scrollWheelZoom={true}
+        style={{ height: "100%", width: "100%", zIndex: 0 }}
+      >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; OpenStreetMap contributors'
