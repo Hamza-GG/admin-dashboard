@@ -4,7 +4,17 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import authAxios from "../utils/authAxios";
 
-// Optional: Custom marker icon if default is broken
+// MUI components
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Box,
+  Typography
+} from "@mui/material";
+
+// Custom marker icon
 const defaultIcon = new L.Icon({
   iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
   iconSize: [25, 41],
@@ -15,7 +25,7 @@ const defaultIcon = new L.Icon({
 export default function SupervisorsMap() {
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState(""); // "" = All
+  const [selectedUser, setSelectedUser] = useState("");
 
   useEffect(() => {
     const fetchLocations = async () => {
@@ -28,17 +38,16 @@ export default function SupervisorsMap() {
         setLoading(false);
       }
     };
-
     fetchLocations();
   }, []);
 
-  // Unique usernames for the dropdown
+  // Unique usernames for dropdown
   const userOptions = useMemo(
     () => Array.from(new Set(locations.map((l) => l.username))).sort(),
     [locations]
   );
 
-  // Filtered markers based on dropdown
+  // Filtered markers
   const visibleLocations = useMemo(
     () =>
       selectedUser
@@ -50,35 +59,37 @@ export default function SupervisorsMap() {
   const center = [33.5899, -7.6039]; // Casablanca
 
   return (
-    <div style={{ padding: 16 }}>
-      <h2 style={{ marginBottom: 12 }}>Supervisors Last Known Locations</h2>
+    <Box p={2}>
+      <Typography variant="h6" gutterBottom>
+        📍 Dernières localisations des superviseurs
+      </Typography>
 
-      {/* Dropdown filter */}
-      <div style={{ marginBottom: 12 }}>
-        <label htmlFor="userFilter" style={{ marginRight: 8 }}>
-          Filter by user:
-        </label>
-        <select
-          id="userFilter"
+      {/* MUI Dropdown Filter */}
+      <FormControl size="small" sx={{ minWidth: 250, mb: 2 }}>
+        <InputLabel>Inspected By</InputLabel>
+        <Select
           value={selectedUser}
+          label="Inspected By"
           onChange={(e) => setSelectedUser(e.target.value)}
-          style={{ padding: 6, minWidth: 220 }}
         >
-          <option value="">All supervisors</option>
+          <MenuItem value="">All supervisors</MenuItem>
           {userOptions.map((u) => (
-            <option key={u} value={u}>
+            <MenuItem key={u} value={u}>
               {u}
-            </option>
+            </MenuItem>
           ))}
-        </select>
-      </div>
+        </Select>
+      </FormControl>
 
       {loading ? (
-        <p>Loading map...</p>
+        <Typography>Loading map...</Typography>
       ) : (
-        <MapContainer center={center} zoom={12} style={{ height: "80vh", width: "100%" }}>
+        <MapContainer
+          center={center}
+          zoom={12}
+          style={{ height: "80vh", width: "100%" }}
+        >
           <TileLayer
-            // If tiles don't show up in prod, make sure your CSP allows this host.
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution="&copy; OpenStreetMap contributors"
           />
@@ -97,6 +108,6 @@ export default function SupervisorsMap() {
           ))}
         </MapContainer>
       )}
-    </div>
+    </Box>
   );
 }
