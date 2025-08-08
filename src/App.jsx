@@ -13,7 +13,7 @@ import ResetPassword from "./pages/ResetPassword";
 import VerifyEmail from "./pages/VerifyEmail";
 import Users from "./pages/Users";
 const theme = createTheme();
-
+import LocationTracker from "./components/LocationTracker";
 
 
 
