@@ -1,20 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import authAxios from "../utils/authAxios";
+import { Box, Typography, Autocomplete, TextField } from "@mui/material";
 
-// MUI components
-import {
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Box,
-  Typography
-} from "@mui/material";
-
-// Custom marker icon
 const defaultIcon = new L.Icon({
   iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
   iconSize: [25, 41],
@@ -22,92 +12,129 @@ const defaultIcon = new L.Icon({
   popupAnchor: [1, -34],
 });
 
-export default function SupervisorsMap() {
-  const [locations, setLocations] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState("");
+function FitToMarkers({ points }) {
+  const map = useMap();
 
   useEffect(() => {
-    const fetchLocations = async () => {
-      try {
-        const res = await authAxios.get("/api/last-locations");
-        setLocations(res.data || []);
-      } catch (err) {
-        console.error("Failed to fetch supervisor locations", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchLocations();
-  }, []);
+    if (!map) return;
+    if (points.length === 0) {
+      // Default center (Casa)
+      map.setView([33.5899, -7.6039], 12, { animate: false });
+      return;
+    }
+    if (points.length === 1) {
+      map.setView(points[0], 14, { animate: false });
+      return;
+    }
+    const bounds = L.latLngBounds(points);
+    map.fitBounds(bounds, { padding: [40, 40] });
+  }, [map, points]);
 
-  // Unique usernames for dropdown
+  return null;
+}
+
+export default function SupervisorsMap() {
+  const [locations, setLocations] = useState([]);
+  const [filteredLocations, setFilteredLocations] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  const fetchLocations = async () => {
+    try {
+      const res = await authAxios.get("/api/last-locations");
+      setLocations(res.data);
+      setFilteredLocations(
+        selectedUser ? res.data.filter((l) => l.username === selectedUser) : res.data
+      );
+    } catch (err) {
+      console.error("Failed to fetch supervisor locations", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchLocations();
+    const t = setInterval(fetchLocations, 60000);
+    return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedUser]);
+
   const userOptions = useMemo(
     () => Array.from(new Set(locations.map((l) => l.username))).sort(),
     [locations]
   );
 
-  // Filtered markers
-  const visibleLocations = useMemo(
-    () =>
-      selectedUser
-        ? locations.filter((l) => l.username === selectedUser)
-        : locations,
-    [locations, selectedUser]
+  const points = useMemo(
+    () => filteredLocations.map((l) => [l.latitude, l.longitude]),
+    [filteredLocations]
   );
 
-  const center = [33.5899, -7.6039]; // Casablanca
-
   return (
-    <Box p={2}>
-      <Typography variant="h6" gutterBottom>
-        📍 Dernières localisations des superviseurs
-      </Typography>
-
-      {/* MUI Dropdown Filter */}
-      <FormControl size="small" sx={{ minWidth: 250, mb: 2 }}>
-        <InputLabel>Superviseur</InputLabel>
-        <Select
+    <Box
+      sx={{
+        // Fill the viewport height minus your AppBar (64px default on desktop)
+        height: { xs: "calc(100vh - 56px)", md: "calc(100vh - 64px)" },
+        width: "100%",           // <-- no 100vw, avoids off-center scrollbars
+        position: "relative",
+      }}
+    >
+      {/* Filter panel */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: 16,
+          left: 16,
+          zIndex: 1000,
+          backgroundColor: "white",
+          p: 2,
+          borderRadius: 2,
+          boxShadow: 3,
+          minWidth: 280,
+        }}
+      >
+        <Typography variant="subtitle1" sx={{ mb: 1 }}>
+          📍 Dernières localisations des superviseurs
+        </Typography>
+        <Autocomplete
+          options={userOptions}
           value={selectedUser}
-          label="I"
-          onChange={(e) => setSelectedUser(e.target.value)}
-        >
-          <MenuItem value="">All supervisors</MenuItem>
-          {userOptions.map((u) => (
-            <MenuItem key={u} value={u}>
-              {u}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+          onChange={(_e, val) => setSelectedUser(val)}
+          renderInput={(params) => (
+            <TextField {...params} label="Superviseur" size="small" />
+          )}
+          clearOnEscape
+        />
+      </Box>
 
-      {loading ? (
-        <Typography>Loading map...</Typography>
-      ) : (
-        <MapContainer
-          center={center}
-          zoom={12}
-          style={{ minHeight: "80vh", width: "99vw" }}
-        >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution="&copy; OpenStreetMap contributors"
-          />
-          {visibleLocations.map((loc) => (
-            <Marker
-              key={loc.user_id}
-              position={[loc.latitude, loc.longitude]}
-              icon={defaultIcon}
-            >
-              <Popup>
-                <strong>{loc.username}</strong>
-                <br />
-                {new Date(loc.timestamp).toLocaleString()}
-              </Popup>
-            </Marker>
-          ))}
-        </MapContainer>
-      )}
+      {/* Map */}
+      <MapContainer
+        // Any initial center/zoom — FitToMarkers will adjust it
+        center={[33.5899, -7.6039]}
+        zoom={12}
+        style={{ height: "100%", width: "100%" }}  // <-- fills the Box without overflow
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; OpenStreetMap contributors'
+        />
+        <FitToMarkers points={points} />
+
+        {filteredLocations.map((loc) => (
+          <Marker
+            key={loc.user_id}
+            position={[loc.latitude, loc.longitude]}
+            icon={defaultIcon}
+          >
+            <Popup>
+              <strong>{loc.username}</strong>
+              <br />
+              {new Date(loc.timestamp).toLocaleString("fr-MA", {
+                timeZone: "Africa/Casablanca",
+                dateStyle: "short",
+                timeStyle: "short",
+              })}
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
     </Box>
   );
 }
