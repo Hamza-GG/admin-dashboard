@@ -10,7 +10,6 @@ import L from "leaflet";
 import authAxios from "../utils/authAxios";
 import { Box, Typography, Autocomplete, TextField } from "@mui/material";
 
-// Default marker icon fix for Leaflet
 const defaultIcon = new L.Icon({
   iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
   iconSize: [25, 41],
@@ -33,14 +32,12 @@ export default function SupervisorsMap() {
     }
   };
 
-  // Fetch data on load and every 60 seconds
   useEffect(() => {
     fetchLocations();
     const interval = setInterval(fetchLocations, 60000);
     return () => clearInterval(interval);
   }, []);
 
-  // Update filtered locations when a user is selected
   useEffect(() => {
     if (selectedUser) {
       setFilteredLocations(locations.filter(loc => loc.username === selectedUser));
@@ -49,18 +46,11 @@ export default function SupervisorsMap() {
     }
   }, [selectedUser, locations]);
 
-  const center = [33.5899, -7.6039]; // Casablanca
-
-  // ✅ Map style
-  const mapStyles = {
-    width: "100%",
-    height: "calc(100vh - 64px)", // minus navbar
-    zIndex: 0,
-  };
+  const center = [33.5899, -7.6039];
 
   return (
-    <Box sx={{ height: "calc(100vh - 64px)", width: "100%", position: "relative" }}>
-      {/* Dropdown Filter */}
+    <Box sx={{ width: "100%", height: "calc(100vh - 64px)", position: "relative" }}>
+      {/* Filter Dropdown */}
       <Box
         sx={{
           position: "absolute",
@@ -82,36 +72,37 @@ export default function SupervisorsMap() {
           value={selectedUser}
           onChange={(e, newValue) => setSelectedUser(newValue)}
           renderInput={(params) => (
-            <TextField {...params} label="Superviseur" size="small" />
+            <TextField {...params} label="Inspected By" size="small" />
           )}
           clearOnEscape
         />
       </Box>
 
       {/* Map Container */}
-      <MapContainer center={center} zoom={13} style={mapStyles}>
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; OpenStreetMap contributors'
-        />
-        {filteredLocations.map((loc) => (
-          <Marker
-            key={loc.user_id}
-            position={[loc.latitude, loc.longitude]}
-            icon={defaultIcon}
-          >
-            <Popup>
-              <strong>{loc.username}</strong>
-              <br />
-              {new Date(loc.timestamp).toLocaleString("fr-MA", {
-                timeZone: "Africa/Casablanca",
-                dateStyle: "short",
-                timeStyle: "short",
-              })}
-            </Popup>
-          </Marker>
-        ))}
-      </MapContainer>
+      <Box sx={{ width: "100%", height: "100%" }}>
+        <MapContainer center={center} zoom={12} style={{ height: "100%", width: "100%", zIndex: 0 }}>
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; OpenStreetMap contributors'
+          />
+          {filteredLocations.map((loc) => (
+            <Marker
+              key={loc.user_id}
+              position={[loc.latitude, loc.longitude]}
+              icon={defaultIcon}
+            >
+              <Popup>
+                <strong>{loc.username}</strong><br />
+                {new Date(loc.timestamp).toLocaleString("fr-MA", {
+                  timeZone: "Africa/Casablanca",
+                  dateStyle: "short",
+                  timeStyle: "short"
+                })}
+              </Popup>
+            </Marker>
+          ))}
+        </MapContainer>
+      </Box>
     </Box>
   );
 }
