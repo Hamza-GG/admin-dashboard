@@ -22,7 +22,7 @@ export default function SupervisorsMap() {
       const res = await authAxios.get("/api/last-locations");
       setLocations(res.data);
     } catch (err) {
-      console.error("Failed to fetch supervisor locations", err);
+      console.error("❌ Failed to fetch supervisor locations:", err);
     } finally {
       setLoading(false);
     }
@@ -30,35 +30,34 @@ export default function SupervisorsMap() {
 
   useEffect(() => {
     fetchLocations(); // initial load
-    const intervalId = setInterval(fetchLocations, 60000); // refresh every 1 min
-
-    return () => clearInterval(intervalId); // cleanup on unmount
+    const intervalId = setInterval(fetchLocations, 60000); // refresh every 60s
+    return () => clearInterval(intervalId); // cleanup
   }, []);
 
   const filteredLocations = locations.filter((loc) =>
     loc.username.toLowerCase().includes(search.toLowerCase())
   );
 
-  const center = [33.5899, -7.6039]; // Casablanca
+  const center = [33.5899, -7.6039]; // Casablanca center
 
   return (
     <div className="h-screen w-screen flex flex-col">
-      {/* Search */}
+      {/* Top Bar with Search */}
       <div className="p-4 bg-white shadow-md z-[1000]">
-        <h2 className="text-xl font-bold mb-2">Supervisors Last Known Locations</h2>
+        <h2 className="text-xl font-bold mb-2">📍 Dernières localisations des superviseurs</h2>
         <input
           type="text"
-          placeholder="Search by username..."
+          placeholder="🔍 Search by username..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full max-w-md p-2 border rounded shadow-sm"
         />
       </div>
 
-      {/* Map */}
+      {/* Map Section */}
       <div className="flex-1">
         {loading ? (
-          <div className="p-4">Loading map...</div>
+          <div className="p-4 text-center text-gray-500">Loading map...</div>
         ) : (
           <MapContainer
             center={center}
@@ -68,7 +67,7 @@ export default function SupervisorsMap() {
           >
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution="&copy; OpenStreetMap contributors"
+              attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             />
             {filteredLocations.map((loc) => (
               <Marker
