@@ -20,27 +20,28 @@ function LocationTracker() {
   useEffect(() => {
     const sendLocation = async () => {
       if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          async (position) => {
-            const { latitude, longitude } = position.coords;
-            try {
-              await fetch("/api/locations", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "Authorization": `Bearer ${localStorage.getItem("token")}`,
-                },
-                body: JSON.stringify({ latitude, longitude }),
-              });
-            } catch (error) {
-              console.error("Failed to send location:", error);
-            }
-          },
-          (error) => {
-            console.warn("Location error:", error);
-          },
-          { enableHighAccuracy: true }
-        );
+navigator.geolocation.getCurrentPosition(
+  async (position) => {
+    const { latitude, longitude } = position.coords;
+    console.log("📍 Got location:", latitude, longitude); // ✅ add this
+    try {
+      await fetch("/api/locations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ latitude, longitude }),
+      });
+    } catch (error) {
+      console.error("❌ Failed to send location:", error);
+    }
+  },
+  (error) => {
+    console.warn("⚠️ Location error:", error); // ✅ log the error
+  },
+  { enableHighAccuracy: true }
+);
       }
     };
 
