@@ -19,34 +19,46 @@ const theme = createTheme();
 function LocationTracker() {
   useEffect(() => {
     const sendLocation = async () => {
+      console.log("📡 Trying to get location...");
+
       if ("geolocation" in navigator) {
-navigator.geolocation.getCurrentPosition(
-  async (position) => {
-    const { latitude, longitude } = position.coords;
-    console.log("📍 Got location:", latitude, longitude); // ✅ add this
-    try {
-      await fetch("/api/locations", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({ latitude, longitude }),
-      });
-    } catch (error) {
-      console.error("❌ Failed to send location:", error);
-    }
-  },
-  (error) => {
-    console.warn("⚠️ Location error:", error); // ✅ log the error
-  },
-  { enableHighAccuracy: true }
-);
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const { latitude, longitude } = position.coords;
+            console.log("📍 Got location:", latitude, longitude);
+
+            try {
+              const res = await fetch("/api/locations", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                },
+                body: JSON.stringify({ latitude, longitude }),
+              });
+
+              const resText = await res.text();
+              console.log("✅ Location sent, status:", res.status, resText);
+
+              if (!res.ok) {
+                console.error("⚠️ Server rejected the request:", res.status);
+              }
+            } catch (error) {
+              console.error("❌ Failed to send location:", error);
+            }
+          },
+          (error) => {
+            console.warn("⚠️ Geolocation error:", error);
+          },
+          { enableHighAccuracy: true }
+        );
+      } else {
+        console.warn("❌ Geolocation not supported");
       }
     };
 
-    sendLocation(); // Send immediately
-    const intervalId = setInterval(sendLocation, 1 * 60 * 1000); // every 1 minute
+    sendLocation();
+    const intervalId = setInterval(sendLocation, 60000);
 
     return () => clearInterval(intervalId);
   }, []);
