@@ -71,10 +71,14 @@ function Navbar({ setIsAuthenticated }) {
   ];
 
   // Role-based filtering
-  const filteredNavItems =
-    userRole === "supervisor"
-      ? navItems.filter((i) => i.to === "/inspection-form")
-      : navItems;
+ const filteredNavItems =
+  userRole === "supervisor"
+    ? navItems.filter((i) =>
+        ["/dashboard", "/riders", "/inspections", "/inspection-form"].includes(
+          i.to
+        )
+      )
+    : navItems;
 
   return (
     <AppBar position="fixed" sx={{ backgroundColor: "#00A082" }} elevation={3}>
