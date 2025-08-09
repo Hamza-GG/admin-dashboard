@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -21,20 +21,29 @@ function Navbar({ setIsAuthenticated }) {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [anchorEl, setAnchorEl] = useState(null);
-  const [userRole, setUserRole] = useState(null);
+  const [userRole, setUserRole] = useState(() => localStorage.getItem("role")); // quick read
+  const [roleLoaded, setRoleLoaded] = useState(!!localStorage.getItem("role"));
 
-  // Fetch role from backend or localStorage
   useEffect(() => {
-    const fetchUserRole = async () => {
-      try {
-        const res = await authAxios.get("/api/me"); // Adjust to your API endpoint
-        setUserRole(res.data.role); // e.g. "admin" or "supervisor"
-      } catch (err) {
-        console.error("Failed to fetch user role:", err);
-      }
-    };
-    fetchUserRole();
-  }, []);
+    // If role not cached, fetch it
+    if (!userRole) {
+      (async () => {
+        try {
+          // ✅ Your backend exposes this endpoint
+          const res = await authAxios.get("/users/me");
+          const role = res?.data?.role || null;
+          setUserRole(role);
+          if (role) localStorage.setItem("role", role);
+        } catch (e) {
+          console.error("Failed to fetch current user role:", e);
+        } finally {
+          setRoleLoaded(true);
+        }
+      })();
+    } else {
+      setRoleLoaded(true);
+    }
+  }, [userRole]);
 
   const handleLogout = async () => {
     try {
@@ -43,6 +52,7 @@ function Navbar({ setIsAuthenticated }) {
       console.error("Failed to log out:", err);
     }
     localStorage.removeItem("token");
+    localStorage.removeItem("role");
     setIsAuthenticated(false);
     navigate("/login");
   };
@@ -50,7 +60,7 @@ function Navbar({ setIsAuthenticated }) {
   const handleMenuOpen = (e) => setAnchorEl(e.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
 
-  // All navigation items
+  // All items
   const navItems = [
     { label: "Home", to: "/dashboard" },
     { label: "Utilisateurs", to: "/users" },
@@ -60,16 +70,16 @@ function Navbar({ setIsAuthenticated }) {
     { label: "Ajouter un contrôle", to: "/inspection-form" },
   ];
 
-  // Filter based on role
+  // Role-based filtering
   const filteredNavItems =
     userRole === "supervisor"
-      ? navItems.filter((item) => item.to === "/inspection-form")
+      ? navItems.filter((i) => i.to === "/inspection-form")
       : navItems;
 
   return (
     <AppBar position="fixed" sx={{ backgroundColor: "#00A082" }} elevation={3}>
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-        {/* Logo and Title */}
+        {/* Logo + Title */}
         <Box
           component={Link}
           to="/dashboard"
@@ -86,7 +96,8 @@ function Navbar({ setIsAuthenticated }) {
           </Typography>
         </Box>
 
-        {isMobile ? (
+        {/* Don’t render links until we know the role, to avoid a brief flash */}
+        {!roleLoaded ? null : isMobile ? (
           <>
             <IconButton color="inherit" onClick={handleMenuOpen}>
               <MenuIcon />
@@ -121,12 +132,7 @@ function Navbar({ setIsAuthenticated }) {
         ) : (
           <Box sx={{ display: "flex", gap: 2 }}>
             {filteredNavItems.map((item) => (
-              <Button
-                key={item.to}
-                color="inherit"
-                component={Link}
-                to={item.to}
-              >
+              <Button key={item.to} color="inherit" component={Link} to={item.to}>
                 {item.label}
               </Button>
             ))}
