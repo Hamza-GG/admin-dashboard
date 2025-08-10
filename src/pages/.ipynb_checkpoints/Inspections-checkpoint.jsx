@@ -282,10 +282,16 @@ const handleSaveEdit = async () => {
                     <TableCell>{row.location || "—"}</TableCell>
                     <TableCell>{row.city}</TableCell>
                     <TableCell>
-                      {row.image_url ? (
-                        <img src={row.image_url} alt="preview" style={{ width: 40, height: 40, borderRadius: "50%" }} />
-                      ) : "—"}
-                    </TableCell>
+  {row.image_url ? (
+    <a href={row.image_url} target="_blank" rel="noopener noreferrer">
+      <img
+        src={row.image_url}
+        alt="preview"
+        style={{ width: 40, height: 40, borderRadius: "50%", cursor: "pointer" }}
+      />
+    </a>
+  ) : "—"}
+</TableCell>
                     <TableCell>{row.comments || "—"}</TableCell>
                     <TableCell>{row.id_number || "—"}</TableCell>
                     <TableCell>{row.timestamp?.slice(0, 19).replace("T", " ")}</TableCell>

@@ -1,8 +1,28 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import authAxios from "../utils/authAxios";
 
 function LocationTracker() {
+  const [isSupervisor, setIsSupervisor] = useState(false);
+
   useEffect(() => {
+    const checkRoleAndTrack = async () => {
+      try {
+        // Get current user role from backend
+        const res = await authAxios.get("/users/me"); 
+        if (res.data.role === "supervisor") {
+          setIsSupervisor(true);
+        }
+      } catch (err) {
+        console.error("❌ Failed to get user info:", err);
+      }
+    };
+
+    checkRoleAndTrack();
+  }, []);
+
+  useEffect(() => {
+    if (!isSupervisor) return;
+
     const sendLocation = async () => {
       console.log("📡 Trying to get location...");
 
@@ -37,7 +57,7 @@ function LocationTracker() {
     const intervalId = setInterval(sendLocation, 60_000); // Every 1 minute
 
     return () => clearInterval(intervalId);
-  }, []);
+  }, [isSupervisor]);
 
   return null;
 }
