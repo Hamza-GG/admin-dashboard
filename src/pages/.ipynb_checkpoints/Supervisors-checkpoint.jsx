@@ -117,7 +117,7 @@ export default function Supervisors() {
       {/* The Map */}
       <MapContainer
         center={fallbackCenter}
-        zoom={12}
+        zoom={5}
         style={{ height: "100%", width: "100%" }}
         // avoids tiny “white strip” glitches on some browsers when resizing
         preferCanvas
