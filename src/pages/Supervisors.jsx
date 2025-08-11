@@ -49,11 +49,18 @@ export default function Supervisors() {
   };
 
   // initial + poll every 60s
-  useEffect(() => {
-    fetchLocations();
-    const id = setInterval(fetchLocations, 60_000);
-    return () => clearInterval(id);
-  }, []);
+ useEffect(() => {
+  fetchLocations();
+  const dataInterval = setInterval(fetchLocations, 60_000); // refresh data
+  const pageInterval = setInterval(() => {
+    window.location.reload(); // full page reload every 1 min
+  }, 60_000);
+
+  return () => {
+    clearInterval(dataInterval);
+    clearInterval(pageInterval);
+  };
+}, []);
 
   const usernames = useMemo(
     () => Array.from(new Set(locations.map(l => l.username))).sort(),
