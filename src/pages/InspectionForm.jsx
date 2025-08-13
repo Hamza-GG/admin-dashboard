@@ -166,63 +166,66 @@ const [form, setForm] = useState({
     );
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
-    if (!form.rider_id && !form.id_number && !form.location) {
-      setError("Please provide at least Rider ID, ID Number, or Location.");
-      return;
-    }
-    setSubmitting(true);
-    try {
-      const data = new FormData();
-      Object.entries(form).forEach(([k, v]) => {
-        if ((k === "rider_id" || k === "id_number") && !v) {
-          data.append(k, "");
-        } else if (k === "image" && v) {
-          data.append("image", v);
-        } else if (k !== "image") {
-          data.append(k, v);
-        }
-      });
-      data.append("inspected_by", inspected_by);
+async function handleSubmit(e) {
+  e.preventDefault();
+  setError("");
+  setSuccess("");
 
-     await authAxios.post("https://employee-inspection-backend.onrender.com/inspections", data, {
-  headers: {
-    "Content-Type": "multipart/form-data",
-  },
-});
-        
-      setSuccess("Inspection submitted!");
-      setForm({
-        rider_id: "",
-        id_number: "",
-        box_serial_number: "",
-        plate_number: "",
-        city: "",
-        location: "",
-        helmet: "",
-        box: "",
-        account: "",
-        parking: "",
-        appearance: "",
-        driving: "",
-        mfc_status: "",
-        courier_behavior: "",
-        image: null,
-        comments: "",
-      });
-    } catch (error) {
-      if (error.response && error.response.data && error.response.data.detail) {
-        setError(error.response.data.detail);
-      } else {
-        setError("Failed to submit inspection.");
-      }
-    } finally {
-      setSubmitting(false);
-    }
+  if (!form.location) {
+    setError("Veuillez fournir la localisation.");
+    return;
   }
+
+  setSubmitting(true);
+  try {
+    const data = new FormData();
+    Object.entries(form).forEach(([k, v]) => {
+      if (k === "image" && v) {
+        data.append("image", v);
+      } else {
+        data.append(k, v);
+      }
+    });
+    data.append("inspected_by", inspected_by);
+
+    await authAxios.post(
+      "https://employee-inspection-backend.onrender.com/inspections",
+      data,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    setSuccess("Inspection soumise !");
+    setForm({
+      rider_id: "",
+      id_number: "",
+      first_name: "",
+      first_last_name: "",
+      mfc_location: "",
+      box_serial_number: "",
+      plate_number: "",
+      city: "",
+      location: "",
+      helmet: "",
+      box: "",
+      account: "",
+      parking: "",
+      appearance: "",
+      driving: "",
+      mfc_status: "",
+      courier_behavior: "",
+      image: null,
+      comments: "",
+    });
+  } catch (error) {
+    if (error.response?.data?.detail) {
+      setError(error.response.data.detail);
+    } else {
+      setError("Échec de la soumission du contrôle.");
+    }
+  } finally {
+    setSubmitting(false);
+  }
+}
 
   return (
     <Box
