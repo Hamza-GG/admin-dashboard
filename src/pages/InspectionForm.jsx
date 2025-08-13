@@ -171,6 +171,7 @@ async function handleSubmit(e) {
   setError("");
   setSuccess("");
 
+  // Require location
   if (!form.location) {
     setError("Veuillez fournir la localisation.");
     return;
@@ -183,10 +184,12 @@ async function handleSubmit(e) {
       if (k === "image" && v) {
         data.append("image", v);
       } else {
-        data.append(k, v);
+        data.append(k, v ?? ""); // ensure strings, not undefined
       }
     });
-    data.append("inspected_by", inspected_by);
+
+    // inspected_by is ignored by backend, but harmless
+    data.append("inspected_by", inspected_by || "");
 
     await authAxios.post(
       "https://employee-inspection-backend.onrender.com/inspections",
@@ -216,12 +219,20 @@ async function handleSubmit(e) {
       image: null,
       comments: "",
     });
-  } catch (error) {
-    if (error.response?.data?.detail) {
-      setError(error.response.data.detail);
-    } else {
-      setError("Échec de la soumission du contrôle.");
+  } catch (err) {
+    // Normalize error to a string to avoid React crashing
+    const detail = err?.response?.data?.detail;
+    let message = "Échec de la soumission du contrôle.";
+    if (Array.isArray(detail)) {
+      // FastAPI validation errors
+      message = detail.map(d => d?.msg || "").filter(Boolean).join(" • ");
+    } else if (typeof detail === "string") {
+      message = detail;
+    } else if (err?.message) {
+      message = err.message;
     }
+    setError(message);
+    console.error("Submit error:", err);
   } finally {
     setSubmitting(false);
   }
