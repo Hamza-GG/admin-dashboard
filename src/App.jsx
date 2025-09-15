@@ -16,6 +16,7 @@ const theme = createTheme();
 import LocationTracker from "./components/LocationTracker";
 import Supervisors from "./pages/Supervisors";
 import "leaflet/dist/leaflet.css";
+import Settings from "./pages/Settings";
 
 // ✅ Protected route wrapper
 function ProtectedRoute({ children }) {
@@ -52,6 +53,14 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+              <Route
+  path="/settings"
+  element={
+    <ProtectedRoute>
+      <Settings />
+    </ProtectedRoute>
+  }
+/>
             <Route
               path="/users"
               element={

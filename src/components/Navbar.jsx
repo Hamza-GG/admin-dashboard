@@ -68,6 +68,7 @@ function Navbar({ setIsAuthenticated }) {
     { label: "Superviseurs", to: "/supervisors" },
     { label: "Contrôles", to: "/inspections" },
     { label: "Ajouter un contrôle", to: "/inspection-form" },
+      { label: "Settings", to: "/settings" },
   ];
 
   // Role-based filtering
