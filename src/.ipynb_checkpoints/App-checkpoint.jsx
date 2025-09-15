@@ -60,6 +60,13 @@ export default function App() {
       <Settings />
     </ProtectedRoute>
   }
+/><Route
+  path="/action-center"
+  element={
+    <ProtectedRoute>
+      <ActionCenter />
+    </ProtectedRoute>
+  }
 />
             <Route
               path="/users"

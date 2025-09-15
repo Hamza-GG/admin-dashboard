@@ -69,6 +69,7 @@ function Navbar({ setIsAuthenticated }) {
     { label: "Contrôles", to: "/inspections" },
     { label: "Ajouter un contrôle", to: "/inspection-form" },
       { label: "Settings", to: "/settings" },
+      { label: "Action Center", to: "/action-center" },
   ];
 
   // Role-based filtering
