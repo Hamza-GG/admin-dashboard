@@ -17,6 +17,7 @@ import LocationTracker from "./components/LocationTracker";
 import Supervisors from "./pages/Supervisors";
 import "leaflet/dist/leaflet.css";
 import Settings from "./pages/Settings";
+import ActionCenter from "./pages/ActionCenter";
 
 // ✅ Protected route wrapper
 function ProtectedRoute({ children }) {
