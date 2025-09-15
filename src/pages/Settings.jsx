@@ -47,86 +47,127 @@ const ALLOWED_FIELDS = [
 ];
 
 export default function Settings() {
-  // Create form state
+  // -------- Actions state ----------
+  const [actions, setActions] = useState([]); // [{id, name}]
+  const [createActionName, setCreateActionName] = useState("");
+  const [loadingActions, setLoadingActions] = useState(true);
+
+  // -------- Rules state ------------
   const [createForm, setCreateForm] = useState({
     rule_id: "",
     field: "",
     option_value: "",
-    action: "",
+    action_id: "", // <-- now stores selected action id
   });
-
-  // List + filters
   const [rules, setRules] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingRules, setLoadingRules] = useState(true);
   const [filterRuleId, setFilterRuleId] = useState("");
   const [filterField, setFilterField] = useState("");
-
-  // Table pagination
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  // Edit dialog
+  // -------- Edit/Delete dialogs ----
   const [editOpen, setEditOpen] = useState(false);
-  const [editRow, setEditRow] = useState(null);
-
-  // Delete dialogs
+  const [editRow, setEditRow] = useState(null); // { id, rule_id, field, option_value, action_id }
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [toDelete, setToDelete] = useState(null);
 
-  // Alerts
+  // -------- Snackbars --------------
   const [alert, setAlert] = useState({ open: false, severity: "success", message: "" });
-
-  const showAlert = (severity, message) => {
-    setAlert({ open: true, severity, message });
-  };
-
+  const showAlert = (severity, message) => setAlert({ open: true, severity, message });
   const closeAlert = () => setAlert((a) => ({ ...a, open: false }));
 
-  // Fetch rules
+  // ===== API loaders =====
+  const fetchActions = async () => {
+    try {
+      setLoadingActions(true);
+      const res = await authAxios.get("/actions");
+      // Expecting [{id, name}] from backend
+      setActions(res.data || []);
+    } catch (e) {
+      console.error(e);
+      showAlert("error", "Failed to load actions.");
+    } finally {
+      setLoadingActions(false);
+    }
+  };
+
   const fetchRules = async () => {
     try {
-      setLoading(true);
+      setLoadingRules(true);
       const params = {};
       if (filterRuleId) params.rule_id = filterRuleId;
       if (filterField) params.field = filterField;
-
       const res = await authAxios.get("/rules", { params });
+      // Expecting each rule item includes {id, rule_id, field, option_value, action_id, action_name?, created_at}
       setRules(res.data || []);
     } catch (e) {
       console.error(e);
       showAlert("error", "Failed to fetch rules.");
     } finally {
-      setLoading(false);
+      setLoadingRules(false);
     }
   };
+
+  useEffect(() => {
+    fetchActions();
+  }, []);
 
   useEffect(() => {
     fetchRules();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterRuleId, filterField]);
 
-  // Derived: unique rule ids for quick filters
+  // Derived: quick filters
   const uniqueRuleIds = useMemo(
     () => Array.from(new Set(rules.map((r) => r.rule_id))).sort((a, b) => a - b),
     [rules]
   );
 
-  // Create rule
-  const handleCreate = async (e) => {
+  const actionNameById = useMemo(() => {
+    const map = new Map();
+    actions.forEach((a) => map.set(a.id, a.name));
+    return map;
+  }, [actions]);
+
+  // ====== Actions: create ======
+  const handleCreateAction = async (e) => {
     e.preventDefault();
-    if (!createForm.rule_id || !createForm.field || !createForm.option_value || !createForm.action) {
+    if (!createActionName.trim()) {
+      showAlert("warning", "Action name is required.");
+      return;
+    }
+    try {
+      const payload = { name: createActionName.trim() };
+      const res = await authAxios.post("/actions", payload);
+      showAlert("success", "Action created.");
+      setCreateActionName("");
+      // refresh actions so dropdown gets the new item
+      fetchActions();
+    } catch (e) {
+      console.error(e);
+      const msg = e?.response?.data?.detail || "Failed to create action.";
+      showAlert("error", msg);
+    }
+  };
+
+  // ====== Rules: create ======
+  const handleCreateRule = async (e) => {
+    e.preventDefault();
+    if (!createForm.rule_id || !createForm.field || !createForm.option_value || !createForm.action_id) {
       showAlert("warning", "Please fill all fields.");
       return;
     }
     try {
-      await authAxios.post("/rules", {
+      const payload = {
         rule_id: Number(createForm.rule_id),
         field: createForm.field,
         option_value: createForm.option_value,
-        action: createForm.action,
-      });
+        action_id: Number(createForm.action_id),
+      };
+      await authAxios.post("/rules", payload);
       showAlert("success", "Rule created.");
-      setCreateForm({ rule_id: "", field: "", option_value: "", action: "" });
+      setCreateForm({ rule_id: "", field: "", option_value: "", action_id: "" });
       fetchRules();
     } catch (e) {
       console.error(e);
@@ -135,20 +176,20 @@ export default function Settings() {
     }
   };
 
-  // Open edit
+  // ====== Rules: edit ======
   const openEdit = (row) => {
+    // normalize incoming row: if backend returns action_name but not action_id, ensure action_id exists
     setEditRow({ ...row });
     setEditOpen(true);
   };
 
-  // Save edit
   const saveEdit = async () => {
     try {
       const payload = {
         rule_id: Number(editRow.rule_id),
         field: editRow.field,
         option_value: editRow.option_value,
-        action: editRow.action,
+        action_id: Number(editRow.action_id),
       };
       await authAxios.put(`/rules/${editRow.id}`, payload);
       showAlert("success", "Rule updated.");
@@ -162,7 +203,7 @@ export default function Settings() {
     }
   };
 
-  // Delete
+  // ====== Rules: delete ======
   const confirmDelete = (row) => {
     setToDelete(row);
     setDeleteOpen(true);
@@ -188,22 +229,56 @@ export default function Settings() {
         Settings
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Create a new action rule or manage existing rules. (Admin only)
+        Create reusable <strong>Actions</strong>, then attach them to <strong>Rules</strong> per field/option. (Admin only)
       </Typography>
 
       <Grid container spacing={3}>
-        {/* Left: Create Rule */}
+        {/* Left column: Create Action + Create Rule */}
         <Grid item xs={12} md={4}>
+          {/* Create Action */}
+          <Paper sx={{ p: 2, mb: 3 }}>
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+              <AddIcon fontSize="small" />
+              <Typography variant="subtitle1" fontWeight={600}>
+                Create Action
+              </Typography>
+            </Stack>
+            <Divider sx={{ mb: 2 }} />
+            <Stack component="form" spacing={2} onSubmit={handleCreateAction}>
+              <TextField
+                label="Action name"
+                value={createActionName}
+                onChange={(e) => setCreateActionName(e.target.value)}
+                fullWidth
+                size="small"
+                placeholder="e.g. Call courier, Notify city lead, Suspend account, ..."
+              />
+              <Button type="submit" variant="contained">Create Action</Button>
+            </Stack>
+            {loadingActions && (
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 2 }}>
+                <CircularProgress size={18} />
+                <Typography variant="caption" color="text.secondary">Loading actions…</Typography>
+              </Stack>
+            )}
+            {!loadingActions && actions.length === 0 && (
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: "block" }}>
+                No actions yet. Create one above, then use it in rules.
+              </Typography>
+            )}
+          </Paper>
+
+          {/* Create Rule */}
           <Paper sx={{ p: 2 }}>
             <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
               <AddIcon fontSize="small" />
               <Typography variant="subtitle1" fontWeight={600}>
-                Create Action Rule
+                Create Rule
               </Typography>
             </Stack>
             <Divider sx={{ mb: 2 }} />
 
-            <Stack component="form" spacing={2} onSubmit={handleCreate}>
+            <Stack component="form" spacing={2} onSubmit={handleCreateRule}>
               <TextField
                 label="Rule ID"
                 type="number"
@@ -239,25 +314,35 @@ export default function Settings() {
                 placeholder="e.g. Non, Compte loué, etc."
               />
 
-              <TextField
-                label="Action"
-                value={createForm.action}
-                onChange={(e) => setCreateForm((s) => ({ ...s, action: e.target.value }))}
-                fullWidth
-                size="small"
-                placeholder="What should happen?"
-                multiline
-                minRows={3}
-              />
+              <FormControl fullWidth size="small" disabled={loadingActions || actions.length === 0}>
+                <InputLabel id="action-select-label">Action</InputLabel>
+                <Select
+                  labelId="action-select-label"
+                  label="Action"
+                  value={createForm.action_id}
+                  onChange={(e) => setCreateForm((s) => ({ ...s, action_id: e.target.value }))}
+                >
+                  {actions.map((a) => (
+                    <MenuItem key={a.id} value={a.id}>
+                      {a.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
-              <Button type="submit" variant="contained">
-                Create
+              <Button type="submit" variant="contained" disabled={actions.length === 0}>
+                Create Rule
               </Button>
+              {actions.length === 0 && (
+                <Typography variant="caption" color="text.secondary">
+                  Create an action first to enable this form.
+                </Typography>
+              )}
             </Stack>
           </Paper>
         </Grid>
 
-        {/* Right: Manage Rules */}
+        {/* Right column: Manage Rules */}
         <Grid item xs={12} md={8}>
           <Paper sx={{ p: 2 }}>
             <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
@@ -311,7 +396,7 @@ export default function Settings() {
 
             {/* Table */}
             <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: 520 }}>
-              {loading ? (
+              {loadingRules ? (
                 <Box sx={{ p: 3, display: "flex", justifyContent: "center" }}>
                   <CircularProgress />
                 </Box>
@@ -337,15 +422,18 @@ export default function Settings() {
                           <TableCell>{row.rule_id}</TableCell>
                           <TableCell>{row.field}</TableCell>
                           <TableCell>{row.option_value}</TableCell>
-                          <TableCell sx={{ maxWidth: 360, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                            {row.action}
+                          <TableCell>
+                            {/* Prefer backend-provided action_name; fall back to lookup */}
+                            {row.action_name || actionNameById.get(row.action_id) || `#${row.action_id}`}
                           </TableCell>
                           <TableCell>
-                            {new Date(row.created_at).toLocaleString("fr-MA", {
-                              timeZone: "Africa/Casablanca",
-                              dateStyle: "short",
-                              timeStyle: "short",
-                            })}
+                            {row.created_at
+                              ? new Date(row.created_at).toLocaleString("fr-MA", {
+                                  timeZone: "Africa/Casablanca",
+                                  dateStyle: "short",
+                                  timeStyle: "short",
+                                })
+                              : "—"}
                           </TableCell>
                           <TableCell align="right">
                             <Tooltip title="Edit">
@@ -396,6 +484,7 @@ export default function Settings() {
                 fullWidth
                 size="small"
               />
+
               <FormControl fullWidth size="small">
                 <InputLabel id="edit-field-label">Field</InputLabel>
                 <Select
@@ -411,6 +500,7 @@ export default function Settings() {
                   ))}
                 </Select>
               </FormControl>
+
               <TextField
                 label="Option"
                 value={editRow.option_value}
@@ -418,15 +508,22 @@ export default function Settings() {
                 fullWidth
                 size="small"
               />
-              <TextField
-                label="Action"
-                value={editRow.action}
-                onChange={(e) => setEditRow((s) => ({ ...s, action: e.target.value }))}
-                fullWidth
-                size="small"
-                multiline
-                minRows={3}
-              />
+
+              <FormControl fullWidth size="small" disabled={loadingActions || actions.length === 0}>
+                <InputLabel id="edit-action-label">Action</InputLabel>
+                <Select
+                  labelId="edit-action-label"
+                  label="Action"
+                  value={editRow.action_id || ""}
+                  onChange={(e) => setEditRow((s) => ({ ...s, action_id: e.target.value }))}
+                >
+                  {actions.map((a) => (
+                    <MenuItem key={a.id} value={a.id}>
+                      {a.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Stack>
           )}
         </DialogContent>
