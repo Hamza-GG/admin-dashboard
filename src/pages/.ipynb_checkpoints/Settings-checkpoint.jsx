@@ -11,7 +11,6 @@ import {
   Alert,
   Snackbar,
   IconButton,
-  Divider,
   Table,
   TableBody,
   TableCell,
@@ -28,6 +27,7 @@ import {
   InputLabel,
   Tooltip,
   CircularProgress,
+  Autocomplete,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -52,14 +52,20 @@ export default function Settings() {
   const [createActionName, setCreateActionName] = useState("");
   const [loadingActions, setLoadingActions] = useState(true);
 
+  // -------- Users (assignees) -------
+  const [users, setUsers] = useState([]); // [{id, username, role, ...}]
+  const [loadingUsers, setLoadingUsers] = useState(true);
+
   // -------- Rules state ------------
   const [createForm, setCreateForm] = useState({
     rule_id: "",
     city: "",
     field: "",
     option_value: "",
-    action: "", // <-- action name, not id
+    action: "", // action name (text)
   });
+  const [createAssignee, setCreateAssignee] = useState(null); // user object or null
+
   const [rules, setRules] = useState([]);
   const [loadingRules, setLoadingRules] = useState(true);
   const [filterRuleId, setFilterRuleId] = useState("");
@@ -70,6 +76,7 @@ export default function Settings() {
   // -------- Edit/Delete dialogs ----
   const [editOpen, setEditOpen] = useState(false);
   const [editRow, setEditRow] = useState(null);
+  const [editAssignee, setEditAssignee] = useState(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [toDelete, setToDelete] = useState(null);
 
@@ -92,6 +99,19 @@ export default function Settings() {
     }
   };
 
+  const fetchUsers = async () => {
+    try {
+      setLoadingUsers(true);
+      const res = await authAxios.get("/users");
+      setUsers(res.data || []);
+    } catch (e) {
+      console.error(e);
+      showAlert("error", "Failed to load users.");
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
   const fetchRules = async () => {
     try {
       setLoadingRules(true);
@@ -110,6 +130,10 @@ export default function Settings() {
 
   useEffect(() => {
     fetchActions();
+    fetchUsers();
+  }, []);
+
+  useEffect(() => {
     fetchRules();
   }, [filterRuleId, filterField]);
 
@@ -117,6 +141,12 @@ export default function Settings() {
     () => Array.from(new Set(rules.map((r) => r.rule_id))).sort((a, b) => a - b),
     [rules]
   );
+
+  const userById = useMemo(() => {
+    const m = new Map();
+    users.forEach(u => m.set(u.id, u));
+    return m;
+  }, [users]);
 
   // ====== Actions: create ======
   const handleCreateAction = async (e) => {
@@ -126,7 +156,7 @@ export default function Settings() {
       return;
     }
     try {
-      const res = await authAxios.post("/actions", { name: createActionName.trim() });
+      await authAxios.post("/actions", { name: createActionName.trim() });
       showAlert("success", "Action created.");
       setCreateActionName("");
       fetchActions();
@@ -150,11 +180,13 @@ export default function Settings() {
         city: createForm.city,
         field: createForm.field,
         option_value: createForm.option_value,
-        action: createForm.action,
+        action: createForm.action, // text action
+        assignee_user_id: createAssignee?.id ?? null,
       };
       await authAxios.post("/inspection-rules", payload);
       showAlert("success", "Rule created.");
       setCreateForm({ rule_id: "", city: "", field: "", option_value: "", action: "" });
+      setCreateAssignee(null);
       fetchRules();
     } catch (e) {
       console.error(e);
@@ -166,6 +198,9 @@ export default function Settings() {
   // ====== Rules: edit ======
   const openEdit = (row) => {
     setEditRow({ ...row });
+    // pre-select current assignee if present
+    const u = row.assignee_user_id ? userById.get(row.assignee_user_id) : null;
+    setEditAssignee(u || null);
     setEditOpen(true);
   };
 
@@ -177,11 +212,13 @@ export default function Settings() {
         field: editRow.field,
         option_value: editRow.option_value,
         action: editRow.action,
+        assignee_user_id: editAssignee?.id ?? null, // allow clearing
       };
       await authAxios.put(`/inspection-rules/${editRow.id}`, payload);
       showAlert("success", "Rule updated.");
       setEditOpen(false);
       setEditRow(null);
+      setEditAssignee(null);
       fetchRules();
     } catch (e) {
       console.error(e);
@@ -230,7 +267,7 @@ export default function Settings() {
                 fullWidth
                 size="small"
               />
-              <Button type="submit" variant="contained">Create Action</Button>
+              <Button type="submit" variant="contained" startIcon={<AddIcon />}>Create Action</Button>
             </Stack>
           </Paper>
 
@@ -279,6 +316,32 @@ export default function Settings() {
                   ))}
                 </Select>
               </FormControl>
+
+              {/* Assignee select (optional) */}
+              <Autocomplete
+                options={users}
+                loading={loadingUsers}
+                getOptionLabel={(o) => o?.username ?? ""}
+                value={createAssignee}
+                onChange={(_, v) => setCreateAssignee(v)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Assignee (optional)"
+                    size="small"
+                    InputProps={{
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {loadingUsers ? <CircularProgress size={16} /> : null}
+                          {params.InputProps.endAdornment}
+                        </>
+                      ),
+                    }}
+                  />
+                )}
+              />
+
               <Button type="submit" variant="contained">Create Rule</Button>
             </Stack>
           </Paper>
@@ -287,7 +350,35 @@ export default function Settings() {
         {/* Right column: Manage Rules */}
         <Grid item xs={12} md={8}>
           <Paper sx={{ p: 2 }}>
-            <Typography variant="subtitle1" fontWeight={600}>Manage Rules</Typography>
+            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+              <Typography variant="subtitle1" fontWeight={600}>Manage Rules</Typography>
+              <Stack direction="row" spacing={2}>
+                <TextField
+                  label="Filter by Rule ID"
+                  size="small"
+                  value={filterRuleId}
+                  onChange={(e) => setFilterRuleId(e.target.value)}
+                  sx={{ width: 160 }}
+                />
+                <FormControl size="small" sx={{ minWidth: 180 }}>
+                  <InputLabel>Filter by Field</InputLabel>
+                  <Select
+                    value={filterField}
+                    onChange={(e) => setFilterField(e.target.value)}
+                    label="Filter by Field"
+                  >
+                    <MenuItem value="">All</MenuItem>
+                    {ALLOWED_FIELDS.map((f) => (
+                      <MenuItem key={f} value={f}>{f}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <Button variant="outlined" startIcon={<FilterAltIcon />} onClick={fetchRules}>
+                  Apply
+                </Button>
+              </Stack>
+            </Stack>
+
             <TableContainer sx={{ maxHeight: 520 }}>
               {loadingRules ? (
                 <Box sx={{ p: 3, display: "flex", justifyContent: "center" }}>
@@ -303,6 +394,7 @@ export default function Settings() {
                       <TableCell>Field</TableCell>
                       <TableCell>Option</TableCell>
                       <TableCell>Action</TableCell>
+                      <TableCell>Assignee</TableCell>
                       <TableCell>Created</TableCell>
                       <TableCell align="right">Actions</TableCell>
                     </TableRow>
@@ -316,12 +408,21 @@ export default function Settings() {
                         <TableCell>{row.field}</TableCell>
                         <TableCell>{row.option_value}</TableCell>
                         <TableCell>{row.action}</TableCell>
+                        <TableCell>{row.assignee_username || "—"}</TableCell>
                         <TableCell>
                           {row.created_at ? new Date(row.created_at).toLocaleString("fr-MA") : "—"}
                         </TableCell>
                         <TableCell align="right">
-                          <IconButton onClick={() => openEdit(row)}><EditIcon fontSize="small" /></IconButton>
-                          <IconButton color="error" onClick={() => confirmDelete(row)}><DeleteIcon fontSize="small" /></IconButton>
+                          <Tooltip title="Edit">
+                            <IconButton onClick={() => openEdit(row)}>
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Delete">
+                            <IconButton color="error" onClick={() => confirmDelete(row)}>
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -388,6 +489,31 @@ export default function Settings() {
                   ))}
                 </Select>
               </FormControl>
+
+              {/* Assignee (optional) */}
+              <Autocomplete
+                options={users}
+                loading={loadingUsers}
+                getOptionLabel={(o) => o?.username ?? ""}
+                value={editAssignee}
+                onChange={(_, v) => setEditAssignee(v)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Assignee (optional)"
+                    size="small"
+                    InputProps={{
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {loadingUsers ? <CircularProgress size={16} /> : null}
+                          {params.InputProps.endAdornment}
+                        </>
+                      ),
+                    }}
+                  />
+                )}
+              />
             </Stack>
           )}
         </DialogContent>
