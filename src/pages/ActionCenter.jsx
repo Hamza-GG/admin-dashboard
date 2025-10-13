@@ -112,7 +112,7 @@ export default function ActionCenter() {
   const openAssign = (row) => {
     setAssignItem(row);
 
-    // Pre-fill with match-level assignees if exist; otherwise use rule default as assignee1 suggestion
+    // Assignee 1: prefer match-level; otherwise fallback to rule's default
     const u1 =
       userById.get(row.match_assignee_user_id) ||
       userById.get(row.rule_assignee_user_id) ||
@@ -133,7 +133,7 @@ export default function ActionCenter() {
         rule_id: assignItem.rule_id,
         assignee_user_id: assignee1?.id ?? null,
         assignee2_user_id: assignee2?.id ?? null,
-        notes: undefined, // optional; leave for confirm step
+        notes: undefined, // keep confirm step for final notes
       });
       show("success", "Assignees updated.");
       setAssignOpen(false);
@@ -186,85 +186,89 @@ export default function ActionCenter() {
                 <TableCell>Field</TableCell>
                 <TableCell>Option</TableCell>
                 <TableCell>Action</TableCell>
+                <TableCell>Assignee 1</TableCell>
+                <TableCell>Assignee 2</TableCell>
                 <TableCell>Inspected By</TableCell>
                 <TableCell>When</TableCell>
-                <TableCell>Rule Assignee</TableCell>
-                <TableCell>Match Assignees</TableCell>
                 <TableCell>Status</TableCell>
+                <TableCell>Comment</TableCell>
                 <TableCell align="right">Assign / Confirm</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {(loading ? [] : rows)
                 .slice(page * rpp, page * rpp + rpp)
-                .map((r) => (
-                  <TableRow key={`${r.inspection_id}-${r.rule_id}`} hover>
-                    <TableCell>#{r.inspection_id}</TableCell>
-                    <TableCell>{r.city || "—"}</TableCell>
-                    <TableCell>{r.field}</TableCell>
-                    <TableCell>{r.option_value}</TableCell>
-                    <TableCell>{r.action_name}</TableCell>
-                    <TableCell>{r.inspected_by}</TableCell>
-                    <TableCell>
-                      {r.timestamp ? new Date(r.timestamp).toLocaleString("fr-MA", {
-                        timeZone: "Africa/Casablanca",
-                        dateStyle: "short",
-                        timeStyle: "short",
-                      }) : "—"}
-                    </TableCell>
-                    <TableCell>
-                      {r.rule_assignee_username || "—"}
-                    </TableCell>
-                    <TableCell>
-                      {[
-                        r.match_assignee_username || null,
-                        r.match_assignee2_username || null,
-                      ].filter(Boolean).join(" , ") || "—"}
-                    </TableCell>
-                    <TableCell>
-                      {r.status === "done"
-                        ? `done by ${r.confirmed_by_username || "—"}`
-                        : "pending"}
-                    </TableCell>
-                    <TableCell align="right">
-                      <Stack direction="row" spacing={1} justifyContent="flex-end">
-                        <Tooltip title="Assign owners">
-                          <span>
-                            <IconButton
-                              size="small"
-                              onClick={() => openAssign(r)}
-                              disabled={loadingUsers}
-                            >
-                              <AssignmentIndIcon />
-                            </IconButton>
-                          </span>
-                        </Tooltip>
-                        <Tooltip title={r.status === "done" ? "Already done" : "Mark done"}>
-                          <span>
-                            <IconButton
-                              color="success"
-                              onClick={() => openConfirm(r)}
-                              disabled={r.status === "done"}
-                              size="small"
-                            >
-                              <CheckCircleIcon />
-                            </IconButton>
-                          </span>
-                        </Tooltip>
-                      </Stack>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                .map((r) => {
+                  const assignee1Name =
+                    r.match_assignee_username ||
+                    r.rule_assignee_username ||
+                    "—";
+                  const assignee2Name = r.match_assignee2_username || "—";
+                  return (
+                    <TableRow key={`${r.inspection_id}-${r.rule_id}`} hover>
+                      <TableCell>#{r.inspection_id}</TableCell>
+                      <TableCell>{r.city || "—"}</TableCell>
+                      <TableCell>{r.field}</TableCell>
+                      <TableCell>{r.option_value}</TableCell>
+                      <TableCell>{r.action_name}</TableCell>
+                      <TableCell>{assignee1Name}</TableCell>
+                      <TableCell>{assignee2Name}</TableCell>
+                      <TableCell>{r.inspected_by}</TableCell>
+                      <TableCell>
+                        {r.timestamp ? new Date(r.timestamp).toLocaleString("fr-MA", {
+                          timeZone: "Africa/Casablanca",
+                          dateStyle: "short",
+                          timeStyle: "short",
+                        }) : "—"}
+                      </TableCell>
+                      <TableCell>
+                        {r.status === "done"
+                          ? `done by ${r.confirmed_by_username || "—"}`
+                          : "pending"}
+                      </TableCell>
+                      <TableCell sx={{ maxWidth: 260, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {r.notes || "—"}
+                      </TableCell>
+                      <TableCell align="right">
+                        <Stack direction="row" spacing={1} justifyContent="flex-end">
+                          <Tooltip title="Assign owners">
+                            <span>
+                              <IconButton
+                                size="small"
+                                onClick={() => openAssign(r)}
+                                disabled={loadingUsers}
+                              >
+                                <AssignmentIndIcon />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                          <Tooltip title={r.status === "done" ? "Already done" : "Mark done"}>
+                            <span>
+                              <IconButton
+                                color="success"
+                                onClick={() => openConfirm(r)}
+                                disabled={r.status === "done"}
+                                size="small"
+                              >
+                                <CheckCircleIcon />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               {(!loading && rows.length === 0) && (
                 <TableRow>
-                  <TableCell colSpan={11} align="center" sx={{ py: 6, color: "text.secondary" }}>
+                  <TableCell colSpan={12} align="center" sx={{ py: 6, color: "text.secondary" }}>
                     No matches
                   </TableCell>
                 </TableRow>
               )}
               {loading && (
                 <TableRow>
-                  <TableCell colSpan={11} align="center" sx={{ py: 6, color: "text.secondary" }}>
+                  <TableCell colSpan={12} align="center" sx={{ py: 6, color: "text.secondary" }}>
                     Loading…
                   </TableCell>
                 </TableRow>
