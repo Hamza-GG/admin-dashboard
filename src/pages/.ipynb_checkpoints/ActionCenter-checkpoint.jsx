@@ -716,32 +716,19 @@ export default function ActionCenter() {
                             </span>
                           </Tooltip>
 
+                          {/* Confirm OR Unconfirm based on status */}
                           {r.status === "done" ? (
-                            <>
-                              <Tooltip title="Unconfirm (set back to pending)">
-                                <span>
-                                  <IconButton
-                                    color="warning"
-                                    onClick={() => openUnconfirm(r)}
-                                    size="small"
-                                  >
-                                    <UndoIcon />
-                                  </IconButton>
-                                </span>
-                              </Tooltip>
-
-                              <Tooltip title="Delete record">
-                                <span>
-                                  <IconButton
-                                    color="error"
-                                    onClick={() => openDelete(r)}
-                                    size="small"
-                                  >
-                                    <DeleteForeverIcon />
-                                  </IconButton>
-                                </span>
-                              </Tooltip>
-                            </>
+                            <Tooltip title="Unconfirm (set back to pending)">
+                              <span>
+                                <IconButton
+                                  color="warning"
+                                  onClick={() => openUnconfirm(r)}
+                                  size="small"
+                                >
+                                  <UndoIcon />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
                           ) : (
                             <Tooltip title="Mark done">
                               <span>
@@ -755,6 +742,19 @@ export default function ActionCenter() {
                               </span>
                             </Tooltip>
                           )}
+
+                          {/* DELETE ALWAYS VISIBLE */}
+                          <Tooltip title="Delete record">
+                            <span>
+                              <IconButton
+                                color="error"
+                                onClick={() => openDelete(r)}
+                                size="small"
+                              >
+                                <DeleteForeverIcon />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
                         </Stack>
                       </TableCell>
                     </TableRow>
