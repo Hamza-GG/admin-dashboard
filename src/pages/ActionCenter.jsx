@@ -19,8 +19,6 @@ export default function ActionCenter() {
   const [users, setUsers] = useState([]); // [{id, username, role, ...}]
   const [loadingUsers, setLoadingUsers] = useState(true);
 
-  // server-side param we already support
-  const [cityFetch, setCityFetch] = useState("");
 
   // pagination
   const [page, setPage] = useState(0);
@@ -75,9 +73,7 @@ export default function ActionCenter() {
   const fetchMatches = async () => {
     try {
       setLoading(true);
-      const params = {};
-      if (cityFetch) params.city = cityFetch;
-      const res = await authAxios.get("/actions/matches", { params });
+      const res = await authAxios.get("/actions/matches");
       setRows(res.data || []);
     } catch (e) {
       console.error(e);
@@ -93,7 +89,7 @@ export default function ActionCenter() {
 
   useEffect(() => {
     fetchMatches();
-  }, [cityFetch]);
+  }, []);
 
   // Unique lists for filters (derived from fetched rows)
   const uniqueCities = useMemo(
@@ -303,33 +299,17 @@ export default function ActionCenter() {
         </Grid>
       </Grid>
 
-      {/* Fetch control (server-side City param) */}
-      <Paper sx={{ p: 2, mb: 2 }}>
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="flex-end">
-          <TextField
-            select
-            size="small"
-            label="Fetch by City (server)"
-            value={cityFetch}
-            onChange={(e) => setCityFetch(e.target.value)}
-            sx={{ minWidth: 220 }}
-          >
-            <MenuItem value="">All</MenuItem>
-            {uniqueCities.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
-          </TextField>
-          <Button variant="outlined" onClick={fetchMatches}>Refetch</Button>
-        </Stack>
-      </Paper>
 
       {/* Filters (client-side) */}
       <Paper sx={{ p: 2, mb: 2 }}>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={3}>
             <TextField
-              select size="small" fullWidth
+              select size="small"
               label="City"
               value={fCity}
               onChange={(e) => { setFCity(e.target.value); setPage(0); }}
+              sx={{ minWidth: 220 }}
             >
               <MenuItem value="">All</MenuItem>
               {uniqueCities.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
@@ -338,10 +318,11 @@ export default function ActionCenter() {
 
           <Grid item xs={12} sm={6} md={3}>
             <TextField
-              select size="small" fullWidth
+              select size="small"
               label="Field"
               value={fField}
               onChange={(e) => { setFField(e.target.value); setPage(0); }}
+              sx={{ minWidth: 220 }}
             >
               <MenuItem value="">All</MenuItem>
               {uniqueFields.map(f => <MenuItem key={f} value={f}>{f}</MenuItem>)}
@@ -350,10 +331,11 @@ export default function ActionCenter() {
 
           <Grid item xs={12} sm={6} md={3}>
             <TextField
-              select size="small" fullWidth
+              select size="small"
               label="Option"
               value={fOption}
               onChange={(e) => { setFOption(e.target.value); setPage(0); }}
+              sx={{ minWidth: 220 }}
             >
               <MenuItem value="">All</MenuItem>
               {uniqueOptions.map(o => <MenuItem key={o} value={o}>{o}</MenuItem>)}
@@ -362,10 +344,11 @@ export default function ActionCenter() {
 
           <Grid item xs={12} sm={6} md={3}>
             <TextField
-              select size="small" fullWidth
+              select size="small"
               label="Action"
               value={fAction}
               onChange={(e) => { setFAction(e.target.value); setPage(0); }}
+              sx={{ minWidth: 220 }}
             >
               <MenuItem value="">All</MenuItem>
               {uniqueActions.map(a => <MenuItem key={a} value={a}>{a}</MenuItem>)}
@@ -384,7 +367,7 @@ export default function ActionCenter() {
                   {...params}
                   label="Assignee 1"
                   size="small"
-                  fullWidth
+                  sx={{ minWidth: 220 }}
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (
@@ -411,7 +394,7 @@ export default function ActionCenter() {
                   {...params}
                   label="Assignee 2"
                   size="small"
-                  fullWidth
+                  sx={{ minWidth: 220 }}
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (
@@ -431,10 +414,14 @@ export default function ActionCenter() {
               label="Start date"
               type="date"
               size="small"
-              fullWidth
               value={fStartDate}
               onChange={(e) => { setFStartDate(e.target.value); setPage(0); }}
               InputLabelProps={{ shrink: true }}
+              sx={{ minWidth: 220 }}
+              inputProps={{
+                onFocus: (e) => e.target.showPicker && e.target.showPicker(),
+                onClick: (e) => e.target.showPicker && e.target.showPicker(),
+              }}
             />
           </Grid>
 
@@ -443,19 +430,24 @@ export default function ActionCenter() {
               label="End date"
               type="date"
               size="small"
-              fullWidth
               value={fEndDate}
               onChange={(e) => { setFEndDate(e.target.value); setPage(0); }}
               InputLabelProps={{ shrink: true }}
+              sx={{ minWidth: 220 }}
+              inputProps={{
+                onFocus: (e) => e.target.showPicker && e.target.showPicker(),
+                onClick: (e) => e.target.showPicker && e.target.showPicker(),
+              }}
             />
           </Grid>
 
           <Grid item xs={12} sm={6} md={3}>
             <TextField
-              select size="small" fullWidth
+              select size="small"
               label="Status"
               value={fStatus}
               onChange={(e) => { setFStatus(e.target.value); setPage(0); }}
+              sx={{ minWidth: 220 }}
             >
               <MenuItem value="">All</MenuItem>
               <MenuItem value="pending">Pending</MenuItem>
