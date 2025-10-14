@@ -3,7 +3,8 @@ import {
   Box, Paper, Typography, Stack, TextField, MenuItem, Button,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   TablePagination, IconButton, Tooltip, Snackbar, Alert, Dialog,
-  DialogTitle, DialogContent, DialogActions, Autocomplete, CircularProgress
+  DialogTitle, DialogContent, DialogActions, Autocomplete, CircularProgress,
+  Grid
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import UndoIcon from "@mui/icons-material/Undo";
@@ -12,13 +13,16 @@ import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import authAxios from "../utils/authAxios";
 
 export default function ActionCenter() {
-  const [rows, setRows] = useState([]); // matches
+  const [rows, setRows] = useState([]); // matches (fetched)
   const [loading, setLoading] = useState(true);
 
   const [users, setUsers] = useState([]); // [{id, username, role, ...}]
   const [loadingUsers, setLoadingUsers] = useState(true);
 
-  const [city, setCity] = useState(""); // optional filter
+  // server-side param we already support
+  const [cityFetch, setCityFetch] = useState("");
+
+  // pagination
   const [page, setPage] = useState(0);
   const [rpp, setRpp] = useState(10);
 
@@ -41,6 +45,17 @@ export default function ActionCenter() {
   const [assignee2, setAssignee2] = useState(null); // user obj or null
   const [assignSaving, setAssignSaving] = useState(false);
 
+  // -------- FILTERS (client-side) --------
+  const [fCity, setFCity] = useState("");
+  const [fField, setFField] = useState("");
+  const [fOption, setFOption] = useState("");
+  const [fAction, setFAction] = useState("");
+  const [fAssignee1, setFAssignee1] = useState(null); // user obj
+  const [fAssignee2, setFAssignee2] = useState(null); // user obj
+  const [fStatus, setFStatus] = useState(""); // "", "pending", "done"
+  const [fStartDate, setFStartDate] = useState(""); // "YYYY-MM-DD"
+  const [fEndDate, setFEndDate] = useState("");
+
   const show = (severity, message) => setAlert({ open: true, severity, message });
   const hide = () => setAlert(a => ({ ...a, open: false }));
 
@@ -61,7 +76,7 @@ export default function ActionCenter() {
     try {
       setLoading(true);
       const params = {};
-      if (city) params.city = city;
+      if (cityFetch) params.city = cityFetch;
       const res = await authAxios.get("/actions/matches", { params });
       setRows(res.data || []);
     } catch (e) {
@@ -78,17 +93,84 @@ export default function ActionCenter() {
 
   useEffect(() => {
     fetchMatches();
-  }, [city]);
+  }, [cityFetch]);
 
-  const uniqueCities = useMemo(() => {
-    return Array.from(new Set(rows.map(r => r.city).filter(Boolean))).sort();
-  }, [rows]);
+  // Unique lists for filters (derived from fetched rows)
+  const uniqueCities = useMemo(
+    () => Array.from(new Set(rows.map(r => r.city).filter(Boolean))).sort(),
+    [rows]
+  );
+  const uniqueFields = useMemo(
+    () => Array.from(new Set(rows.map(r => r.field).filter(Boolean))).sort(),
+    [rows]
+  );
+  const uniqueOptions = useMemo(
+    () => Array.from(new Set(rows.map(r => r.option_value).filter(Boolean))).sort(),
+    [rows]
+  );
+  const uniqueActions = useMemo(
+    () => Array.from(new Set(rows.map(r => r.action_name).filter(Boolean))).sort(),
+    [rows]
+  );
 
   const userById = useMemo(() => {
     const m = new Map();
     users.forEach(u => m.set(u.id, u));
     return m;
   }, [users]);
+
+  // ---------- FILTERING ----------
+  const filteredRows = useMemo(() => {
+    return rows.filter(r => {
+      if (fCity && r.city !== fCity) return false;
+      if (fField && r.field !== fField) return false;
+      if (fOption && r.option_value !== fOption) return false;
+      if (fAction && r.action_name !== fAction) return false;
+
+      // Assignee 1: match-level assignee1, else fallback to rule default
+      if (fAssignee1) {
+        const a1id = r.match_assignee_user_id ?? r.rule_assignee_user_id ?? null;
+        if (a1id !== fAssignee1.id) return false;
+      }
+
+      // Assignee 2: only match-level
+      if (fAssignee2) {
+        if ((r.match_assignee2_user_id ?? null) !== fAssignee2.id) return false;
+      }
+
+      if (fStatus) {
+        const isDone = r.status === "done";
+        if (fStatus === "done" && !isDone) return false;
+        if (fStatus === "pending" && isDone) return false;
+      }
+
+      if (fStartDate || fEndDate) {
+        const ts = r.timestamp ? new Date(r.timestamp) : null;
+        if (!ts) return false;
+        const day = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+        const tsDay = day(ts);
+
+        if (fStartDate) {
+          const start = new Date(fStartDate + "T00:00:00");
+          if (tsDay < day(start)) return false;
+        }
+        if (fEndDate) {
+          const end = new Date(fEndDate + "T00:00:00");
+          if (tsDay > day(end)) return false;
+        }
+      }
+
+      return true;
+    });
+  }, [rows, fCity, fField, fOption, fAction, fAssignee1, fAssignee2, fStatus, fStartDate, fEndDate]);
+
+  // ---------- SCORECARDS ----------
+  const totals = useMemo(() => {
+    const total = filteredRows.length;
+    const pending = filteredRows.filter(r => r.status !== "done").length;
+    const pctPending = total ? Math.round((pending / total) * 100) : 0;
+    return { total, pending, pctPending };
+  }, [filteredRows]);
 
   // -------- Confirm flow ----------
   const openConfirm = (row) => {
@@ -141,8 +223,6 @@ export default function ActionCenter() {
   // -------- Assign flow -----------
   const openAssign = (row) => {
     setAssignItem(row);
-
-    // Assignee 1: prefer match-level; otherwise fallback to rule's default
     const u1 =
       userById.get(row.match_assignee_user_id) ||
       userById.get(row.rule_assignee_user_id) ||
@@ -177,6 +257,19 @@ export default function ActionCenter() {
     }
   };
 
+  const resetFilters = () => {
+    setFCity("");
+    setFField("");
+    setFOption("");
+    setFAction("");
+    setFAssignee1(null);
+    setFAssignee2(null);
+    setFStatus("");
+    setFStartDate("");
+    setFEndDate("");
+    setPage(0);
+  };
+
   return (
     <Box sx={{ p: { xs: 2, md: 4 }, bgcolor: "#f7fafd", minHeight: "calc(100vh - 64px)" }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
@@ -187,26 +280,198 @@ export default function ActionCenter() {
           </Tooltip>
         </Box>
       </Stack>
-      <Typography color="text.secondary" sx={{ mb: 2 }}>
-        Inspections that match your rules. Assign owners and mark actions as completed once handled.
-      </Typography>
 
-      <Paper sx={{ p: 2 }}>
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mb: 2 }}>
+      {/* Scorecards */}
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid item xs={12} sm={4}>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="overline" color="text.secondary">Total actions</Typography>
+            <Typography variant="h4" fontWeight={800}>{totals.total}</Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="overline" color="text.secondary">Total pending</Typography>
+            <Typography variant="h4" fontWeight={800}>{totals.pending}</Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="overline" color="text.secondary">% pending</Typography>
+            <Typography variant="h4" fontWeight={800}>{totals.pctPending}%</Typography>
+          </Paper>
+        </Grid>
+      </Grid>
+
+      {/* Fetch control (server-side City param) */}
+      <Paper sx={{ p: 2, mb: 2 }}>
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="flex-end">
           <TextField
             select
             size="small"
-            label="City"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            sx={{ minWidth: 200 }}
+            label="Fetch by City (server)"
+            value={cityFetch}
+            onChange={(e) => setCityFetch(e.target.value)}
+            sx={{ minWidth: 220 }}
           >
             <MenuItem value="">All</MenuItem>
             {uniqueCities.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
           </TextField>
-          <Button variant="outlined" onClick={fetchMatches}>Apply</Button>
+          <Button variant="outlined" onClick={fetchMatches}>Refetch</Button>
         </Stack>
+      </Paper>
 
+      {/* Filters (client-side) */}
+      <Paper sx={{ p: 2, mb: 2 }}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6} md={3}>
+            <TextField
+              select size="small" fullWidth
+              label="City"
+              value={fCity}
+              onChange={(e) => { setFCity(e.target.value); setPage(0); }}
+            >
+              <MenuItem value="">All</MenuItem>
+              {uniqueCities.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
+            </TextField>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <TextField
+              select size="small" fullWidth
+              label="Field"
+              value={fField}
+              onChange={(e) => { setFField(e.target.value); setPage(0); }}
+            >
+              <MenuItem value="">All</MenuItem>
+              {uniqueFields.map(f => <MenuItem key={f} value={f}>{f}</MenuItem>)}
+            </TextField>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <TextField
+              select size="small" fullWidth
+              label="Option"
+              value={fOption}
+              onChange={(e) => { setFOption(e.target.value); setPage(0); }}
+            >
+              <MenuItem value="">All</MenuItem>
+              {uniqueOptions.map(o => <MenuItem key={o} value={o}>{o}</MenuItem>)}
+            </TextField>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <TextField
+              select size="small" fullWidth
+              label="Action"
+              value={fAction}
+              onChange={(e) => { setFAction(e.target.value); setPage(0); }}
+            >
+              <MenuItem value="">All</MenuItem>
+              {uniqueActions.map(a => <MenuItem key={a} value={a}>{a}</MenuItem>)}
+            </TextField>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <Autocomplete
+              options={users}
+              loading={loadingUsers}
+              getOptionLabel={(o) => o?.username ?? ""}
+              value={fAssignee1}
+              onChange={(_, v) => { setFAssignee1(v); setPage(0); }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Assignee 1"
+                  size="small"
+                  fullWidth
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {loadingUsers ? <CircularProgress size={16} /> : null}
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  }}
+                />
+              )}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <Autocomplete
+              options={users}
+              loading={loadingUsers}
+              getOptionLabel={(o) => o?.username ?? ""}
+              value={fAssignee2}
+              onChange={(_, v) => { setFAssignee2(v); setPage(0); }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Assignee 2"
+                  size="small"
+                  fullWidth
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {loadingUsers ? <CircularProgress size={16} /> : null}
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  }}
+                />
+              )}
+            />
+          </Grid>
+
+          <Grid item xs={6} sm={3} md={3}>
+            <TextField
+              label="Start date"
+              type="date"
+              size="small"
+              fullWidth
+              value={fStartDate}
+              onChange={(e) => { setFStartDate(e.target.value); setPage(0); }}
+              InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
+
+          <Grid item xs={6} sm={3} md={3}>
+            <TextField
+              label="End date"
+              type="date"
+              size="small"
+              fullWidth
+              value={fEndDate}
+              onChange={(e) => { setFEndDate(e.target.value); setPage(0); }}
+              InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3}>
+            <TextField
+              select size="small" fullWidth
+              label="Status"
+              value={fStatus}
+              onChange={(e) => { setFStatus(e.target.value); setPage(0); }}
+            >
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="pending">Pending</MenuItem>
+              <MenuItem value="done">Done</MenuItem>
+            </TextField>
+          </Grid>
+
+          <Grid item xs={12} sm={6} md={3} display="flex" alignItems="center">
+            <Stack direction="row" spacing={1} sx={{ width: "100%" }}>
+              <Button variant="outlined" onClick={resetFilters} fullWidth>Reset filters</Button>
+            </Stack>
+          </Grid>
+        </Grid>
+      </Paper>
+
+      <Paper sx={{ p: 2 }}>
         <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: 560 }}>
           <Table stickyHeader size="small">
             <TableHead>
@@ -226,7 +491,7 @@ export default function ActionCenter() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {(loading ? [] : rows)
+              {(loading ? [] : filteredRows)
                 .slice(page * rpp, page * rpp + rpp)
                 .map((r) => {
                   const assignee1Name =
@@ -303,7 +568,7 @@ export default function ActionCenter() {
                     </TableRow>
                   );
                 })}
-              {(!loading && rows.length === 0) && (
+              {(!loading && filteredRows.length === 0) && (
                 <TableRow>
                   <TableCell colSpan={12} align="center" sx={{ py: 6, color: "text.secondary" }}>
                     No matches
@@ -323,7 +588,7 @@ export default function ActionCenter() {
 
         <TablePagination
           component="div"
-          count={rows.length}
+          count={filteredRows.length}
           page={page}
           onPageChange={(_, p) => setPage(p)}
           rowsPerPage={rpp}
@@ -408,7 +673,7 @@ export default function ActionCenter() {
           <Typography variant="body2" sx={{ mb: 2 }}>
             Inspection #{confirmItem?.inspection_id} — {confirmItem?.action_name}
           </Typography>
-          <TextField
+        <TextField
             label="Notes (optional)"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
