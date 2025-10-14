@@ -688,3 +688,4 @@ export default function Settings() {
       </Snackbar>
     </Box>
   );
+}
