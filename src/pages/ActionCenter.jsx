@@ -4,13 +4,81 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   TablePagination, IconButton, Tooltip, Snackbar, Alert, Dialog,
   DialogTitle, DialogContent, DialogActions, Autocomplete, CircularProgress,
-  Grid
+  Grid, Chip, Avatar, Divider
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import UndoIcon from "@mui/icons-material/Undo";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
+import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
+import DoneAllIcon from "@mui/icons-material/DoneAll";
 import authAxios from "../utils/authAxios";
+
+function initials(name = "") {
+  const parts = String(name).split("@")[0].split(/[.\s_]/).filter(Boolean);
+  const a = (parts[0]?.[0] || "").toUpperCase();
+  const b = (parts[1]?.[0] || "").toUpperCase();
+  return (a + b) || (String(name)[0] || "").toUpperCase();
+}
+
+function PriorityChip({ value }) {
+  const label = value ?? "Normal";
+  const map = {
+    Urgent: { color: "error", icon: <PriorityHighIcon fontSize="small" /> },
+    High: { color: "warning", icon: <PriorityHighIcon fontSize="small" /> },
+    Normal: { color: "info", icon: null },
+    Low: { color: "default", icon: null },
+  };
+  const conf = map[label] || map.Normal;
+  return (
+    <Chip
+      size="small"
+      color={conf.color}
+      icon={conf.icon}
+      label={label}
+      variant={label === "Low" ? "outlined" : "filled"}
+      sx={{ fontWeight: 600 }}
+    />
+  );
+}
+
+function StatusChip({ status, by }) {
+  if (status === "done") {
+    return (
+      <Tooltip title={by ? `Done by ${by}` : "Done"}>
+        <Chip
+          size="small"
+          color="success"
+          icon={<DoneAllIcon fontSize="small" />}
+          label="Done"
+        />
+      </Tooltip>
+    );
+  }
+  return (
+    <Chip
+      size="small"
+      color="warning"
+      icon={<HourglassEmptyIcon fontSize="small" />}
+      label="Pending"
+      variant="outlined"
+    />
+  );
+}
+
+function AssigneeChip({ name }) {
+  if (!name) return <Typography component="span" color="text.disabled">—</Typography>;
+  return (
+    <Chip
+      size="small"
+      avatar={<Avatar sx={{ width: 20, height: 20 }}>{initials(name)}</Avatar>}
+      label={name}
+      variant="outlined"
+    />
+  );
+}
 
 export default function ActionCenter() {
   const [rows, setRows] = useState([]); // matches (fetched)
@@ -18,7 +86,6 @@ export default function ActionCenter() {
 
   const [users, setUsers] = useState([]); // [{id, username, role, ...}]
   const [loadingUsers, setLoadingUsers] = useState(true);
-
 
   // pagination
   const [page, setPage] = useState(0);
@@ -174,7 +241,7 @@ export default function ActionCenter() {
     return { total, pending, pctPending };
   }, [filteredRows]);
 
-  // -------- Confirm flow ----------
+  // -------- Confirm / Unconfirm / Assign flows ----------
   const openConfirm = (row) => {
     setConfirmItem(row);
     setNotes("");
@@ -198,7 +265,6 @@ export default function ActionCenter() {
     }
   };
 
-  // -------- Unconfirm flow ----------
   const openUnconfirm = (row) => {
     setUnconfirmItem(row);
     setUnconfirmReason("");
@@ -222,7 +288,6 @@ export default function ActionCenter() {
     }
   };
 
-  // -------- Assign flow -----------
   const openAssign = (row) => {
     setAssignItem(row);
     const u1 =
@@ -245,7 +310,7 @@ export default function ActionCenter() {
         rule_id: assignItem.rule_id,
         assignee_user_id: assignee1?.id ?? null,
         assignee2_user_id: assignee2?.id ?? null,
-        notes: undefined, // keep confirm step for final notes
+        notes: undefined,
       });
       show("success", "Assignees updated.");
       setAssignOpen(false);
@@ -274,9 +339,13 @@ export default function ActionCenter() {
   };
 
   return (
-    <Box sx={{ p: { xs: 2, md: 4 }, bgcolor: "#f7fafd", minHeight: "calc(100vh - 64px)" }}>
+    <Box sx={{ p: { xs: 2, md: 4 }, bgcolor: "#f5f7fb", minHeight: "calc(100vh - 64px)" }}>
+      {/* Header */}
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-        <Typography variant="h4" fontWeight="bold">Action Center</Typography>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <FilterListIcon color="primary" />
+          <Typography variant="h4" fontWeight="bold">Action Center</Typography>
+        </Stack>
         <Box>
           <Tooltip title="Refresh">
             <IconButton onClick={fetchMatches}><RefreshIcon /></IconButton>
@@ -287,28 +356,69 @@ export default function ActionCenter() {
       {/* Scorecards */}
       <Grid container spacing={2} sx={{ mb: 2 }}>
         <Grid item xs={12} sm={4}>
-          <Paper sx={{ p: 2 }}>
+          <Paper
+            sx={{
+              p: 2,
+              borderRadius: 3,
+              background: "linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%)",
+            }}
+            elevation={0}
+          >
             <Typography variant="overline" color="text.secondary">Total actions</Typography>
-            <Typography variant="h4" fontWeight={800}>{totals.total}</Typography>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <PriorityHighIcon color="primary" />
+              <Typography variant="h4" fontWeight={800}>{totals.total}</Typography>
+            </Stack>
           </Paper>
         </Grid>
         <Grid item xs={12} sm={4}>
-          <Paper sx={{ p: 2 }}>
+          <Paper
+            sx={{
+              p: 2,
+              borderRadius: 3,
+              background: "linear-gradient(135deg, #fff3e0 0%, #ffffff 100%)",
+            }}
+            elevation={0}
+          >
             <Typography variant="overline" color="text.secondary">Total pending</Typography>
-            <Typography variant="h4" fontWeight={800}>{totals.pending}</Typography>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <HourglassEmptyIcon color="warning" />
+              <Typography variant="h4" fontWeight={800}>{totals.pending}</Typography>
+            </Stack>
           </Paper>
         </Grid>
         <Grid item xs={12} sm={4}>
-          <Paper sx={{ p: 2 }}>
+          <Paper
+            sx={{
+              p: 2,
+              borderRadius: 3,
+              background: "linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%)",
+            }}
+            elevation={0}
+          >
             <Typography variant="overline" color="text.secondary">% pending</Typography>
-            <Typography variant="h4" fontWeight={800}>{totals.pctPending}%</Typography>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <DoneAllIcon color="success" />
+              <Typography variant="h4" fontWeight={800}>{totals.pctPending}%</Typography>
+            </Stack>
           </Paper>
         </Grid>
       </Grid>
 
-
-      {/* Filters (client-side) */}
-      <Paper sx={{ p: 2, mb: 2 }}>
+      {/* Filters */}
+      <Paper
+        sx={{
+          p: 2,
+          mb: 2,
+          borderRadius: 3,
+        }}
+        elevation={0}
+      >
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+          <FilterListIcon fontSize="small" color="action" />
+          <Typography variant="subtitle2" color="text.secondary">Filters</Typography>
+        </Stack>
+        <Divider sx={{ mb: 2 }} />
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={3}>
             <TextField
@@ -361,6 +471,7 @@ export default function ActionCenter() {
               {uniqueActions.map(a => <MenuItem key={a} value={a}>{a}</MenuItem>)}
             </TextField>
           </Grid>
+
           <Grid item xs={12} sm={6} md={3}>
             <TextField
               select size="small"
@@ -476,14 +587,17 @@ export default function ActionCenter() {
 
           <Grid item xs={12} sm={6} md={3} display="flex" alignItems="center">
             <Stack direction="row" spacing={1} sx={{ width: "100%" }}>
-              <Button variant="outlined" onClick={resetFilters} fullWidth>Reset filters</Button>
+              <Button variant="outlined" onClick={resetFilters} fullWidth startIcon={<UndoIcon />}>
+                Reset filters
+              </Button>
             </Stack>
           </Grid>
         </Grid>
       </Paper>
 
-      <Paper sx={{ p: 2 }}>
-        <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: 560 }}>
+      {/* Table */}
+      <Paper sx={{ p: 2, borderRadius: 3 }} elevation={0}>
+        <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: 560, borderRadius: 2 }}>
           <Table stickyHeader size="small">
             <TableHead>
               <TableRow>
@@ -510,17 +624,33 @@ export default function ActionCenter() {
                     r.match_assignee_username ||
                     r.rule_assignee_username ||
                     "—";
-                  const assignee2Name = r.match_assignee2_username || "—";
+                  const assignee2Name = r.match_assignee2_username || null;
+
+                  const priority = r.priority ?? "Normal";
+                  const borderColor =
+                    priority === "Urgent" ? "error.light"
+                    : priority === "High" ? "warning.light"
+                    : priority === "Normal" ? "info.light"
+                    : "divider";
+
                   return (
-                    <TableRow key={`${r.inspection_id}-${r.rule_id}`} hover>
+                    <TableRow
+                      key={`${r.inspection_id}-${r.rule_id}`}
+                      hover
+                      sx={{
+                        "&:nth-of-type(odd)": { bgcolor: "action.hover" },
+                        borderLeft: 3,
+                        borderLeftColor: borderColor,
+                      }}
+                    >
                       <TableCell>#{r.inspection_id}</TableCell>
                       <TableCell>{r.city || "—"}</TableCell>
                       <TableCell>{r.field}</TableCell>
                       <TableCell>{r.option_value}</TableCell>
                       <TableCell>{r.action_name}</TableCell>
-                      <TableCell>{r.priority ?? "Normal"}</TableCell>
-                      <TableCell>{assignee1Name}</TableCell>
-                      <TableCell>{assignee2Name}</TableCell>
+                      <TableCell><PriorityChip value={r.priority} /></TableCell>
+                      <TableCell><AssigneeChip name={assignee1Name} /></TableCell>
+                      <TableCell><AssigneeChip name={assignee2Name} /></TableCell>
                       <TableCell>{r.inspected_by}</TableCell>
                       <TableCell>
                         {r.timestamp ? new Date(r.timestamp).toLocaleString("fr-MA", {
@@ -529,11 +659,7 @@ export default function ActionCenter() {
                           timeStyle: "short",
                         }) : "—"}
                       </TableCell>
-                      <TableCell>
-                        {r.status === "done"
-                          ? `done by ${r.confirmed_by_username || "—"}`
-                          : "pending"}
-                      </TableCell>
+                      <TableCell><StatusChip status={r.status} by={r.confirmed_by_username} /></TableCell>
                       <TableCell sx={{ maxWidth: 260, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                         {r.notes || "—"}
                       </TableCell>
@@ -686,7 +812,7 @@ export default function ActionCenter() {
           <Typography variant="body2" sx={{ mb: 2 }}>
             Inspection #{confirmItem?.inspection_id} — {confirmItem?.action_name}
           </Typography>
-        <TextField
+          <TextField
             label="Notes (optional)"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
