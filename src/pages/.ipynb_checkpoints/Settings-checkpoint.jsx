@@ -28,6 +28,7 @@ import {
   Tooltip,
   CircularProgress,
   Autocomplete,
+  Chip,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -46,8 +47,28 @@ const ALLOWED_FIELDS = [
   "courier_behavior",
 ];
 
+// Keep these values exactly as your backend expects
+const PRIORITY_OPTIONS = ["Urgent", "High", "Medium", "Low", "Info", "None"];
+
+function priorityColor(p) {
+  switch (p) {
+    case "Urgent":
+      return "error";
+    case "High":
+      return "warning";
+    case "Medium":
+      return "info";
+    case "Low":
+      return "success";
+    case "Info":
+      return "secondary";
+    default:
+      return "default";
+  }
+}
+
 export default function Settings() {
-  // -------- Actions state ----------
+  // -------- Actions ----------
   const [actions, setActions] = useState([]);
   const [createActionName, setCreateActionName] = useState("");
   const [loadingActions, setLoadingActions] = useState(true);
@@ -56,13 +77,14 @@ export default function Settings() {
   const [users, setUsers] = useState([]); // [{id, username, role, ...}]
   const [loadingUsers, setLoadingUsers] = useState(true);
 
-  // -------- Rules state ------------
+  // -------- Rules ------------
   const [createForm, setCreateForm] = useState({
     rule_id: "",
     city: "",
     field: "",
     option_value: "",
-    action: "", // action name (text)
+    action: "",
+    priority: "None", // default
   });
   const [createAssignee, setCreateAssignee] = useState(null); // user object or null
 
@@ -135,6 +157,7 @@ export default function Settings() {
 
   useEffect(() => {
     fetchRules();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterRuleId, filterField]);
 
   const uniqueRuleIds = useMemo(
@@ -144,7 +167,7 @@ export default function Settings() {
 
   const userById = useMemo(() => {
     const m = new Map();
-    users.forEach(u => m.set(u.id, u));
+    users.forEach((u) => m.set(u.id, u));
     return m;
   }, [users]);
 
@@ -170,22 +193,31 @@ export default function Settings() {
   // ====== Rules: create ======
   const handleCreateRule = async (e) => {
     e.preventDefault();
-    if (!createForm.rule_id || !createForm.city || !createForm.field || !createForm.option_value || !createForm.action) {
+    const { rule_id, city, field, option_value, action, priority } = createForm;
+    if (!rule_id || !city || !field || !option_value || !action) {
       showAlert("warning", "Please fill all fields.");
       return;
     }
     try {
       const payload = {
-        rule_id: Number(createForm.rule_id),
-        city: createForm.city,
-        field: createForm.field,
-        option_value: createForm.option_value,
-        action: createForm.action, // text action
+        rule_id: Number(rule_id),
+        city,
+        field,
+        option_value,
+        action, // text action
+        priority, // <- NEW
         assignee_user_id: createAssignee?.id ?? null,
       };
       await authAxios.post("/inspection-rules", payload);
       showAlert("success", "Rule created.");
-      setCreateForm({ rule_id: "", city: "", field: "", option_value: "", action: "" });
+      setCreateForm({
+        rule_id: "",
+        city: "",
+        field: "",
+        option_value: "",
+        action: "",
+        priority: "None",
+      });
       setCreateAssignee(null);
       fetchRules();
     } catch (e) {
@@ -197,8 +229,7 @@ export default function Settings() {
 
   // ====== Rules: edit ======
   const openEdit = (row) => {
-    setEditRow({ ...row });
-    // pre-select current assignee if present
+    setEditRow({ ...row, priority: row.priority || "None" });
     const u = row.assignee_user_id ? userById.get(row.assignee_user_id) : null;
     setEditAssignee(u || null);
     setEditOpen(true);
@@ -212,6 +243,7 @@ export default function Settings() {
         field: editRow.field,
         option_value: editRow.option_value,
         action: editRow.action,
+        priority: editRow.priority || "None", // <- NEW
         assignee_user_id: editAssignee?.id ?? null, // allow clearing
       };
       await authAxios.put(`/inspection-rules/${editRow.id}`, payload);
@@ -258,7 +290,9 @@ export default function Settings() {
         <Grid item xs={12} md={4}>
           {/* Create Action */}
           <Paper sx={{ p: 2, mb: 3 }}>
-            <Typography variant="subtitle1" fontWeight={600}>Create Action</Typography>
+            <Typography variant="subtitle1" fontWeight={600}>
+              Create Action
+            </Typography>
             <Stack component="form" spacing={2} onSubmit={handleCreateAction}>
               <TextField
                 label="Action name"
@@ -267,35 +301,44 @@ export default function Settings() {
                 fullWidth
                 size="small"
               />
-              <Button type="submit" variant="contained" startIcon={<AddIcon />}>Create Action</Button>
+              <Button type="submit" variant="contained" startIcon={<AddIcon />}>
+                Create Action
+              </Button>
             </Stack>
           </Paper>
 
           {/* Create Rule */}
           <Paper sx={{ p: 2 }}>
-            <Typography variant="subtitle1" fontWeight={600}>Create Rule</Typography>
+            <Typography variant="subtitle1" fontWeight={600}>
+              Create Rule
+            </Typography>
             <Stack component="form" spacing={2} onSubmit={handleCreateRule}>
               <TextField
                 label="Rule ID"
                 type="number"
                 value={createForm.rule_id}
                 onChange={(e) => setCreateForm((s) => ({ ...s, rule_id: e.target.value }))}
-                fullWidth size="small"
+                fullWidth
+                size="small"
               />
               <TextField
                 label="City"
                 value={createForm.city}
                 onChange={(e) => setCreateForm((s) => ({ ...s, city: e.target.value }))}
-                fullWidth size="small"
+                fullWidth
+                size="small"
               />
               <FormControl fullWidth size="small">
                 <InputLabel>Field</InputLabel>
                 <Select
                   value={createForm.field}
                   onChange={(e) => setCreateForm((s) => ({ ...s, field: e.target.value }))}
+                  label="Field"
                 >
                   {ALLOWED_FIELDS.map((f) => (
-                    <MenuItem key={f} value={f}>{f}</MenuItem>
+                    <MenuItem key={f} value={f}>
+                      {f}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -303,16 +346,36 @@ export default function Settings() {
                 label="Option"
                 value={createForm.option_value}
                 onChange={(e) => setCreateForm((s) => ({ ...s, option_value: e.target.value }))}
-                fullWidth size="small"
+                fullWidth
+                size="small"
               />
               <FormControl fullWidth size="small">
                 <InputLabel>Action</InputLabel>
                 <Select
                   value={createForm.action}
                   onChange={(e) => setCreateForm((s) => ({ ...s, action: e.target.value }))}
+                  label="Action"
                 >
                   {actions.map((a) => (
-                    <MenuItem key={a.id} value={a.name}>{a.name}</MenuItem>
+                    <MenuItem key={a.id} value={a.name}>
+                      {a.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* Priority */}
+              <FormControl fullWidth size="small">
+                <InputLabel>Priority</InputLabel>
+                <Select
+                  value={createForm.priority}
+                  onChange={(e) => setCreateForm((s) => ({ ...s, priority: e.target.value }))}
+                  label="Priority"
+                >
+                  {PRIORITY_OPTIONS.map((p) => (
+                    <MenuItem key={p} value={p}>
+                      {p}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -342,7 +405,9 @@ export default function Settings() {
                 )}
               />
 
-              <Button type="submit" variant="contained">Create Rule</Button>
+              <Button type="submit" variant="contained">
+                Create Rule
+              </Button>
             </Stack>
           </Paper>
         </Grid>
@@ -351,7 +416,9 @@ export default function Settings() {
         <Grid item xs={12} md={8}>
           <Paper sx={{ p: 2 }}>
             <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-              <Typography variant="subtitle1" fontWeight={600}>Manage Rules</Typography>
+              <Typography variant="subtitle1" fontWeight={600}>
+                Manage Rules
+              </Typography>
               <Stack direction="row" spacing={2}>
                 <TextField
                   label="Filter by Rule ID"
@@ -369,7 +436,9 @@ export default function Settings() {
                   >
                     <MenuItem value="">All</MenuItem>
                     {ALLOWED_FIELDS.map((f) => (
-                      <MenuItem key={f} value={f}>{f}</MenuItem>
+                      <MenuItem key={f} value={f}>
+                        {f}
+                      </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -394,6 +463,7 @@ export default function Settings() {
                       <TableCell>Field</TableCell>
                       <TableCell>Option</TableCell>
                       <TableCell>Action</TableCell>
+                      <TableCell>Priority</TableCell>
                       <TableCell>Assignee</TableCell>
                       <TableCell>Created</TableCell>
                       <TableCell align="right">Actions</TableCell>
@@ -401,13 +471,21 @@ export default function Settings() {
                   </TableHead>
                   <TableBody>
                     {rules.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                      <TableRow key={row.id}>
+                      <TableRow key={row.id} hover>
                         <TableCell>{row.id}</TableCell>
                         <TableCell>{row.rule_id}</TableCell>
                         <TableCell>{row.city}</TableCell>
                         <TableCell>{row.field}</TableCell>
                         <TableCell>{row.option_value}</TableCell>
                         <TableCell>{row.action}</TableCell>
+                        <TableCell>
+                          <Chip
+                            size="small"
+                            label={row.priority || "None"}
+                            color={priorityColor(row.priority)}
+                            variant={row.priority && row.priority !== "None" ? "filled" : "outlined"}
+                          />
+                        </TableCell>
                         <TableCell>{row.assignee_username || "—"}</TableCell>
                         <TableCell>
                           {row.created_at ? new Date(row.created_at).toLocaleString("fr-MA") : "—"}
@@ -430,6 +508,7 @@ export default function Settings() {
                 </Table>
               )}
             </TableContainer>
+
             <TablePagination
               component="div"
               count={rules.length}
@@ -440,6 +519,7 @@ export default function Settings() {
                 setRowsPerPage(parseInt(e.target.value, 10));
                 setPage(0);
               }}
+              rowsPerPageOptions={[5, 10, 25, 50]}
             />
           </Paper>
         </Grid>
@@ -467,9 +547,12 @@ export default function Settings() {
                 <Select
                   value={editRow.field}
                   onChange={(e) => setEditRow((s) => ({ ...s, field: e.target.value }))}
+                  label="Field"
                 >
                   {ALLOWED_FIELDS.map((f) => (
-                    <MenuItem key={f} value={f}>{f}</MenuItem>
+                    <MenuItem key={f} value={f}>
+                      {f}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -483,9 +566,28 @@ export default function Settings() {
                 <Select
                   value={editRow.action}
                   onChange={(e) => setEditRow((s) => ({ ...s, action: e.target.value }))}
+                  label="Action"
                 >
                   {actions.map((a) => (
-                    <MenuItem key={a.id} value={a.name}>{a.name}</MenuItem>
+                    <MenuItem key={a.id} value={a.name}>
+                      {a.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* Priority */}
+              <FormControl>
+                <InputLabel>Priority</InputLabel>
+                <Select
+                  value={editRow.priority || "None"}
+                  onChange={(e) => setEditRow((s) => ({ ...s, priority: e.target.value }))}
+                  label="Priority"
+                >
+                  {PRIORITY_OPTIONS.map((p) => (
+                    <MenuItem key={p} value={p}>
+                      {p}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -519,7 +621,9 @@ export default function Settings() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setEditOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={saveEdit}>Save</Button>
+          <Button variant="contained" onClick={saveEdit}>
+            Save
+          </Button>
         </DialogActions>
       </Dialog>
 
@@ -531,13 +635,17 @@ export default function Settings() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteOpen(false)}>Cancel</Button>
-          <Button color="error" variant="contained" onClick={doDelete}>Delete</Button>
+          <Button color="error" variant="contained" onClick={doDelete}>
+            Delete
+          </Button>
         </DialogActions>
       </Dialog>
 
       {/* Snackbar */}
       <Snackbar open={alert.open} autoHideDuration={3500} onClose={closeAlert}>
-        <Alert onClose={closeAlert} severity={alert.severity} variant="filled">{alert.message}</Alert>
+        <Alert onClose={closeAlert} severity={alert.severity} variant="filled">
+          {alert.message}
+        </Alert>
       </Snackbar>
     </Box>
   );
