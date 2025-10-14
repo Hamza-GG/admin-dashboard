@@ -47,23 +47,16 @@ const ALLOWED_FIELDS = [
   "courier_behavior",
 ];
 
-// Keep these values exactly as your backend expects
 const PRIORITY_OPTIONS = ["Urgent", "High", "Medium", "Low", "Info", "None"];
 
 function priorityColor(p) {
   switch (p) {
-    case "Urgent":
-      return "error";
-    case "High":
-      return "warning";
-    case "Medium":
-      return "info";
-    case "Low":
-      return "success";
-    case "Info":
-      return "secondary";
-    default:
-      return "default";
+    case "Urgent": return "error";
+    case "High": return "warning";
+    case "Medium": return "info";
+    case "Low": return "success";
+    case "Info": return "secondary";
+    default: return "default";
   }
 }
 
@@ -84,11 +77,11 @@ export default function Settings() {
     field: "",
     option_value: "",
     action: "",
-    priority: "None", // default
-    second_level_action: "",
-    second_level_threshold: "", // keep as string for input; cast before sending
+    priority: "None",
+    escalate_action: "",        // <-- use backend names
+    escalate_threshold: "",     // <-- keep as string for input; cast before sending
   });
-  const [createAssignee, setCreateAssignee] = useState(null); // user object or null
+  const [createAssignee, setCreateAssignee] = useState(null);
 
   const [rules, setRules] = useState([]);
   const [loadingRules, setLoadingRules] = useState(true);
@@ -162,11 +155,6 @@ export default function Settings() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterRuleId, filterField]);
 
-  const uniqueRuleIds = useMemo(
-    () => Array.from(new Set(rules.map((r) => r.rule_id))).sort((a, b) => a - b),
-    [rules]
-  );
-
   const userById = useMemo(() => {
     const m = new Map();
     users.forEach((u) => m.set(u.id, u));
@@ -187,8 +175,7 @@ export default function Settings() {
       fetchActions();
     } catch (e) {
       console.error(e);
-      const msg = e?.response?.data?.detail || "Failed to create action.";
-      showAlert("error", msg);
+      showAlert("error", e?.response?.data?.detail || "Failed to create action.");
     }
   };
 
@@ -202,8 +189,8 @@ export default function Settings() {
       option_value,
       action,
       priority,
-      second_level_action,
-      second_level_threshold,
+      escalate_action,
+      escalate_threshold,
     } = createForm;
 
     if (!rule_id || !city || !field || !option_value || !action) {
@@ -217,17 +204,17 @@ export default function Settings() {
         city,
         field,
         option_value,
-        action, // text action
-        priority, // text priority
+        action,          // text action
+        priority,        // text priority
         assignee_user_id: createAssignee?.id ?? null,
       };
 
-      // Only include 2nd level fields if provided
-      if (second_level_action && second_level_action.trim()) {
-        payload.second_level_action = second_level_action.trim();
+      // Only include escalate_* if provided
+      if (escalate_action && escalate_action.trim()) {
+        payload.escalate_action = escalate_action.trim();
       }
-      if (second_level_threshold !== "" && !Number.isNaN(Number(second_level_threshold))) {
-        payload.second_level_threshold = Number(second_level_threshold);
+      if (escalate_threshold !== "" && !Number.isNaN(Number(escalate_threshold))) {
+        payload.escalate_threshold = Number(escalate_threshold);
       }
 
       await authAxios.post("/inspection-rules", payload);
@@ -239,27 +226,25 @@ export default function Settings() {
         option_value: "",
         action: "",
         priority: "None",
-        second_level_action: "",
-        second_level_threshold: "",
+        escalate_action: "",
+        escalate_threshold: "",
       });
       setCreateAssignee(null);
       fetchRules();
     } catch (e) {
       console.error(e);
-      const msg = e?.response?.data?.detail || "Failed to create rule.";
-      showAlert("error", msg);
+      showAlert("error", e?.response?.data?.detail || "Failed to create rule.");
     }
   };
 
   // ====== Rules: edit ======
   const openEdit = (row) => {
-    // Normalize fields for editing UI
     setEditRow({
       ...row,
       priority: row.priority || "None",
-      second_level_action: row.second_level_action || "",
-      second_level_threshold:
-        typeof row.second_level_threshold === "number" ? String(row.second_level_threshold) : "",
+      escalate_action: row.escalate_action || "",
+      escalate_threshold:
+        typeof row.escalate_threshold === "number" ? String(row.escalate_threshold) : "",
     });
     const u = row.assignee_user_id ? userById.get(row.assignee_user_id) : null;
     setEditAssignee(u || null);
@@ -275,21 +260,20 @@ export default function Settings() {
         option_value: editRow.option_value,
         action: editRow.action,
         priority: editRow.priority || "None",
-        assignee_user_id: editAssignee?.id ?? null, // allow clearing
+        assignee_user_id: editAssignee?.id ?? null,
       };
 
-      // Include 2nd level fields only if user filled them (empty string removes them)
-      if (editRow.second_level_action && editRow.second_level_action.trim()) {
-        payload.second_level_action = editRow.second_level_action.trim();
+      if (editRow.escalate_action && editRow.escalate_action.trim()) {
+        payload.escalate_action = editRow.escalate_action.trim();
       } else {
-        payload.second_level_action = null;
+        payload.escalate_action = null;
       }
 
-      if (editRow.second_level_threshold !== "") {
-        const n = Number(editRow.second_level_threshold);
-        payload.second_level_threshold = Number.isNaN(n) ? null : n;
+      if (editRow.escalate_threshold !== "") {
+        const n = Number(editRow.escalate_threshold);
+        payload.escalate_threshold = Number.isNaN(n) ? null : n;
       } else {
-        payload.second_level_threshold = null;
+        payload.escalate_threshold = null;
       }
 
       await authAxios.put(`/inspection-rules/${editRow.id}`, payload);
@@ -300,8 +284,7 @@ export default function Settings() {
       fetchRules();
     } catch (e) {
       console.error(e);
-      const msg = e?.response?.data?.detail || "Failed to update rule.";
-      showAlert("error", msg);
+      showAlert("error", e?.response?.data?.detail || "Failed to update rule.");
     }
   };
 
@@ -320,8 +303,7 @@ export default function Settings() {
       fetchRules();
     } catch (e) {
       console.error(e);
-      const msg = e?.response?.data?.detail || "Failed to delete rule.";
-      showAlert("error", msg);
+      showAlert("error", e?.response?.data?.detail || "Failed to delete rule.");
     }
   };
 
@@ -336,9 +318,7 @@ export default function Settings() {
         <Grid item xs={12} md={4}>
           {/* Create Action */}
           <Paper sx={{ p: 2, mb: 3 }}>
-            <Typography variant="subtitle1" fontWeight={600}>
-              Create Action
-            </Typography>
+            <Typography variant="subtitle1" fontWeight={600}>Create Action</Typography>
             <Stack component="form" spacing={2} onSubmit={handleCreateAction}>
               <TextField
                 label="Action name"
@@ -355,24 +335,20 @@ export default function Settings() {
 
           {/* Create Rule */}
           <Paper sx={{ p: 2 }}>
-            <Typography variant="subtitle1" fontWeight={600}>
-              Create Rule
-            </Typography>
+            <Typography variant="subtitle1" fontWeight={600}>Create Rule</Typography>
             <Stack component="form" spacing={2} onSubmit={handleCreateRule}>
               <TextField
                 label="Rule ID"
                 type="number"
                 value={createForm.rule_id}
                 onChange={(e) => setCreateForm((s) => ({ ...s, rule_id: e.target.value }))}
-                fullWidth
-                size="small"
+                fullWidth size="small"
               />
               <TextField
                 label="City"
                 value={createForm.city}
                 onChange={(e) => setCreateForm((s) => ({ ...s, city: e.target.value }))}
-                fullWidth
-                size="small"
+                fullWidth size="small"
               />
               <FormControl fullWidth size="small">
                 <InputLabel>Field</InputLabel>
@@ -382,9 +358,7 @@ export default function Settings() {
                   label="Field"
                 >
                   {ALLOWED_FIELDS.map((f) => (
-                    <MenuItem key={f} value={f}>
-                      {f}
-                    </MenuItem>
+                    <MenuItem key={f} value={f}>{f}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -392,8 +366,7 @@ export default function Settings() {
                 label="Option"
                 value={createForm.option_value}
                 onChange={(e) => setCreateForm((s) => ({ ...s, option_value: e.target.value }))}
-                fullWidth
-                size="small"
+                fullWidth size="small"
               />
               <FormControl fullWidth size="small">
                 <InputLabel>Action</InputLabel>
@@ -403,9 +376,7 @@ export default function Settings() {
                   label="Action"
                 >
                   {actions.map((a) => (
-                    <MenuItem key={a.id} value={a.name}>
-                      {a.name}
-                    </MenuItem>
+                    <MenuItem key={a.id} value={a.name}>{a.name}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -419,31 +390,25 @@ export default function Settings() {
                   label="Priority"
                 >
                   {PRIORITY_OPTIONS.map((p) => (
-                    <MenuItem key={p} value={p}>
-                      {p}
-                    </MenuItem>
+                    <MenuItem key={p} value={p}>{p}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
 
-              {/* Second-level Action (optional) */}
+              {/* Escalation (optional) */}
               <TextField
-                label="Second-level Action (optional)"
-                value={createForm.second_level_action}
-                onChange={(e) => setCreateForm((s) => ({ ...s, second_level_action: e.target.value }))}
-                fullWidth
-                size="small"
+                label="Escalate Action (optional)"
+                value={createForm.escalate_action}
+                onChange={(e) => setCreateForm((s) => ({ ...s, escalate_action: e.target.value }))}
+                fullWidth size="small"
                 placeholder="e.g. Escalate to compliance"
               />
-
-              {/* Second-level Threshold (optional) */}
               <TextField
-                label="Second-level Threshold (optional)"
+                label="Escalate Threshold (optional)"
                 type="number"
-                value={createForm.second_level_threshold}
-                onChange={(e) => setCreateForm((s) => ({ ...s, second_level_threshold: e.target.value }))}
-                fullWidth
-                size="small"
+                value={createForm.escalate_threshold}
+                onChange={(e) => setCreateForm((s) => ({ ...s, escalate_threshold: e.target.value }))}
+                fullWidth size="small"
                 placeholder="e.g. 3"
               />
 
@@ -472,9 +437,7 @@ export default function Settings() {
                 )}
               />
 
-              <Button type="submit" variant="contained">
-                Create Rule
-              </Button>
+              <Button type="submit" variant="contained">Create Rule</Button>
             </Stack>
           </Paper>
         </Grid>
@@ -483,9 +446,7 @@ export default function Settings() {
         <Grid item xs={12} md={8}>
           <Paper sx={{ p: 2 }}>
             <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-              <Typography variant="subtitle1" fontWeight={600}>
-                Manage Rules
-              </Typography>
+              <Typography variant="subtitle1" fontWeight={600}>Manage Rules</Typography>
               <Stack direction="row" spacing={2}>
                 <TextField
                   label="Filter by Rule ID"
@@ -503,9 +464,7 @@ export default function Settings() {
                   >
                     <MenuItem value="">All</MenuItem>
                     {ALLOWED_FIELDS.map((f) => (
-                      <MenuItem key={f} value={f}>
-                        {f}
-                      </MenuItem>
+                      <MenuItem key={f} value={f}>{f}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -531,8 +490,8 @@ export default function Settings() {
                       <TableCell>Option</TableCell>
                       <TableCell>Action</TableCell>
                       <TableCell>Priority</TableCell>
-                      <TableCell>2nd Action</TableCell>
-                      <TableCell>2nd Threshold</TableCell>
+                      <TableCell>Escalate Action</TableCell>
+                      <TableCell>Escalate Threshold</TableCell>
                       <TableCell>Assignee</TableCell>
                       <TableCell>Created</TableCell>
                       <TableCell align="right">Actions</TableCell>
@@ -556,10 +515,10 @@ export default function Settings() {
                           />
                         </TableCell>
                         <TableCell sx={{ maxWidth: 220, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                          {row.second_level_action || "—"}
+                          {row.escalate_action || "—"}
                         </TableCell>
                         <TableCell>
-                          {typeof row.second_level_threshold === "number" ? row.second_level_threshold : "—"}
+                          {typeof row.escalate_threshold === "number" ? row.escalate_threshold : "—"}
                         </TableCell>
                         <TableCell>{row.assignee_username || "—"}</TableCell>
                         <TableCell>
@@ -625,9 +584,7 @@ export default function Settings() {
                   label="Field"
                 >
                   {ALLOWED_FIELDS.map((f) => (
-                    <MenuItem key={f} value={f}>
-                      {f}
-                    </MenuItem>
+                    <MenuItem key={f} value={f}>{f}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -644,9 +601,7 @@ export default function Settings() {
                   label="Action"
                 >
                   {actions.map((a) => (
-                    <MenuItem key={a.id} value={a.name}>
-                      {a.name}
-                    </MenuItem>
+                    <MenuItem key={a.id} value={a.name}>{a.name}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -660,27 +615,23 @@ export default function Settings() {
                   label="Priority"
                 >
                   {PRIORITY_OPTIONS.map((p) => (
-                    <MenuItem key={p} value={p}>
-                      {p}
-                    </MenuItem>
+                    <MenuItem key={p} value={p}>{p}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
 
-              {/* Second-level Action */}
+              {/* Escalation */}
               <TextField
-                label="Second-level Action (optional)"
-                value={editRow.second_level_action}
-                onChange={(e) => setEditRow((s) => ({ ...s, second_level_action: e.target.value }))}
+                label="Escalate Action (optional)"
+                value={editRow.escalate_action}
+                onChange={(e) => setEditRow((s) => ({ ...s, escalate_action: e.target.value }))}
                 placeholder="e.g. Escalate to compliance"
               />
-
-              {/* Second-level Threshold */}
               <TextField
-                label="Second-level Threshold (optional)"
+                label="Escalate Threshold (optional)"
                 type="number"
-                value={editRow.second_level_threshold}
-                onChange={(e) => setEditRow((s) => ({ ...s, second_level_threshold: e.target.value }))}
+                value={editRow.escalate_threshold}
+                onChange={(e) => setEditRow((s) => ({ ...s, escalate_threshold: e.target.value }))}
                 placeholder="e.g. 3"
               />
 
@@ -713,9 +664,7 @@ export default function Settings() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setEditOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={saveEdit}>
-            Save
-          </Button>
+          <Button variant="contained" onClick={saveEdit}>Save</Button>
         </DialogActions>
       </Dialog>
 
@@ -727,9 +676,7 @@ export default function Settings() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteOpen(false)}>Cancel</Button>
-          <Button color="error" variant="contained" onClick={doDelete}>
-            Delete
-          </Button>
+          <Button color="error" variant="contained" onClick={doDelete}>Delete</Button>
         </DialogActions>
       </Dialog>
 
@@ -741,4 +688,3 @@ export default function Settings() {
       </Snackbar>
     </Box>
   );
-}
