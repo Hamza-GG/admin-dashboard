@@ -48,6 +48,7 @@ export default function ActionCenter() {
   const [fField, setFField] = useState("");
   const [fOption, setFOption] = useState("");
   const [fAction, setFAction] = useState("");
+  const [fPriority, setFPriority] = useState(""); // "", "Urgent", "High", "Normal", "Low"
   const [fAssignee1, setFAssignee1] = useState(null); // user obj
   const [fAssignee2, setFAssignee2] = useState(null); // user obj
   const [fStatus, setFStatus] = useState(""); // "", "pending", "done"
@@ -108,6 +109,10 @@ export default function ActionCenter() {
     () => Array.from(new Set(rows.map(r => r.action_name).filter(Boolean))).sort(),
     [rows]
   );
+  const uniquePriorities = useMemo(
+    () => Array.from(new Set(rows.map(r => (r.priority ?? "Normal")).filter(Boolean))).sort(),
+    [rows]
+  );
 
   const userById = useMemo(() => {
     const m = new Map();
@@ -122,6 +127,7 @@ export default function ActionCenter() {
       if (fField && r.field !== fField) return false;
       if (fOption && r.option_value !== fOption) return false;
       if (fAction && r.action_name !== fAction) return false;
+      if (fPriority && (r.priority ?? "Normal") !== fPriority) return false;
 
       // Assignee 1: match-level assignee1, else fallback to rule default
       if (fAssignee1) {
@@ -158,7 +164,7 @@ export default function ActionCenter() {
 
       return true;
     });
-  }, [rows, fCity, fField, fOption, fAction, fAssignee1, fAssignee2, fStatus, fStartDate, fEndDate]);
+  }, [rows, fCity, fField, fOption, fAction, fPriority, fAssignee1, fAssignee2, fStatus, fStartDate, fEndDate]);
 
   // ---------- SCORECARDS ----------
   const totals = useMemo(() => {
@@ -258,6 +264,7 @@ export default function ActionCenter() {
     setFField("");
     setFOption("");
     setFAction("");
+    setFPriority("");
     setFAssignee1(null);
     setFAssignee2(null);
     setFStatus("");
@@ -352,6 +359,18 @@ export default function ActionCenter() {
             >
               <MenuItem value="">All</MenuItem>
               {uniqueActions.map(a => <MenuItem key={a} value={a}>{a}</MenuItem>)}
+            </TextField>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <TextField
+              select size="small"
+              label="Priority"
+              value={fPriority}
+              onChange={(e) => { setFPriority(e.target.value); setPage(0); }}
+              sx={{ minWidth: 220 }}
+            >
+              <MenuItem value="">All</MenuItem>
+              {uniquePriorities.map(p => <MenuItem key={p} value={p}>{p}</MenuItem>)}
             </TextField>
           </Grid>
 
@@ -473,6 +492,7 @@ export default function ActionCenter() {
                 <TableCell>Field</TableCell>
                 <TableCell>Option</TableCell>
                 <TableCell>Action</TableCell>
+                <TableCell>Priority</TableCell>
                 <TableCell>Assignee 1</TableCell>
                 <TableCell>Assignee 2</TableCell>
                 <TableCell>Inspected By</TableCell>
@@ -498,6 +518,7 @@ export default function ActionCenter() {
                       <TableCell>{r.field}</TableCell>
                       <TableCell>{r.option_value}</TableCell>
                       <TableCell>{r.action_name}</TableCell>
+                      <TableCell>{r.priority ?? "Normal"}</TableCell>
                       <TableCell>{assignee1Name}</TableCell>
                       <TableCell>{assignee2Name}</TableCell>
                       <TableCell>{r.inspected_by}</TableCell>
@@ -562,14 +583,14 @@ export default function ActionCenter() {
                 })}
               {(!loading && filteredRows.length === 0) && (
                 <TableRow>
-                  <TableCell colSpan={12} align="center" sx={{ py: 6, color: "text.secondary" }}>
+                  <TableCell colSpan={13} align="center" sx={{ py: 6, color: "text.secondary" }}>
                     No matches
                   </TableCell>
                 </TableRow>
               )}
               {loading && (
                 <TableRow>
-                  <TableCell colSpan={12} align="center" sx={{ py: 6, color: "text.secondary" }}>
+                  <TableCell colSpan={13} align="center" sx={{ py: 6, color: "text.secondary" }}>
                     Loading…
                   </TableCell>
                 </TableRow>
