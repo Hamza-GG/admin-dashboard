@@ -147,7 +147,7 @@ export default function ActionCenter() {
       if (fStartDate || fEndDate) {
         const ts = r.timestamp ? new Date(r.timestamp) : null;
         if (!ts) return false;
-        const day = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+        const day = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
         const tsDay = day(ts);
 
         if (fStartDate) {
