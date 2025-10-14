@@ -85,6 +85,8 @@ export default function Settings() {
     option_value: "",
     action: "",
     priority: "None", // default
+    second_level_action: "",
+    second_level_threshold: "", // keep as string for input; cast before sending
   });
   const [createAssignee, setCreateAssignee] = useState(null); // user object or null
 
@@ -193,11 +195,22 @@ export default function Settings() {
   // ====== Rules: create ======
   const handleCreateRule = async (e) => {
     e.preventDefault();
-    const { rule_id, city, field, option_value, action, priority } = createForm;
+    const {
+      rule_id,
+      city,
+      field,
+      option_value,
+      action,
+      priority,
+      second_level_action,
+      second_level_threshold,
+    } = createForm;
+
     if (!rule_id || !city || !field || !option_value || !action) {
-      showAlert("warning", "Please fill all fields.");
+      showAlert("warning", "Please fill all required fields.");
       return;
     }
+
     try {
       const payload = {
         rule_id: Number(rule_id),
@@ -205,9 +218,18 @@ export default function Settings() {
         field,
         option_value,
         action, // text action
-        priority, // <- NEW
+        priority, // text priority
         assignee_user_id: createAssignee?.id ?? null,
       };
+
+      // Only include 2nd level fields if provided
+      if (second_level_action && second_level_action.trim()) {
+        payload.second_level_action = second_level_action.trim();
+      }
+      if (second_level_threshold !== "" && !Number.isNaN(Number(second_level_threshold))) {
+        payload.second_level_threshold = Number(second_level_threshold);
+      }
+
       await authAxios.post("/inspection-rules", payload);
       showAlert("success", "Rule created.");
       setCreateForm({
@@ -217,6 +239,8 @@ export default function Settings() {
         option_value: "",
         action: "",
         priority: "None",
+        second_level_action: "",
+        second_level_threshold: "",
       });
       setCreateAssignee(null);
       fetchRules();
@@ -229,7 +253,14 @@ export default function Settings() {
 
   // ====== Rules: edit ======
   const openEdit = (row) => {
-    setEditRow({ ...row, priority: row.priority || "None" });
+    // Normalize fields for editing UI
+    setEditRow({
+      ...row,
+      priority: row.priority || "None",
+      second_level_action: row.second_level_action || "",
+      second_level_threshold:
+        typeof row.second_level_threshold === "number" ? String(row.second_level_threshold) : "",
+    });
     const u = row.assignee_user_id ? userById.get(row.assignee_user_id) : null;
     setEditAssignee(u || null);
     setEditOpen(true);
@@ -243,9 +274,24 @@ export default function Settings() {
         field: editRow.field,
         option_value: editRow.option_value,
         action: editRow.action,
-        priority: editRow.priority || "None", // <- NEW
+        priority: editRow.priority || "None",
         assignee_user_id: editAssignee?.id ?? null, // allow clearing
       };
+
+      // Include 2nd level fields only if user filled them (empty string removes them)
+      if (editRow.second_level_action && editRow.second_level_action.trim()) {
+        payload.second_level_action = editRow.second_level_action.trim();
+      } else {
+        payload.second_level_action = null;
+      }
+
+      if (editRow.second_level_threshold !== "") {
+        const n = Number(editRow.second_level_threshold);
+        payload.second_level_threshold = Number.isNaN(n) ? null : n;
+      } else {
+        payload.second_level_threshold = null;
+      }
+
       await authAxios.put(`/inspection-rules/${editRow.id}`, payload);
       showAlert("success", "Rule updated.");
       setEditOpen(false);
@@ -380,6 +426,27 @@ export default function Settings() {
                 </Select>
               </FormControl>
 
+              {/* Second-level Action (optional) */}
+              <TextField
+                label="Second-level Action (optional)"
+                value={createForm.second_level_action}
+                onChange={(e) => setCreateForm((s) => ({ ...s, second_level_action: e.target.value }))}
+                fullWidth
+                size="small"
+                placeholder="e.g. Escalate to compliance"
+              />
+
+              {/* Second-level Threshold (optional) */}
+              <TextField
+                label="Second-level Threshold (optional)"
+                type="number"
+                value={createForm.second_level_threshold}
+                onChange={(e) => setCreateForm((s) => ({ ...s, second_level_threshold: e.target.value }))}
+                fullWidth
+                size="small"
+                placeholder="e.g. 3"
+              />
+
               {/* Assignee select (optional) */}
               <Autocomplete
                 options={users}
@@ -464,6 +531,8 @@ export default function Settings() {
                       <TableCell>Option</TableCell>
                       <TableCell>Action</TableCell>
                       <TableCell>Priority</TableCell>
+                      <TableCell>2nd Action</TableCell>
+                      <TableCell>2nd Threshold</TableCell>
                       <TableCell>Assignee</TableCell>
                       <TableCell>Created</TableCell>
                       <TableCell align="right">Actions</TableCell>
@@ -485,6 +554,12 @@ export default function Settings() {
                             color={priorityColor(row.priority)}
                             variant={row.priority && row.priority !== "None" ? "filled" : "outlined"}
                           />
+                        </TableCell>
+                        <TableCell sx={{ maxWidth: 220, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                          {row.second_level_action || "—"}
+                        </TableCell>
+                        <TableCell>
+                          {typeof row.second_level_threshold === "number" ? row.second_level_threshold : "—"}
                         </TableCell>
                         <TableCell>{row.assignee_username || "—"}</TableCell>
                         <TableCell>
@@ -591,6 +666,23 @@ export default function Settings() {
                   ))}
                 </Select>
               </FormControl>
+
+              {/* Second-level Action */}
+              <TextField
+                label="Second-level Action (optional)"
+                value={editRow.second_level_action}
+                onChange={(e) => setEditRow((s) => ({ ...s, second_level_action: e.target.value }))}
+                placeholder="e.g. Escalate to compliance"
+              />
+
+              {/* Second-level Threshold */}
+              <TextField
+                label="Second-level Threshold (optional)"
+                type="number"
+                value={editRow.second_level_threshold}
+                onChange={(e) => setEditRow((s) => ({ ...s, second_level_threshold: e.target.value }))}
+                placeholder="e.g. 3"
+              />
 
               {/* Assignee (optional) */}
               <Autocomplete
