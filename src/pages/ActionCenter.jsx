@@ -14,6 +14,7 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import authAxios from "../utils/authAxios";
 
 function initials(name = "") {
@@ -109,6 +110,10 @@ export default function ActionCenter() {
   const [assignee1, setAssignee1] = useState(null); // user obj or null
   const [assignee2, setAssignee2] = useState(null); // user obj or null
   const [assignSaving, setAssignSaving] = useState(false);
+
+  // delete dialog
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteItem, setDeleteItem] = useState(null);
 
   // -------- FILTERS (client-side) --------
   const [fCity, setFCity] = useState("");
@@ -321,6 +326,40 @@ export default function ActionCenter() {
       show("error", e?.response?.data?.detail || "Failed to set assignees.");
     } finally {
       setAssignSaving(false);
+    }
+  };
+
+  // -------- Delete flow ----------
+  const openDelete = (row) => {
+    setDeleteItem(row);
+    setDeleteOpen(true);
+  };
+
+  const doDelete = async () => {
+    if (!deleteItem) return;
+    const { inspection_id, rule_id } = deleteItem;
+    try {
+      // Try DELETE with query params first
+      try {
+        await authAxios.delete("/actions/matches", {
+          params: { inspection_id, rule_id },
+        });
+      } catch (e1) {
+        // Try RESTful path
+        try {
+          await authAxios.delete(`/actions/matches/${inspection_id}/${rule_id}`);
+        } catch (e2) {
+          // Try POST fallback
+          await authAxios.post("/actions/matches/delete", { inspection_id, rule_id });
+        }
+      }
+      show("success", "Record deleted.");
+      setDeleteOpen(false);
+      setDeleteItem(null);
+      fetchMatches();
+    } catch (e) {
+      console.error(e);
+      show("error", e?.response?.data?.detail || "Failed to delete record.");
     }
   };
 
@@ -613,7 +652,7 @@ export default function ActionCenter() {
                 <TableCell>When</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell>Comment</TableCell>
-                <TableCell align="right">Assign / Confirm</TableCell>
+                <TableCell align="right">Assign / Confirm / Delete</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -678,17 +717,31 @@ export default function ActionCenter() {
                           </Tooltip>
 
                           {r.status === "done" ? (
-                            <Tooltip title="Unconfirm (set back to pending)">
-                              <span>
-                                <IconButton
-                                  color="warning"
-                                  onClick={() => openUnconfirm(r)}
-                                  size="small"
-                                >
-                                  <UndoIcon />
-                                </IconButton>
-                              </span>
-                            </Tooltip>
+                            <>
+                              <Tooltip title="Unconfirm (set back to pending)">
+                                <span>
+                                  <IconButton
+                                    color="warning"
+                                    onClick={() => openUnconfirm(r)}
+                                    size="small"
+                                  >
+                                    <UndoIcon />
+                                  </IconButton>
+                                </span>
+                              </Tooltip>
+
+                              <Tooltip title="Delete record">
+                                <span>
+                                  <IconButton
+                                    color="error"
+                                    onClick={() => openDelete(r)}
+                                    size="small"
+                                  >
+                                    <DeleteForeverIcon />
+                                  </IconButton>
+                                </span>
+                              </Tooltip>
+                            </>
                           ) : (
                             <Tooltip title="Mark done">
                               <span>
@@ -709,14 +762,14 @@ export default function ActionCenter() {
                 })}
               {(!loading && filteredRows.length === 0) && (
                 <TableRow>
-                  <TableCell colSpan={13} align="center" sx={{ py: 6, color: "text.secondary" }}>
+                  <TableCell colSpan={14} align="center" sx={{ py: 6, color: "text.secondary" }}>
                     No matches
                   </TableCell>
                 </TableRow>
               )}
               {loading && (
                 <TableRow>
-                  <TableCell colSpan={13} align="center" sx={{ py: 6, color: "text.secondary" }}>
+                  <TableCell colSpan={14} align="center" sx={{ py: 6, color: "text.secondary" }}>
                     Loading…
                   </TableCell>
                 </TableRow>
@@ -849,6 +902,23 @@ export default function ActionCenter() {
           <Button color="warning" variant="contained" onClick={doUnconfirm}>
             Unconfirm
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete dialog */}
+      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Delete record</DialogTitle>
+        <DialogContent dividers>
+          <Typography variant="body2">
+            This will permanently delete the selected record
+            {deleteItem ? ` (inspection #${deleteItem.inspection_id}, rule #${deleteItem.rule_id})` : ""}.
+            <br />
+            Are you sure?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteOpen(false)}>Cancel</Button>
+          <Button color="error" variant="contained" onClick={doDelete}>Delete</Button>
         </DialogActions>
       </Dialog>
 
