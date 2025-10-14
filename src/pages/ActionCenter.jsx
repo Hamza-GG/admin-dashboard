@@ -6,6 +6,7 @@ import {
   DialogTitle, DialogContent, DialogActions, Autocomplete, CircularProgress
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import UndoIcon from "@mui/icons-material/Undo";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import authAxios from "../utils/authAxios";
@@ -27,6 +28,11 @@ export default function ActionCenter() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [confirmItem, setConfirmItem] = useState(null);
   const [notes, setNotes] = useState("");
+
+  // unconfirm dialog
+  const [unconfirmOpen, setUnconfirmOpen] = useState(false);
+  const [unconfirmItem, setUnconfirmItem] = useState(null);
+  const [unconfirmReason, setUnconfirmReason] = useState("");
 
   // assign dialog
   const [assignOpen, setAssignOpen] = useState(false);
@@ -105,6 +111,30 @@ export default function ActionCenter() {
     } catch (e) {
       console.error(e);
       show("error", e?.response?.data?.detail || "Failed to confirm action.");
+    }
+  };
+
+  // -------- Unconfirm flow ----------
+  const openUnconfirm = (row) => {
+    setUnconfirmItem(row);
+    setUnconfirmReason("");
+    setUnconfirmOpen(true);
+  };
+
+  const doUnconfirm = async () => {
+    try {
+      await authAxios.post("/actions/unconfirm", {
+        inspection_id: unconfirmItem.inspection_id,
+        rule_id: unconfirmItem.rule_id,
+        reason: unconfirmReason || undefined,
+      });
+      show("success", "Action set back to pending.");
+      setUnconfirmOpen(false);
+      setUnconfirmItem(null);
+      fetchMatches();
+    } catch (e) {
+      console.error(e);
+      show("error", e?.response?.data?.detail || "Failed to unconfirm action.");
     }
   };
 
@@ -242,18 +272,32 @@ export default function ActionCenter() {
                               </IconButton>
                             </span>
                           </Tooltip>
-                          <Tooltip title={r.status === "done" ? "Already done" : "Mark done"}>
-                            <span>
-                              <IconButton
-                                color="success"
-                                onClick={() => openConfirm(r)}
-                                disabled={r.status === "done"}
-                                size="small"
-                              >
-                                <CheckCircleIcon />
-                              </IconButton>
-                            </span>
-                          </Tooltip>
+
+                          {r.status === "done" ? (
+                            <Tooltip title="Unconfirm (set back to pending)">
+                              <span>
+                                <IconButton
+                                  color="warning"
+                                  onClick={() => openUnconfirm(r)}
+                                  size="small"
+                                >
+                                  <UndoIcon />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
+                          ) : (
+                            <Tooltip title="Mark done">
+                              <span>
+                                <IconButton
+                                  color="success"
+                                  onClick={() => openConfirm(r)}
+                                  size="small"
+                                >
+                                  <CheckCircleIcon />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
+                          )}
                         </Stack>
                       </TableCell>
                     </TableRow>
@@ -376,6 +420,31 @@ export default function ActionCenter() {
         <DialogActions>
           <Button onClick={() => setConfirmOpen(false)}>Cancel</Button>
           <Button variant="contained" onClick={doConfirm}>Confirm</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Unconfirm dialog */}
+      <Dialog open={unconfirmOpen} onClose={() => setUnconfirmOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Unconfirm action</DialogTitle>
+        <DialogContent dividers>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            Inspection #{unconfirmItem?.inspection_id} — {unconfirmItem?.action_name}
+          </Typography>
+          <TextField
+            label="Reason (optional)"
+            value={unconfirmReason}
+            onChange={(e) => setUnconfirmReason(e.target.value)}
+            fullWidth
+            multiline
+            minRows={3}
+            placeholder="Why are you reopening this?"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setUnconfirmOpen(false)}>Cancel</Button>
+          <Button color="warning" variant="contained" onClick={doUnconfirm}>
+            Unconfirm
+          </Button>
         </DialogActions>
       </Dialog>
 
