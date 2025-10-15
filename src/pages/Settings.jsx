@@ -3,7 +3,6 @@ import {
   Box,
   Paper,
   Typography,
-  Grid,
   TextField,
   MenuItem,
   Button,
@@ -29,10 +28,10 @@ import {
   CircularProgress,
   Autocomplete,
   Chip,
-  Divider,
   List,
   ListItemButton,
   ListItemText,
+  Divider,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -275,14 +274,14 @@ export default function Settings() {
   // ====== Rules: edit ======
   const openEditRule = (row) => {
     setEditRow({
-  ...row,
-  priority: row.priority || "None",
-  second_level_action: (row.second_level_action ?? row.escalate_action) || "",
-  second_level_threshold:
-    typeof (row.second_level_threshold ?? row.escalate_threshold) === "number"
-      ? String(row.second_level_threshold ?? row.escalate_threshold)
-      : "",
-});
+      ...row,
+      priority: row.priority || "None",
+      second_level_action: (row.second_level_action ?? row.escalate_action) || "",
+      second_level_threshold:
+        typeof (row.second_level_threshold ?? row.escalate_threshold) === "number"
+          ? String(row.second_level_threshold ?? row.escalate_threshold)
+          : "",
+    });
     const u = row.assignee_user_id ? userById.get(row.assignee_user_id) : null;
     setEditAssignee(u || null);
     setEditOpen(true);
@@ -389,7 +388,16 @@ export default function Settings() {
     }
   };
 
-  // ====== Render chunks ======
+  // ===== Helpers for display =====
+  const renderSecondAction = (row) =>
+    (row.second_level_action ?? row.escalate_action) || "—";
+
+  const renderSecondThreshold = (row) => {
+    const v = row.second_level_threshold ?? row.escalate_threshold;
+    return typeof v === "number" ? v : "—";
+  };
+
+  // ====== Render panes ======
 
   const ActionsPane = (
     <Paper sx={{ p: 2 }}>
@@ -420,9 +428,7 @@ export default function Settings() {
               <TableRow>
                 <TableCell width={80}>ID</TableCell>
                 <TableCell>Name</TableCell>
-                <TableCell width={140} align="right">
-                  Created By
-                </TableCell>
+                <TableCell width={140} align="right">Created By</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -479,9 +485,7 @@ export default function Settings() {
                 label="Field"
               >
                 {ALLOWED_FIELDS.map((f) => (
-                  <MenuItem key={f} value={f}>
-                    {f}
-                  </MenuItem>
+                  <MenuItem key={f} value={f}>{f}</MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -503,9 +507,7 @@ export default function Settings() {
                 label="Action"
               >
                 {actions.map((a) => (
-                  <MenuItem key={a.id} value={a.name}>
-                    {a.name}
-                  </MenuItem>
+                  <MenuItem key={a.id} value={a.name}>{a.name}</MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -518,9 +520,7 @@ export default function Settings() {
                 label="Priority"
               >
                 {PRIORITY_OPTIONS.map((p) => (
-                  <MenuItem key={p} value={p}>
-                    {p}
-                  </MenuItem>
+                  <MenuItem key={p} value={p}>{p}</MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -581,9 +581,7 @@ export default function Settings() {
       {/* Manage Rules */}
       <Paper sx={{ p: 2 }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-          <Typography variant="h6" fontWeight={700}>
-            Active Rules
-          </Typography>
+          <Typography variant="h6" fontWeight={700}>Active Rules</Typography>
           <Stack direction="row" spacing={2}>
             <TextField
               label="Filter by Rule ID"
@@ -601,9 +599,7 @@ export default function Settings() {
               >
                 <MenuItem value="">All</MenuItem>
                 {ALLOWED_FIELDS.map((f) => (
-                  <MenuItem key={f} value={f}>
-                    {f}
-                  </MenuItem>
+                  <MenuItem key={f} value={f}>{f}</MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -653,13 +649,11 @@ export default function Settings() {
                         variant={row.priority && row.priority !== "None" ? "filled" : "outlined"}
                       />
                     </TableCell>
-                    <TableCell sx={{ whiteSpace: "normal", wordBreak: "break-word", maxWidth: 360 }}>
-  {(row.second_level_action ?? row.escalate_action) || "—"}
-</TableCell>
-                    <TableCell>
-                      {typeof (row.second_level_threshold ?? row.escalate_threshold) === "number"
-    ? (row.second_level_threshold ?? row.escalate_threshold)
-    : "—"}
+                    <TableCell sx={{ whiteSpace: "normal", wordBreak: "break-word", maxWidth: 420 }}>
+                      {renderSecondAction(row)}
+                    </TableCell>
+                    <TableCell sx={{ minWidth: 120 }}>
+                      {renderSecondThreshold(row)}
                     </TableCell>
                     <TableCell>{row.assignee_username || "—"}</TableCell>
                     <TableCell>
@@ -730,9 +724,7 @@ export default function Settings() {
                   label="Field"
                 >
                   {ALLOWED_FIELDS.map((f) => (
-                    <MenuItem key={f} value={f}>
-                      {f}
-                    </MenuItem>
+                    <MenuItem key={f} value={f}>{f}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -749,9 +741,7 @@ export default function Settings() {
                   label="Action"
                 >
                   {actions.map((a) => (
-                    <MenuItem key={a.id} value={a.name}>
-                      {a.name}
-                    </MenuItem>
+                    <MenuItem key={a.id} value={a.name}>{a.name}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -764,9 +754,7 @@ export default function Settings() {
                   label="Priority"
                 >
                   {PRIORITY_OPTIONS.map((p) => (
-                    <MenuItem key={p} value={p}>
-                      {p}
-                    </MenuItem>
+                    <MenuItem key={p} value={p}>{p}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -814,9 +802,7 @@ export default function Settings() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setEditOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={saveEditRule}>
-            Save
-          </Button>
+          <Button variant="contained" onClick={saveEditRule}>Save</Button>
         </DialogActions>
       </Dialog>
 
@@ -828,9 +814,7 @@ export default function Settings() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteOpen(false)}>Cancel</Button>
-          <Button color="error" variant="contained" onClick={doDeleteRule}>
-            Delete
-          </Button>
+          <Button color="error" variant="contained" onClick={doDeleteRule}>Delete</Button>
         </DialogActions>
       </Dialog>
     </Stack>
@@ -944,57 +928,45 @@ export default function Settings() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setEditUserOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={saveUser}>
-            Save
-          </Button>
+          <Button variant="contained" onClick={saveUser}>Save</Button>
         </DialogActions>
       </Dialog>
     </Paper>
   );
 
   return (
-    <Box sx={{ p: 3, bgcolor: "#f7fafd", minHeight: "calc(100vh - 64px)" }}>
+    <Box sx={{ p: 3, bgcolor: "#f7fafd", minHeight: "calc(100vh - 64px)", width: "100%" }}>
       <Typography variant="h4" fontWeight="bold" gutterBottom>
         Settings
       </Typography>
 
-      <Grid container spacing={3}>
+      {/* Full-width responsive layout: fixed sidebar, fluid content */}
+      <Stack direction="row" spacing={3} alignItems="flex-start" sx={{ width: "100%" }}>
         {/* Sidebar */}
-        <Grid item xs={12} md={2} lg={2}>
-          <Paper sx={{ p: 1 }}>
-            <List component="nav">
-              <ListItemButton
-                selected={activeTab === "actions"}
-                onClick={() => setActiveTab("actions")}
-              >
-                <BoltIcon fontSize="small" sx={{ mr: 1 }} />
-                <ListItemText primary="Actions" />
-              </ListItemButton>
-              <ListItemButton
-                selected={activeTab === "rules"}
-                onClick={() => setActiveTab("rules")}
-              >
-                <RuleIcon fontSize="small" sx={{ mr: 1 }} />
-                <ListItemText primary="Rules" />
-              </ListItemButton>
-              <ListItemButton
-                selected={activeTab === "users"}
-                onClick={() => setActiveTab("users")}
-              >
-                <PeopleAltIcon fontSize="small" sx={{ mr: 1 }} />
-                <ListItemText primary="Users" />
-              </ListItemButton>
-            </List>
-          </Paper>
-        </Grid>
+        <Paper sx={{ width: 260, flexShrink: 0 }}>
+          <List component="nav" dense>
+            <ListItemButton selected={activeTab === "actions"} onClick={() => setActiveTab("actions")}>
+              <BoltIcon fontSize="small" sx={{ mr: 1 }} />
+              <ListItemText primary="Actions" />
+            </ListItemButton>
+            <ListItemButton selected={activeTab === "rules"} onClick={() => setActiveTab("rules")}>
+              <RuleIcon fontSize="small" sx={{ mr: 1 }} />
+              <ListItemText primary="Rules" />
+            </ListItemButton>
+            <ListItemButton selected={activeTab === "users"} onClick={() => setActiveTab("users")}>
+              <PeopleAltIcon fontSize="small" sx={{ mr: 1 }} />
+              <ListItemText primary="Users" />
+            </ListItemButton>
+          </List>
+        </Paper>
 
-        {/* Content */}
-        <Grid item xs={12} md={10} lg={10}>
+        {/* Content (fills remaining width) */}
+        <Box sx={{ flex: 1, minWidth: 0 }}>
           {activeTab === "actions" && ActionsPane}
           {activeTab === "rules" && RulesPane}
           {activeTab === "users" && UsersPane}
-        </Grid>
-      </Grid>
+        </Box>
+      </Stack>
 
       {/* Snackbar */}
       <Snackbar open={alert.open} autoHideDuration={3500} onClose={closeAlert}>
