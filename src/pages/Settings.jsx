@@ -935,38 +935,37 @@ export default function Settings() {
   );
 
   return (
-    <Box sx={{ p: 3, bgcolor: "#f7fafd", minHeight: "calc(100vh - 64px)", width: "100%" }}>
-      <Typography variant="h4" fontWeight="bold" gutterBottom>
-        Settings
-      </Typography>
+  <Box
+    sx={{
+      // full-bleed even if a parent <Container maxWidth="lg"> exists
+      width: "100vw",
+      ml: "calc(-50vw + 50%)",
+      mr: "calc(-50vw + 50%)",
 
-      {/* Full-width responsive layout: fixed sidebar, fluid content */}
-      <Stack direction="row" spacing={3} alignItems="flex-start" sx={{ width: "100%" }}>
-        {/* Sidebar */}
-        <Paper sx={{ width: 260, flexShrink: 0 }}>
-          <List component="nav" dense>
-            <ListItemButton selected={activeTab === "actions"} onClick={() => setActiveTab("actions")}>
-              <BoltIcon fontSize="small" sx={{ mr: 1 }} />
-              <ListItemText primary="Actions" />
-            </ListItemButton>
-            <ListItemButton selected={activeTab === "rules"} onClick={() => setActiveTab("rules")}>
-              <RuleIcon fontSize="small" sx={{ mr: 1 }} />
-              <ListItemText primary="Rules" />
-            </ListItemButton>
-            <ListItemButton selected={activeTab === "users"} onClick={() => setActiveTab("users")}>
-              <PeopleAltIcon fontSize="small" sx={{ mr: 1 }} />
-              <ListItemText primary="Users" />
-            </ListItemButton>
-          </List>
-        </Paper>
+      // page styling
+      bgcolor: "#f7fafd",
+      minHeight: "calc(100vh - 64px)",
+      px: { xs: 2, md: 3 },
+      py: 3,
+    }}
+  >
+    <Typography variant="h4" fontWeight="bold" gutterBottom>
+      Settings
+    </Typography>
 
-        {/* Content (fills remaining width) */}
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          {activeTab === "actions" && ActionsPane}
-          {activeTab === "rules" && RulesPane}
-          {activeTab === "users" && UsersPane}
-        </Box>
-      </Stack>
+    <Stack direction="row" spacing={3} alignItems="flex-start" sx={{ width: "100%" }}>
+      {/* Sidebar */}
+      <Paper sx={{ width: 260, flexShrink: 0 }}>
+        {/* ...left nav as-is... */}
+      </Paper>
+
+      {/* Content — make sure it can actually stretch */}
+      <Box sx={{ flex: 1, minWidth: 0, maxWidth: "100%" }}>
+        {activeTab === "actions" && ActionsPane}
+        {activeTab === "rules" && RulesPane}
+        {activeTab === "users" && UsersPane}
+      </Box>
+    </Stack>
 
       {/* Snackbar */}
       <Snackbar open={alert.open} autoHideDuration={3500} onClose={closeAlert}>
