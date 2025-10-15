@@ -441,7 +441,7 @@ export default function Settings() {
             <CircularProgress />
           </Box>
         ) : (
-          <Table size="small">
+          <Table size="small" sx={{ width: "100%" }}>
             <TableHead>
               <TableRow>
                 <TableCell width={80}>ID</TableCell>
@@ -472,7 +472,7 @@ export default function Settings() {
   );
 
   const RulesPane = (
-    <Stack spacing={2}>
+  <Stack spacing={2} sx={{ width: "100%", flex: 1, minWidth: 0 }}>
       {/* Create Rule */}
       <Paper sx={{ p: 2, width: "100%" }}>
         <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
@@ -633,7 +633,7 @@ export default function Settings() {
               <CircularProgress />
             </Box>
           ) : (
-            <Table size="small" stickyHeader>
+            <Table size="small" stickyHeader sx={{ width: "100%" }}>
               <TableHead>
                 <TableRow>
                   <TableCell>ID</TableCell>
@@ -849,7 +849,7 @@ export default function Settings() {
             <CircularProgress />
           </Box>
         ) : (
-          <Table stickyHeader size="small">
+          <Table stickyHeader size="small" sx={{ width: "100%" }}>
             <TableHead>
               <TableRow>
                 <TableCell>Username (email)</TableCell>
@@ -958,7 +958,7 @@ export default function Settings() {
       width: "100%",            // simpler & safer than 100vw + negative margins
       bgcolor: "#f7fafd",
       minHeight: "calc(100vh - 64px)",
-      px: { xs: 2, md: 3 },
+      px: { xs: 2, md: 4 },
       py: 3,
     }}
   >
@@ -973,7 +973,7 @@ export default function Settings() {
   sx={{ width: "100%" }}   // remove maxWidth & centering
 >
       {/* Sidebar */}
-      <Paper sx={{ width: 260, flexShrink: 0 }}>
+      <Paper sx={{ width: 280, flexShrink: 0 }}>
         <Sidebar activeTab={activeTab} onChange={setActiveTab} />
       </Paper>
 
