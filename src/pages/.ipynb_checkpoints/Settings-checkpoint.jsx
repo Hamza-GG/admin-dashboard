@@ -29,18 +29,11 @@ import {
   CircularProgress,
   Autocomplete,
   Chip,
-  Divider,
-  List,
-  ListItemButton,
-  ListItemText,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import FilterAltIcon from "@mui/icons-material/FilterAlt";
-import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
-import RuleIcon from "@mui/icons-material/Rule";
-import BoltIcon from "@mui/icons-material/Bolt";
 import authAxios from "../utils/authAxios";
 
 const ALLOWED_FIELDS = [
@@ -75,15 +68,13 @@ function priorityColor(p) {
 }
 
 export default function Settings() {
-  const [activeTab, setActiveTab] = useState("actions"); // "actions" | "rules" | "users"
-
   // -------- Actions ----------
   const [actions, setActions] = useState([]);
   const [createActionName, setCreateActionName] = useState("");
   const [loadingActions, setLoadingActions] = useState(true);
 
-  // -------- Users (assignees & Users tab) -------
-  const [users, setUsers] = useState([]); // [{id, username, role, is_verified}]
+  // -------- Users (assignees) -------
+  const [users, setUsers] = useState([]); // [{id, username, role, ...}]
   const [loadingUsers, setLoadingUsers] = useState(true);
 
   // -------- Rules ------------
@@ -93,9 +84,9 @@ export default function Settings() {
     field: "",
     option_value: "",
     action: "",
-    priority: "None",
+    priority: "None", // default
     second_level_action: "",
-    second_level_threshold: "",
+    second_level_threshold: "", // keep as string for input; cast before sending
   });
   const [createAssignee, setCreateAssignee] = useState(null); // user object or null
 
@@ -103,17 +94,10 @@ export default function Settings() {
   const [loadingRules, setLoadingRules] = useState(true);
   const [filterRuleId, setFilterRuleId] = useState("");
   const [filterField, setFilterField] = useState("");
-  const [pageRules, setPageRules] = useState(0);
-  const [rppRules, setRppRules] = useState(10);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  // -------- Users tab state ----
-  const [userPage, setUserPage] = useState(0);
-  const [userRpp, setUserRpp] = useState(10);
-  const [editUserOpen, setEditUserOpen] = useState(false);
-  const [editUserRow, setEditUserRow] = useState(null);
-  const [newPassword, setNewPassword] = useState("");
-
-  // -------- Rule Edit/Delete dialogs ----
+  // -------- Edit/Delete dialogs ----
   const [editOpen, setEditOpen] = useState(false);
   const [editRow, setEditRow] = useState(null);
   const [editAssignee, setEditAssignee] = useState(null);
@@ -168,19 +152,13 @@ export default function Settings() {
     }
   };
 
-  // Load per tab to keep things lighter
   useEffect(() => {
-    if (activeTab === "actions") fetchActions();
-    if (activeTab === "rules") {
-      fetchActions(); // needed for action dropdowns
-      fetchUsers();   // needed for assignee lists
-      fetchRules();
-    }
-    if (activeTab === "users") fetchUsers();
-  }, [activeTab]);
+    fetchActions();
+    fetchUsers();
+  }, []);
 
   useEffect(() => {
-    if (activeTab === "rules") fetchRules();
+    fetchRules();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterRuleId, filterField]);
 
@@ -244,6 +222,7 @@ export default function Settings() {
         assignee_user_id: createAssignee?.id ?? null,
       };
 
+      // Only include 2nd level fields if provided
       if (second_level_action && second_level_action.trim()) {
         payload.second_level_action = second_level_action.trim();
       }
@@ -273,20 +252,28 @@ export default function Settings() {
   };
 
   // ====== Rules: edit ======
-  const openEditRule = (row) => {
+  const openEdit = (row) => {
+    // Accept both second_level_* and escalate_* just in case
+    const secondAction = row.second_level_action ?? row.escalate_action ?? "";
+    const secondThreshold =
+      typeof row.second_level_threshold === "number"
+        ? String(row.second_level_threshold)
+        : typeof row.escalate_threshold === "number"
+        ? String(row.escalate_threshold)
+        : "";
+
     setEditRow({
       ...row,
       priority: row.priority || "None",
-      second_level_action: row.second_level_action || "",
-      second_level_threshold:
-        typeof row.second_level_threshold === "number" ? String(row.second_level_threshold) : "",
+      second_level_action: secondAction,
+      second_level_threshold: secondThreshold,
     });
     const u = row.assignee_user_id ? userById.get(row.assignee_user_id) : null;
     setEditAssignee(u || null);
     setEditOpen(true);
   };
 
-  const saveEditRule = async () => {
+  const saveEdit = async () => {
     try {
       const payload = {
         rule_id: Number(editRow.rule_id),
@@ -298,6 +285,7 @@ export default function Settings() {
         assignee_user_id: editAssignee?.id ?? null, // allow clearing
       };
 
+      // Include 2nd level fields only if user filled them (empty string removes them)
       if (editRow.second_level_action && editRow.second_level_action.trim()) {
         payload.second_level_action = editRow.second_level_action.trim();
       } else {
@@ -325,12 +313,12 @@ export default function Settings() {
   };
 
   // ====== Rules: delete ======
-  const confirmDeleteRule = (row) => {
+  const confirmDelete = (row) => {
     setToDelete(row);
     setDeleteOpen(true);
   };
 
-  const doDeleteRule = async () => {
+  const doDelete = async () => {
     try {
       await authAxios.delete(`/inspection-rules/${toDelete.id}`);
       showAlert("success", "Rule deleted.");
@@ -344,364 +332,289 @@ export default function Settings() {
     }
   };
 
-  // ===== Users tab: edit user =====
-  const openEditUser = (u) => {
-    setEditUserRow({ ...u, new_password: "" });
-    setNewPassword("");
-    setEditUserOpen(true);
-  };
-
-  const saveUser = async () => {
-    try {
-      const form = new FormData();
-      if (editUserRow.role) form.append("role", editUserRow.role);
-      if (typeof editUserRow.is_verified === "boolean") {
-        form.append("is_verified", String(editUserRow.is_verified));
-      }
-      if (newPassword) form.append("new_password", newPassword);
-
-      await authAxios.put(`/users/by-username/${encodeURIComponent(editUserRow.username)}`, form, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      showAlert("success", "User updated.");
-      setEditUserOpen(false);
-      setEditUserRow(null);
-      setNewPassword("");
-      fetchUsers();
-    } catch (e) {
-      console.error(e);
-      const msg = e?.response?.data?.detail || "Failed to update user.";
-      showAlert("error", msg);
-    }
-  };
-
-  const deleteUser = async (u) => {
-    try {
-      await authAxios.delete(`/users/by-username/${encodeURIComponent(u.username)}`);
-      showAlert("success", "User deleted.");
-      fetchUsers();
-    } catch (e) {
-      console.error(e);
-      const msg = e?.response?.data?.detail || "Failed to delete user.";
-      showAlert("error", msg);
-    }
-  };
-
-  // ====== Render chunks ======
-
-  const ActionsPane = (
-    <Paper sx={{ p: 2 }}>
-      <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
-        Actions
+  return (
+    <Box sx={{ p: 3, bgcolor: "#f7fafd", minHeight: "calc(100vh - 64px)" }}>
+      <Typography variant="h4" fontWeight="bold" gutterBottom>
+        Settings
       </Typography>
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="flex-start" sx={{ mb: 2 }}>
-        <TextField
-          label="Action name"
-          value={createActionName}
-          onChange={(e) => setCreateActionName(e.target.value)}
-          size="small"
-          sx={{ minWidth: 260 }}
-        />
-        <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateAction}>
-          Create Action
-        </Button>
-      </Stack>
 
-      <TableContainer component={Paper} variant="outlined">
-        {loadingActions ? (
-          <Box sx={{ p: 3, display: "flex", justifyContent: "center" }}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell width={80}>ID</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell width={140} align="right">
-                  Created By
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {actions.map((a) => (
-                <TableRow key={a.id} hover>
-                  <TableCell>{a.id}</TableCell>
-                  <TableCell>{a.name}</TableCell>
-                  <TableCell align="right">{a.created_by ?? "—"}</TableCell>
-                </TableRow>
-              ))}
-              {actions.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={3} align="center" sx={{ py: 6, color: "text.secondary" }}>
-                    No actions yet
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        )}
-      </TableContainer>
-    </Paper>
-  );
-
-  const RulesPane = (
-    <Stack spacing={2}>
-      {/* Create Rule */}
-      <Paper sx={{ p: 2 }}>
-        <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
-          Create Rule
-        </Typography>
-        <Stack component="form" spacing={2} onSubmit={handleCreateRule}>
-          <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
-            <TextField
-              label="Rule ID"
-              type="number"
-              value={createForm.rule_id}
-              onChange={(e) => setCreateForm((s) => ({ ...s, rule_id: e.target.value }))}
-              size="small"
-              sx={{ minWidth: 160 }}
-            />
-            <TextField
-              label="City"
-              value={createForm.city}
-              onChange={(e) => setCreateForm((s) => ({ ...s, city: e.target.value }))}
-              size="small"
-              sx={{ minWidth: 200 }}
-            />
-            <FormControl size="small" sx={{ minWidth: 200 }}>
-              <InputLabel>Field</InputLabel>
-              <Select
-                value={createForm.field}
-                onChange={(e) => setCreateForm((s) => ({ ...s, field: e.target.value }))}
-                label="Field"
-              >
-                {ALLOWED_FIELDS.map((f) => (
-                  <MenuItem key={f} value={f}>
-                    {f}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <TextField
-              label="Option"
-              value={createForm.option_value}
-              onChange={(e) => setCreateForm((s) => ({ ...s, option_value: e.target.value }))}
-              size="small"
-              sx={{ minWidth: 200 }}
-            />
-          </Stack>
-
-          <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
-            <FormControl size="small" sx={{ minWidth: 240 }}>
-              <InputLabel>Action</InputLabel>
-              <Select
-                value={createForm.action}
-                onChange={(e) => setCreateForm((s) => ({ ...s, action: e.target.value }))}
-                label="Action"
-              >
-                {actions.map((a) => (
-                  <MenuItem key={a.id} value={a.name}>
-                    {a.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <FormControl size="small" sx={{ minWidth: 180 }}>
-              <InputLabel>Priority</InputLabel>
-              <Select
-                value={createForm.priority}
-                onChange={(e) => setCreateForm((s) => ({ ...s, priority: e.target.value }))}
-                label="Priority"
-              >
-                {PRIORITY_OPTIONS.map((p) => (
-                  <MenuItem key={p} value={p}>
-                    {p}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <TextField
-              label="2nd-level Action (optional)"
-              value={createForm.second_level_action}
-              onChange={(e) => setCreateForm((s) => ({ ...s, second_level_action: e.target.value }))}
-              size="small"
-              sx={{ flex: 1, minWidth: 220 }}
-              placeholder="e.g. Escalate to compliance"
-            />
-
-            <TextField
-              label="2nd-level Threshold (optional)"
-              type="number"
-              value={createForm.second_level_threshold}
-              onChange={(e) => setCreateForm((s) => ({ ...s, second_level_threshold: e.target.value }))}
-              size="small"
-              sx={{ minWidth: 180 }}
-              placeholder="e.g. 3"
-            />
-          </Stack>
-
-          <Autocomplete
-            options={users}
-            loading={loadingUsers}
-            getOptionLabel={(o) => o?.username ?? ""}
-            value={createAssignee}
-            onChange={(_, v) => setCreateAssignee(v)}
-            renderInput={(params) => (
+      <Grid container spacing={3}>
+        {/* Left column: Actions + Create Rule */}
+        <Grid item xs={12} md={3}>
+          {/* Create Action */}
+          <Paper sx={{ p: 2, mb: 3 }}>
+            <Typography variant="subtitle1" fontWeight={600}>
+              Create Action
+            </Typography>
+            <Stack component="form" spacing={2} onSubmit={handleCreateAction}>
               <TextField
-                {...params}
-                label="Assignee (optional)"
+                label="Action name"
+                value={createActionName}
+                onChange={(e) => setCreateActionName(e.target.value)}
+                fullWidth
                 size="small"
-                InputProps={{
-                  ...params.InputProps,
-                  endAdornment: (
-                    <>
-                      {loadingUsers ? <CircularProgress size={16} /> : null}
-                      {params.InputProps.endAdornment}
-                    </>
-                  ),
-                }}
               />
-            )}
-            sx={{ maxWidth: 420 }}
-          />
+              <Button type="submit" variant="contained" startIcon={<AddIcon />}>
+                Create Action
+              </Button>
+            </Stack>
+          </Paper>
 
-          <Box>
-            <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateRule}>
+          {/* Create Rule */}
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="subtitle1" fontWeight={600}>
               Create Rule
-            </Button>
-          </Box>
-        </Stack>
-      </Paper>
+            </Typography>
+            <Stack component="form" spacing={2} onSubmit={handleCreateRule}>
+              <TextField
+                label="Rule ID"
+                type="number"
+                value={createForm.rule_id}
+                onChange={(e) => setCreateForm((s) => ({ ...s, rule_id: e.target.value }))}
+                fullWidth
+                size="small"
+              />
+              <TextField
+                label="City"
+                value={createForm.city}
+                onChange={(e) => setCreateForm((s) => ({ ...s, city: e.target.value }))}
+                fullWidth
+                size="small"
+              />
+              <FormControl fullWidth size="small">
+                <InputLabel>Field</InputLabel>
+                <Select
+                  value={createForm.field}
+                  onChange={(e) => setCreateForm((s) => ({ ...s, field: e.target.value }))}
+                  label="Field"
+                >
+                  {ALLOWED_FIELDS.map((f) => (
+                    <MenuItem key={f} value={f}>
+                      {f}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <TextField
+                label="Option"
+                value={createForm.option_value}
+                onChange={(e) => setCreateForm((s) => ({ ...s, option_value: e.target.value }))}
+                fullWidth
+                size="small"
+              />
+              <FormControl fullWidth size="small">
+                <InputLabel>Action</InputLabel>
+                <Select
+                  value={createForm.action}
+                  onChange={(e) => setCreateForm((s) => ({ ...s, action: e.target.value }))}
+                  label="Action"
+                >
+                  {actions.map((a) => (
+                    <MenuItem key={a.id} value={a.name}>
+                      {a.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
-      {/* Manage Rules */}
-      <Paper sx={{ p: 2 }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-          <Typography variant="h6" fontWeight={700}>
-            Active Rules
-          </Typography>
-          <Stack direction="row" spacing={2}>
-            <TextField
-              label="Filter by Rule ID"
-              size="small"
-              value={filterRuleId}
-              onChange={(e) => setFilterRuleId(e.target.value)}
-              sx={{ width: 160 }}
-            />
-            <FormControl size="small" sx={{ minWidth: 180 }}>
-              <InputLabel>Filter by Field</InputLabel>
-              <Select
-                value={filterField}
-                onChange={(e) => setFilterField(e.target.value)}
-                label="Filter by Field"
-              >
-                <MenuItem value="">All</MenuItem>
-                {ALLOWED_FIELDS.map((f) => (
-                  <MenuItem key={f} value={f}>
-                    {f}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <Button variant="outlined" startIcon={<FilterAltIcon />} onClick={fetchRules}>
-              Apply
-            </Button>
-          </Stack>
-        </Stack>
+              {/* Priority */}
+              <FormControl fullWidth size="small">
+                <InputLabel>Priority</InputLabel>
+                <Select
+                  value={createForm.priority}
+                  onChange={(e) => setCreateForm((s) => ({ ...s, priority: e.target.value }))}
+                  label="Priority"
+                >
+                  {PRIORITY_OPTIONS.map((p) => (
+                    <MenuItem key={p} value={p}>
+                      {p}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
-        <TableContainer sx={{ maxHeight: 520 }}>
-          {loadingRules ? (
-            <Box sx={{ p: 3, display: "flex", justifyContent: "center" }}>
-              <CircularProgress />
-            </Box>
-          ) : (
-            <Table size="small" stickyHeader>
-              <TableHead>
-                <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>Rule ID</TableCell>
-                  <TableCell>City</TableCell>
-                  <TableCell>Field</TableCell>
-                  <TableCell>Option</TableCell>
-                  <TableCell>Action</TableCell>
-                  <TableCell>Priority</TableCell>
-                  <TableCell>2nd Action</TableCell>
-                  <TableCell>2nd Threshold</TableCell>
-                  <TableCell>Assignee</TableCell>
-                  <TableCell>Created</TableCell>
-                  <TableCell align="right">Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {rules.slice(pageRules * rppRules, pageRules * rppRules + rppRules).map((row) => (
-                  <TableRow key={row.id} hover>
-                    <TableCell>{row.id}</TableCell>
-                    <TableCell>{row.rule_id}</TableCell>
-                    <TableCell>{row.city}</TableCell>
-                    <TableCell>{row.field}</TableCell>
-                    <TableCell>{row.option_value}</TableCell>
-                    <TableCell>{row.action}</TableCell>
-                    <TableCell>
-                      <Chip
-                        size="small"
-                        label={row.priority || "None"}
-                        color={priorityColor(row.priority)}
-                        variant={row.priority && row.priority !== "None" ? "filled" : "outlined"}
-                      />
-                    </TableCell>
-                    <TableCell sx={{ maxWidth: 220, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                      {row.second_level_action || "—"}
-                    </TableCell>
-                    <TableCell>
-                      {typeof row.second_level_threshold === "number" ? row.second_level_threshold : "—"}
-                    </TableCell>
-                    <TableCell>{row.assignee_username || "—"}</TableCell>
-                    <TableCell>
-                      {row.created_at ? new Date(row.created_at).toLocaleString("fr-MA") : "—"}
-                    </TableCell>
-                    <TableCell align="right">
-                      <Tooltip title="Edit">
-                        <IconButton onClick={() => openEditRule(row)}>
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete">
-                        <IconButton color="error" onClick={() => confirmDeleteRule(row)}>
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {!loadingRules && rules.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={12} align="center" sx={{ py: 6, color: "text.secondary" }}>
-                      No rules found
-                    </TableCell>
-                  </TableRow>
+              {/* Second-level Action (optional) */}
+              <TextField
+                label="2nd-level Action (optional)"
+                value={createForm.second_level_action}
+                onChange={(e) => setCreateForm((s) => ({ ...s, second_level_action: e.target.value }))}
+                fullWidth
+                size="small"
+                placeholder="e.g. Escalate to compliance"
+              />
+
+              {/* Second-level Threshold (optional) */}
+              <TextField
+                label="2nd-level Threshold (optional)"
+                type="number"
+                value={createForm.second_level_threshold}
+                onChange={(e) => setCreateForm((s) => ({ ...s, second_level_threshold: e.target.value }))}
+                fullWidth
+                size="small"
+                placeholder="e.g. 3"
+              />
+
+              {/* Assignee select (optional) */}
+              <Autocomplete
+                options={users}
+                loading={loadingUsers}
+                getOptionLabel={(o) => o?.username ?? ""}
+                value={createAssignee}
+                onChange={(_, v) => setCreateAssignee(v)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Assignee (optional)"
+                    size="small"
+                    InputProps={{
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {loadingUsers ? <CircularProgress size={16} /> : null}
+                          {params.InputProps.endAdornment}
+                        </>
+                      ),
+                    }}
+                  />
                 )}
-              </TableBody>
-            </Table>
-          )}
-        </TableContainer>
+              />
 
-        <TablePagination
-          component="div"
-          count={rules.length}
-          page={pageRules}
-          onPageChange={(_, p) => setPageRules(p)}
-          rowsPerPage={rppRules}
-          onRowsPerPageChange={(e) => {
-            setRppRules(parseInt(e.target.value, 10));
-            setPageRules(0);
-          }}
-          rowsPerPageOptions={[5, 10, 25, 50]}
-        />
-      </Paper>
+              <Button type="submit" variant="contained">
+                Create Rule
+              </Button>
+            </Stack>
+          </Paper>
+        </Grid>
 
-      {/* Edit Rule Dialog */}
+        {/* Right column: Manage Rules (wider now) */}
+        <Grid item xs={12} md={9}>
+          <Paper sx={{ p: 2 }}>
+            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+              <Typography variant="subtitle1" fontWeight={600}>
+                Active Rules
+              </Typography>
+              <Stack direction="row" spacing={2}>
+                <TextField
+                  label="Filter by Rule ID"
+                  size="small"
+                  value={filterRuleId}
+                  onChange={(e) => setFilterRuleId(e.target.value)}
+                  sx={{ width: 160 }}
+                />
+                <FormControl size="small" sx={{ minWidth: 180 }}>
+                  <InputLabel>Filter by Field</InputLabel>
+                  <Select
+                    value={filterField}
+                    onChange={(e) => setFilterField(e.target.value)}
+                    label="Filter by Field"
+                  >
+                    <MenuItem value="">All</MenuItem>
+                    {ALLOWED_FIELDS.map((f) => (
+                      <MenuItem key={f} value={f}>
+                        {f}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <Button variant="outlined" startIcon={<FilterAltIcon />} onClick={fetchRules}>
+                  Apply
+                </Button>
+              </Stack>
+            </Stack>
+
+            <TableContainer sx={{ maxHeight: 520 }}>
+              {loadingRules ? (
+                <Box sx={{ p: 3, display: "flex", justifyContent: "center" }}>
+                  <CircularProgress />
+                </Box>
+              ) : (
+                <Table size="small" stickyHeader>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>ID</TableCell>
+                      <TableCell>Rule ID</TableCell>
+                      <TableCell>City</TableCell>
+                      <TableCell>Field</TableCell>
+                      <TableCell>Option</TableCell>
+                      <TableCell>Action</TableCell>
+                      <TableCell>Priority</TableCell>
+                      <TableCell>2nd Action</TableCell>
+                      <TableCell>2nd Threshold</TableCell>
+                      <TableCell>Assignee</TableCell>
+                      <TableCell>Created</TableCell>
+                      <TableCell align="right">Actions</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {rules.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+                      // Backward-compat support
+                      const secondAction = row.second_level_action ?? row.escalate_action ?? "";
+                      const secondThreshold =
+                        row.second_level_threshold ?? row.escalate_threshold ?? null;
+
+                      return (
+                        <TableRow key={row.id} hover>
+                          <TableCell>{row.id}</TableCell>
+                          <TableCell>{row.rule_id}</TableCell>
+                          <TableCell>{row.city}</TableCell>
+                          <TableCell>{row.field}</TableCell>
+                          <TableCell>{row.option_value}</TableCell>
+                          <TableCell>{row.action}</TableCell>
+                          <TableCell>
+                            <Chip
+                              size="small"
+                              label={row.priority || "None"}
+                              color={priorityColor(row.priority)}
+                              variant={row.priority && row.priority !== "None" ? "filled" : "outlined"}
+                            />
+                          </TableCell>
+                          <TableCell sx={{ whiteSpace: "normal", wordBreak: "break-word", maxWidth: 360 }}>
+                            {secondAction || "—"}
+                          </TableCell>
+                          <TableCell>
+                            {typeof secondThreshold === "number" ? secondThreshold : "—"}
+                          </TableCell>
+                          <TableCell>{row.assignee_username || "—"}</TableCell>
+                          <TableCell>
+                            {row.created_at ? new Date(row.created_at).toLocaleString("fr-MA") : "—"}
+                          </TableCell>
+                          <TableCell align="right">
+                            <Tooltip title="Edit">
+                              <IconButton onClick={() => openEdit(row)}>
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Delete">
+                              <IconButton color="error" onClick={() => confirmDelete(row)}>
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              )}
+            </TableContainer>
+
+            <TablePagination
+              component="div"
+              count={rules.length}
+              page={page}
+              onPageChange={(_, p) => setPage(p)}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={(e) => {
+                setRowsPerPage(parseInt(e.target.value, 10));
+                setPage(0);
+              }}
+              rowsPerPageOptions={[5, 10, 25, 50]}
+            />
+          </Paper>
+        </Grid>
+      </Grid>
+
+      {/* Edit Dialog */}
       <Dialog open={editOpen} onClose={() => setEditOpen(false)} fullWidth>
         <DialogTitle>Edit Rule</DialogTitle>
         <DialogContent dividers>
@@ -752,6 +665,7 @@ export default function Settings() {
                 </Select>
               </FormControl>
 
+              {/* Priority */}
               <FormControl>
                 <InputLabel>Priority</InputLabel>
                 <Select
@@ -767,6 +681,7 @@ export default function Settings() {
                 </Select>
               </FormControl>
 
+              {/* Second-level Action */}
               <TextField
                 label="2nd-level Action (optional)"
                 value={editRow.second_level_action}
@@ -774,6 +689,7 @@ export default function Settings() {
                 placeholder="e.g. Escalate to compliance"
               />
 
+              {/* Second-level Threshold */}
               <TextField
                 label="2nd-level Threshold (optional)"
                 type="number"
@@ -782,6 +698,7 @@ export default function Settings() {
                 placeholder="e.g. 3"
               />
 
+              {/* Assignee (optional) */}
               <Autocomplete
                 options={users}
                 loading={loadingUsers}
@@ -810,13 +727,13 @@ export default function Settings() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setEditOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={saveEditRule}>
+          <Button variant="contained" onClick={saveEdit}>
             Save
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Delete Rule confirm */}
+      {/* Delete confirm */}
       <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
         <DialogTitle>Delete Rule?</DialogTitle>
         <DialogContent dividers>
@@ -824,173 +741,11 @@ export default function Settings() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteOpen(false)}>Cancel</Button>
-          <Button color="error" variant="contained" onClick={doDeleteRule}>
+          <Button color="error" variant="contained" onClick={doDelete}>
             Delete
           </Button>
         </DialogActions>
       </Dialog>
-    </Stack>
-  );
-
-  const UsersPane = (
-    <Paper sx={{ p: 2 }}>
-      <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
-        Users
-      </Typography>
-      <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: 560 }}>
-        {loadingUsers ? (
-          <Box sx={{ p: 3, display: "flex", justifyContent: "center" }}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <Table stickyHeader size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Username (email)</TableCell>
-                <TableCell>Role</TableCell>
-                <TableCell>Verified</TableCell>
-                <TableCell align="right">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {users
-                .slice(userPage * userRpp, userPage * userRpp + userRpp)
-                .map((u) => (
-                  <TableRow key={u.id} hover>
-                    <TableCell>{u.username}</TableCell>
-                    <TableCell>{u.role}</TableCell>
-                    <TableCell>{u.is_verified ? "Yes" : "No"}</TableCell>
-                    <TableCell align="right">
-                      <Tooltip title="Edit">
-                        <IconButton onClick={() => openEditUser(u)}>
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete">
-                        <IconButton color="error" onClick={() => deleteUser(u)}>
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              {!loadingUsers && users.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={4} align="center" sx={{ py: 6, color: "text.secondary" }}>
-                    No users found
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        )}
-      </TableContainer>
-
-      <TablePagination
-        component="div"
-        count={users.length}
-        page={userPage}
-        onPageChange={(_, p) => setUserPage(p)}
-        rowsPerPage={userRpp}
-        onRowsPerPageChange={(e) => {
-          setUserRpp(parseInt(e.target.value, 10));
-          setUserPage(0);
-        }}
-        rowsPerPageOptions={[5, 10, 25, 50]}
-      />
-
-      {/* Edit user dialog */}
-      <Dialog open={editUserOpen} onClose={() => setEditUserOpen(false)} fullWidth>
-        <DialogTitle>Edit User</DialogTitle>
-        <DialogContent dividers>
-          {editUserRow && (
-            <Stack spacing={2}>
-              <TextField label="Username" value={editUserRow.username} InputProps={{ readOnly: true }} />
-              <FormControl>
-                <InputLabel>Role</InputLabel>
-                <Select
-                  label="Role"
-                  value={editUserRow.role || ""}
-                  onChange={(e) => setEditUserRow((s) => ({ ...s, role: e.target.value }))}
-                >
-                  <MenuItem value="admin">admin</MenuItem>
-                  <MenuItem value="supervisor">supervisor</MenuItem>
-                </Select>
-              </FormControl>
-              <FormControl>
-                <InputLabel>Verified</InputLabel>
-                <Select
-                  label="Verified"
-                  value={editUserRow.is_verified ? "true" : "false"}
-                  onChange={(e) => setEditUserRow((s) => ({ ...s, is_verified: e.target.value === "true" }))}
-                >
-                  <MenuItem value="true">Yes</MenuItem>
-                  <MenuItem value="false">No</MenuItem>
-                </Select>
-              </FormControl>
-              <TextField
-                label="New password (optional)"
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                helperText="Leave blank to keep current password"
-              />
-            </Stack>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setEditUserOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={saveUser}>
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Paper>
-  );
-
-  return (
-    <Box sx={{ p: 3, bgcolor: "#f7fafd", minHeight: "calc(100vh - 64px)" }}>
-      <Typography variant="h4" fontWeight="bold" gutterBottom>
-        Settings
-      </Typography>
-
-      <Grid container spacing={3}>
-        {/* Sidebar */}
-        <Grid item xs={12} md={3} lg={2}>
-          <Paper sx={{ p: 1 }}>
-            <List component="nav">
-              <ListItemButton
-                selected={activeTab === "actions"}
-                onClick={() => setActiveTab("actions")}
-              >
-                <BoltIcon fontSize="small" sx={{ mr: 1 }} />
-                <ListItemText primary="Actions" />
-              </ListItemButton>
-              <ListItemButton
-                selected={activeTab === "rules"}
-                onClick={() => setActiveTab("rules")}
-              >
-                <RuleIcon fontSize="small" sx={{ mr: 1 }} />
-                <ListItemText primary="Rules" />
-              </ListItemButton>
-              <ListItemButton
-                selected={activeTab === "users"}
-                onClick={() => setActiveTab("users")}
-              >
-                <PeopleAltIcon fontSize="small" sx={{ mr: 1 }} />
-                <ListItemText primary="Users" />
-              </ListItemButton>
-            </List>
-          </Paper>
-        </Grid>
-
-        {/* Content */}
-        <Grid item xs={12} md={9} lg={10}>
-          {activeTab === "actions" && ActionsPane}
-          {activeTab === "rules" && RulesPane}
-          {activeTab === "users" && UsersPane}
-        </Grid>
-      </Grid>
 
       {/* Snackbar */}
       <Snackbar open={alert.open} autoHideDuration={3500} onClose={closeAlert}>
