@@ -277,11 +277,11 @@ export default function Settings() {
       };
 
       if (second_level_action && second_level_action.trim()) {
-        payload.second_level_action = second_level_action.trim();
-      }
-      if (second_level_threshold !== "" && !Number.isNaN(Number(second_level_threshold))) {
-        payload.second_level_threshold = Number(second_level_threshold);
-      }
+  payload.escalate_action = second_level_action.trim();
+}
+if (second_level_threshold !== "" && !Number.isNaN(Number(second_level_threshold))) {
+  payload.escalate_threshold = Number(second_level_threshold);
+}
 
       await authAxios.post("/inspection-rules", payload);
       showAlert("success", "Rule created.");
@@ -333,17 +333,17 @@ export default function Settings() {
       };
 
       if (editRow.second_level_action && editRow.second_level_action.trim()) {
-        payload.second_level_action = editRow.second_level_action.trim();
-      } else {
-        payload.second_level_action = null;
-      }
+  payload.escalate_action = editRow.second_level_action.trim();
+} else {
+  payload.escalate_action = null;
+}
 
-      if (editRow.second_level_threshold !== "") {
-        const n = Number(editRow.second_level_threshold);
-        payload.second_level_threshold = Number.isNaN(n) ? null : n;
-      } else {
-        payload.second_level_threshold = null;
-      }
+if (editRow.second_level_threshold !== "") {
+  const n = Number(editRow.second_level_threshold);
+  payload.escalate_threshold = Number.isNaN(n) ? null : n;
+} else {
+  payload.escalate_threshold = null;
+}
 
       await authAxios.put(`/inspection-rules/${editRow.id}`, payload);
       showAlert("success", "Rule updated.");
@@ -969,7 +969,7 @@ export default function Settings() {
   );
 
   return (
-  <Box sx={{ bgcolor: "#f7fafd", minHeight: "calc(100vh - 64px)", width: "100%" }}>
+  <Box sx={{ bgcolor: "#f7fafd", minHeight: "100vh", width: "100vw", overflowX: "hidden" }}>
     <Box
       sx={{
         display: "flex",
@@ -997,7 +997,7 @@ export default function Settings() {
         <Paper
           elevation={1}
           sx={{
-            width: 280,
+            width: 250,
             flexShrink: 0,
             height: "fit-content",
           }}
@@ -1006,7 +1006,16 @@ export default function Settings() {
         </Paper>
 
         {/* Content */}
-        <Box sx={{ flex: 1, width: "100%" }}>
+         <Box
+    sx={{
+      flex: 1,
+      width: "100%",
+      bgcolor: "white",
+      p: 2,
+      borderRadius: 2,
+      boxShadow: 1,
+    }}
+  >
           {activeTab === "actions" && ActionsPane}
           {activeTab === "rules" && RulesPane}
           {activeTab === "users" && UsersPane}
