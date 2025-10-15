@@ -92,7 +92,7 @@ function Navbar({ setIsAuthenticated }) {
           sx={{ display: "flex", alignItems: "center", textDecoration: "none" }}
         >
           <img
-            src="/rider.gif"
+            src="/glopi.png"
             alt="logo"
             style={{ height: 52, marginRight: 30 }}
             type="image/gif"
