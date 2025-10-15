@@ -123,7 +123,6 @@ export default function ActionCenter() {
 
   // -------- FILTERS (client-side) --------
   const [fCity, setFCity] = useState("");
-  thead
   const [fField, setFField] = useState("");
   const [fOption, setFOption] = useState("");
   const [fAction, setFAction] = useState("");
