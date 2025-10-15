@@ -15,6 +15,7 @@ import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import authAxios from "../utils/authAxios";
 
 function initials(name = "") {
@@ -115,8 +116,14 @@ export default function ActionCenter() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteItem, setDeleteItem] = useState(null);
 
+  // details dialog (recap)
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [detailsData, setDetailsData] = useState(null);
+
   // -------- FILTERS (client-side) --------
   const [fCity, setFCity] = useState("");
+  thead
   const [fField, setFField] = useState("");
   const [fOption, setFOption] = useState("");
   const [fAction, setFAction] = useState("");
@@ -363,6 +370,36 @@ export default function ActionCenter() {
     }
   };
 
+  // -------- Details (recap) flow ----------
+  const openDetails = async (row) => {
+    setDetailsOpen(true);
+    setDetailsLoading(true);
+    setDetailsData(null);
+    try {
+      try {
+        const r = await authAxios.get(`/inspections/${row.inspection_id}`);
+        setDetailsData(r.data);
+      } catch (e1) {
+        // Fallback: fetch all and pick the one (not ideal but robust)
+        const r = await authAxios.get("/inspections");
+        const found = (r.data || []).find(i => i.id === row.inspection_id);
+        if (found) setDetailsData(found);
+        else throw e1;
+      }
+    } catch (e) {
+      console.error(e);
+      setDetailsData({ __error: true });
+    } finally {
+      setDetailsLoading(false);
+    }
+  };
+
+  const closeDetails = () => {
+    setDetailsOpen(false);
+    setDetailsData(null);
+    setDetailsLoading(false);
+  };
+
   const resetFilters = () => {
     setFCity("");
     setFField("");
@@ -445,14 +482,7 @@ export default function ActionCenter() {
       </Grid>
 
       {/* Filters */}
-      <Paper
-        sx={{
-          p: 2,
-          mb: 2,
-          borderRadius: 3,
-        }}
-        elevation={0}
-      >
+      <Paper sx={{ p: 2, mb: 2, borderRadius: 3 }} elevation={0}>
         <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
           <FilterListIcon fontSize="small" color="action" />
           <Typography variant="subtitle2" color="text.secondary">Filters</Typography>
@@ -641,6 +671,7 @@ export default function ActionCenter() {
             <TableHead>
               <TableRow>
                 <TableCell>Inspection</TableCell>
+                <TableCell>Rider</TableCell>{/* NEW */}
                 <TableCell>City</TableCell>
                 <TableCell>Field</TableCell>
                 <TableCell>Option</TableCell>
@@ -652,6 +683,7 @@ export default function ActionCenter() {
                 <TableCell>When</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell>Comment</TableCell>
+                <TableCell>Details</TableCell>{/* NEW */}
                 <TableCell align="right">Assign / Confirm / Delete</TableCell>
               </TableRow>
             </TableHead>
@@ -683,6 +715,7 @@ export default function ActionCenter() {
                       }}
                     >
                       <TableCell>#{r.inspection_id}</TableCell>
+                      <TableCell>{r.rider_id ?? "—"}</TableCell> {/* NEW */}
                       <TableCell>{r.city || "—"}</TableCell>
                       <TableCell>{r.field}</TableCell>
                       <TableCell>{r.option_value}</TableCell>
@@ -701,6 +734,16 @@ export default function ActionCenter() {
                       <TableCell><StatusChip status={r.status} by={r.confirmed_by_username} /></TableCell>
                       <TableCell sx={{ maxWidth: 260, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                         {r.notes || "—"}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          startIcon={<VisibilityIcon />}
+                          onClick={() => openDetails(r)}
+                        >
+                          Recap
+                        </Button>
                       </TableCell>
                       <TableCell align="right">
                         <Stack direction="row" spacing={1} justifyContent="flex-end">
@@ -762,14 +805,14 @@ export default function ActionCenter() {
                 })}
               {(!loading && filteredRows.length === 0) && (
                 <TableRow>
-                  <TableCell colSpan={14} align="center" sx={{ py: 6, color: "text.secondary" }}>
+                  <TableCell colSpan={15} align="center" sx={{ py: 6, color: "text.secondary" }}>
                     No matches
                   </TableCell>
                 </TableRow>
               )}
               {loading && (
                 <TableRow>
-                  <TableCell colSpan={14} align="center" sx={{ py: 6, color: "text.secondary" }}>
+                  <TableCell colSpan={15} align="center" sx={{ py: 6, color: "text.secondary" }}>
                     Loading…
                   </TableCell>
                 </TableRow>
@@ -919,6 +962,84 @@ export default function ActionCenter() {
         <DialogActions>
           <Button onClick={() => setDeleteOpen(false)}>Cancel</Button>
           <Button color="error" variant="contained" onClick={doDelete}>Delete</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Details (recap) dialog */}
+      <Dialog open={detailsOpen} onClose={closeDetails} maxWidth="md" fullWidth>
+        <DialogTitle>Inspection recap</DialogTitle>
+        <DialogContent dividers>
+          {detailsLoading ? (
+            <Stack alignItems="center" sx={{ py: 4 }}>
+              <CircularProgress />
+            </Stack>
+          ) : !detailsData || detailsData.__error ? (
+            <Typography color="error">Failed to load inspection details.</Typography>
+          ) : (
+            <Grid container spacing={2}>
+              {/* Left: fields */}
+              <Grid item xs={12} md={7}>
+                <Grid container spacing={1}>
+                  {[
+                    ["ID", detailsData.id],
+                    ["Rider ID", detailsData.rider_id ?? "—"],
+                    ["ID Number", detailsData.id_number ?? "—"],
+                    ["Inspected By", detailsData.inspected_by ?? "—"],
+                    ["City", detailsData.city ?? "—"],
+                    ["Location", detailsData.location ?? "—"],
+                    ["Timestamp", detailsData.timestamp ? new Date(detailsData.timestamp).toLocaleString("fr-MA") : "—"],
+                    ["Helmet", detailsData.helmet ?? "—"],
+                    ["Box", detailsData.box ?? "—"],
+                    ["Account", detailsData.account ?? "—"],
+                    ["Parking", detailsData.parking ?? "—"],
+                    ["Appearance", detailsData.appearance ?? "—"],
+                    ["Driving", detailsData.driving ?? "—"],
+                    ["MFC Status", detailsData.mfc_status ?? "—"],
+                    ["MFC Location", detailsData.mfc_location ?? "—"],
+                    ["Courier Behavior", detailsData.courier_behavior ?? "—"],
+                    ["Plate Number", detailsData.plate_number ?? "—"],
+                    ["Box Serial", detailsData.box_serial_number ?? "—"],
+                    ["Comments", detailsData.comments ?? "—"],
+                  ].map(([k, v]) => (
+                    <Grid item xs={6} key={k}>
+                      <Typography variant="caption" color="text.secondary">{k}</Typography>
+                      <Typography variant="body2">{String(v)}</Typography>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Grid>
+
+              {/* Right: image (if any) */}
+              <Grid item xs={12} md={5}>
+                {detailsData.image_url ? (
+                  <Box
+                    component="img"
+                    src={detailsData.image_url}
+                    alt="Inspection"
+                    sx={{ width: "100%", borderRadius: 2, border: "1px solid", borderColor: "divider" }}
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      height: 200,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      bgcolor: "action.hover",
+                      borderRadius: 2,
+                      border: "1px dashed",
+                      borderColor: "divider",
+                    }}
+                  >
+                    <Typography color="text.secondary">No image</Typography>
+                  </Box>
+                )}
+              </Grid>
+            </Grid>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeDetails}>Close</Button>
         </DialogActions>
       </Dialog>
 
