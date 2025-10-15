@@ -267,7 +267,7 @@ export default function Settings() {
 
     try {
       const payload = {
-        rule_id: Number(rule_id),
+        rule_id: rule_id.trim(),
         city,
         field,
         option_value,
@@ -323,7 +323,7 @@ if (second_level_threshold !== "" && !Number.isNaN(Number(second_level_threshold
   const saveEditRule = async () => {
     try {
       const payload = {
-        rule_id: Number(editRow.rule_id),
+        rule_id: editRow.rule_id.trim(),
         city: editRow.city,
         field: editRow.field,
         option_value: editRow.option_value,
@@ -497,13 +497,14 @@ if (editRow.second_level_threshold !== "") {
         <Stack component="form" spacing={2} onSubmit={handleCreateRule}>
           <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
             <TextField
-              label="Rule ID"
-              type="number"
-              value={createForm.rule_id}
-              onChange={(e) => setCreateForm((s) => ({ ...s, rule_id: e.target.value }))}
-              size="small"
-              sx={{ minWidth: 160 }}
-            />
+  label="Rule Name"
+  value={createForm.rule_id}
+  onChange={(e) => setCreateForm((s) => ({ ...s, rule_id: e.target.value }))}
+  size="small"
+  sx={{ minWidth: 160 }}
+  placeholder="e.g. Helmet missing"
+  helperText="Use a short descriptive name"
+/>
             <TextField
               label="City"
               value={createForm.city}
@@ -739,12 +740,12 @@ if (editRow.second_level_threshold !== "") {
         <DialogContent dividers>
           {editRow && (
             <Stack spacing={2}>
-              <TextField
-                label="Rule ID"
-                type="number"
-                value={editRow.rule_id}
-                onChange={(e) => setEditRow((s) => ({ ...s, rule_id: e.target.value }))}
-              />
+            <TextField
+  label="Rule Name"
+  value={createForm.rule_id}
+  onChange={(e) => setCreateForm((s) => ({ ...s, rule_id: e.target.value }))}
+
+/>
               <TextField
                 label="City"
                 value={editRow.city}
@@ -983,16 +984,18 @@ if (editRow.second_level_threshold !== "") {
         Settings
       </Typography>
 
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "flex-start",
-          gap: 3,
-          flex: 1,
-          width: "100%",
-        }}
-      >
+<Box
+  sx={{
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 3,
+    width: "100%",
+    flexGrow: 1,
+    height: "calc(100vh - 120px)", // makes the panel taller
+    overflow: "hidden",
+  }}
+>
         {/* Sidebar */}
         <Paper
           elevation={1}
@@ -1006,16 +1009,18 @@ if (editRow.second_level_threshold !== "") {
         </Paper>
 
         {/* Content */}
-         <Box
-    sx={{
-      flex: 1,
-      width: "100%",
-      bgcolor: "white",
-      p: 2,
-      borderRadius: 2,
-      boxShadow: 1,
-    }}
-  >
+<Box
+  sx={{
+    flexGrow: 1,
+    minWidth: 0,
+    bgcolor: "white",
+    p: 3,
+    borderRadius: 2,
+    boxShadow: 2,
+    height: "100%",
+    overflowY: "auto",
+  }}
+>
           {activeTab === "actions" && ActionsPane}
           {activeTab === "rules" && RulesPane}
           {activeTab === "users" && UsersPane}
