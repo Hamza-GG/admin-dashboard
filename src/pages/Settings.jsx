@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
+  Container,
   Paper,
   Typography,
   TextField,
@@ -53,7 +54,7 @@ const ALLOWED_FIELDS = [
   "courier_behavior",
 ];
 
-// Keep these values exactly as your backend expects
+// Keep these values exactly as backend expects
 const PRIORITY_OPTIONS = ["Urgent", "High", "Medium", "Low", "Info", "None"];
 
 function priorityColor(p) {
@@ -72,6 +73,7 @@ function priorityColor(p) {
       return "default";
   }
 }
+
 function Sidebar({ activeTab, onChange }) {
   return (
     <List dense disablePadding>
@@ -472,7 +474,7 @@ export default function Settings() {
   );
 
   const RulesPane = (
-  <Stack spacing={2} sx={{ width: "100%", flex: 1, minWidth: 0 }}>
+    <Stack spacing={2} sx={{ width: "100%", flex: 1, minWidth: 0 }}>
       {/* Create Rule */}
       <Paper sx={{ p: 2, width: "100%" }}>
         <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
@@ -953,53 +955,41 @@ export default function Settings() {
   );
 
   return (
-  <Box
-    sx={{
-      // Break out of any parent Container maxWidth to use full viewport width
-      position: "relative",
-      left: "50%",
-      right: "50%",
-      marginLeft: "-50vw",
-      marginRight: "-50vw",
-      width: "100vw",
+    <Box sx={{ bgcolor: "#f7fafd", minHeight: "calc(100vh - 64px)" }}>
+      <Container
+        maxWidth={false}
+        sx={{
+          maxWidth: "1600px", // adjust if you want wider/narrower content
+          mx: "auto",
+          px: { xs: 2, md: 4 },
+          py: 3,
+        }}
+      >
+        <Typography variant="h4" fontWeight="bold" gutterBottom>
+          Settings
+        </Typography>
 
-      bgcolor: "#f7fafd",
-      minHeight: "calc(100vh - 64px)",
-      px: { xs: 2, md: 4 },
-      py: 3,
-    }}
-  >
-    <Typography variant="h4" fontWeight="bold" gutterBottom>
-      Settings
-    </Typography>
+        <Stack direction="row" spacing={3} alignItems="flex-start" sx={{ width: "100%" }}>
+          {/* Sidebar */}
+          <Paper sx={{ width: 280, flexShrink: 0 }}>
+            <Sidebar activeTab={activeTab} onChange={setActiveTab} />
+          </Paper>
 
-    <Stack
-  direction="row"
-  spacing={3}
-  alignItems="flex-start"
-  sx={{ width: "100vw", maxWidth: "100vw" }}
->
-      {/* Sidebar */}
-      <Paper sx={{ width: 280, flexShrink: 0 }}>
-        <Sidebar activeTab={activeTab} onChange={setActiveTab} />
-      </Paper>
+          {/* Content */}
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            {activeTab === "actions" && <Box sx={{ width: "100%" }}>{ActionsPane}</Box>}
+            {activeTab === "rules" && <Box sx={{ width: "100%" }}>{RulesPane}</Box>}
+            {activeTab === "users" && <Box sx={{ width: "100%" }}>{UsersPane}</Box>}
+          </Box>
+        </Stack>
 
-      {/* Content */}
-      <Box sx={{ flex: 1, minWidth: 0, maxWidth: "100%" }}>
-        <Box sx={{ width: "100%" }}>
-          {activeTab === "actions" && <Box sx={{ width: "100%" }}>{ActionsPane}</Box>}
-          {activeTab === "rules" && <Box sx={{ width: "100%" }}>{RulesPane}</Box>}
-          {activeTab === "users" && <Box sx={{ width: "100%" }}>{UsersPane}</Box>}
-        </Box>
-      </Box>
-    </Stack>
-
-    {/* Snackbar */}
-    <Snackbar open={alert.open} autoHideDuration={3500} onClose={closeAlert}>
-      <Alert onClose={closeAlert} severity={alert.severity} variant="filled">
-        {alert.message}
-      </Alert>
-    </Snackbar>
-  </Box>
-);
+        {/* Snackbar */}
+        <Snackbar open={alert.open} autoHideDuration={3500} onClose={closeAlert}>
+          <Alert onClose={closeAlert} severity={alert.severity} variant="filled">
+            {alert.message}
+          </Alert>
+        </Snackbar>
+      </Container>
+    </Box>
+  );
 }
