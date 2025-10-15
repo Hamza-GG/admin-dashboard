@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
-  Container,
   Paper,
   Typography,
   TextField,
@@ -32,7 +31,6 @@ import {
   List,
   ListItemButton,
   ListItemText,
-  Divider,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -57,6 +55,21 @@ const ALLOWED_FIELDS = [
 // Keep these values exactly as backend expects
 const PRIORITY_OPTIONS = ["Urgent", "High", "Medium", "Low", "Info", "None"];
 
+/** Full-bleed wrapper that escapes any parent Container limits */
+function FullBleed({ children }) {
+  return (
+    <Box
+      sx={{
+        width: "100vw",
+        ml: "calc(50% - 50vw)", // pull to left edge
+        mr: "calc(50% - 50vw)", // pull to right edge
+      }}
+    >
+      {children}
+    </Box>
+  );
+}
+
 function priorityColor(p) {
   switch (p) {
     case "Urgent":
@@ -70,7 +83,7 @@ function priorityColor(p) {
     case "Info":
       return "secondary";
     default:
-      return "default";
+      return undefined; // ✅ let MUI use default style
   }
 }
 
@@ -191,8 +204,8 @@ export default function Settings() {
   useEffect(() => {
     if (activeTab === "actions") fetchActions();
     if (activeTab === "rules") {
-      fetchActions(); // needed for action dropdowns
-      fetchUsers();   // needed for assignee lists
+      fetchActions(); // for action dropdowns
+      fetchUsers();   // for assignee lists
       fetchRules();
     }
     if (activeTab === "users") fetchUsers();
@@ -415,6 +428,7 @@ export default function Settings() {
   const renderSecondThreshold = (row) => {
     const v = row.second_level_threshold ?? row.escalate_threshold;
     return typeof v === "number" ? v : "—";
+    // If you store as string sometimes, coerce with Number(v) and check !Number.isNaN
   };
 
   // ====== Render panes ======
@@ -955,41 +969,57 @@ export default function Settings() {
   );
 
   return (
-    <Box sx={{ bgcolor: "#f7fafd", minHeight: "calc(100vh - 64px)" }}>
-      <Container
-        maxWidth={false}
+  <Box sx={{ bgcolor: "#f7fafd", minHeight: "calc(100vh - 64px)", width: "100%" }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        width: "100%",
+        height: "100%",
+        p: { xs: 2, md: 3 },
+      }}
+    >
+      <Typography variant="h4" fontWeight="bold" gutterBottom>
+        Settings
+      </Typography>
+
+      <Box
         sx={{
-          maxWidth: "1600px", // adjust if you want wider/narrower content
-          mx: "auto",
-          px: { xs: 2, md: 4 },
-          py: 3,
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "flex-start",
+          gap: 3,
+          flex: 1,
+          width: "100%",
         }}
       >
-        <Typography variant="h4" fontWeight="bold" gutterBottom>
-          Settings
-        </Typography>
+        {/* Sidebar */}
+        <Paper
+          elevation={1}
+          sx={{
+            width: 280,
+            flexShrink: 0,
+            height: "fit-content",
+          }}
+        >
+          <Sidebar activeTab={activeTab} onChange={setActiveTab} />
+        </Paper>
 
-        <Stack direction="row" spacing={3} alignItems="flex-start" sx={{ width: "100%" }}>
-          {/* Sidebar */}
-          <Paper sx={{ width: 280, flexShrink: 0 }}>
-            <Sidebar activeTab={activeTab} onChange={setActiveTab} />
-          </Paper>
+        {/* Content */}
+        <Box sx={{ flex: 1, width: "100%" }}>
+          {activeTab === "actions" && ActionsPane}
+          {activeTab === "rules" && RulesPane}
+          {activeTab === "users" && UsersPane}
+        </Box>
+      </Box>
 
-          {/* Content */}
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            {activeTab === "actions" && <Box sx={{ width: "100%" }}>{ActionsPane}</Box>}
-            {activeTab === "rules" && <Box sx={{ width: "100%" }}>{RulesPane}</Box>}
-            {activeTab === "users" && <Box sx={{ width: "100%" }}>{UsersPane}</Box>}
-          </Box>
-        </Stack>
-
-        {/* Snackbar */}
-        <Snackbar open={alert.open} autoHideDuration={3500} onClose={closeAlert}>
-          <Alert onClose={closeAlert} severity={alert.severity} variant="filled">
-            {alert.message}
-          </Alert>
-        </Snackbar>
-      </Container>
+      {/* Snackbar */}
+      <Snackbar open={alert.open} autoHideDuration={3500} onClose={closeAlert}>
+        <Alert onClose={closeAlert} severity={alert.severity} variant="filled">
+          {alert.message}
+        </Alert>
+      </Snackbar>
     </Box>
-  );
+  </Box>
+);
 }
