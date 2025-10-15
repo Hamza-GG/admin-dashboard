@@ -72,6 +72,24 @@ function priorityColor(p) {
       return "default";
   }
 }
+function Sidebar({ activeTab, onChange }) {
+  return (
+    <List dense disablePadding>
+      <ListItemButton selected={activeTab === "actions"} onClick={() => onChange("actions")}>
+        <BoltIcon sx={{ mr: 1 }} />
+        <ListItemText primary="Actions" />
+      </ListItemButton>
+      <ListItemButton selected={activeTab === "rules"} onClick={() => onChange("rules")}>
+        <RuleIcon sx={{ mr: 1 }} />
+        <ListItemText primary="Rules" />
+      </ListItemButton>
+      <ListItemButton selected={activeTab === "users"} onClick={() => onChange("users")}>
+        <PeopleAltIcon sx={{ mr: 1 }} />
+        <ListItemText primary="Users" />
+      </ListItemButton>
+    </List>
+  );
+}
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState("actions"); // "actions" | "rules" | "users"
@@ -400,7 +418,7 @@ export default function Settings() {
   // ====== Render panes ======
 
   const ActionsPane = (
-    <Paper sx={{ p: 2 }}>
+    <Paper sx={{ p: 2, width: "100%" }}>
       <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
         Actions
       </Typography>
@@ -417,7 +435,7 @@ export default function Settings() {
         </Button>
       </Stack>
 
-      <TableContainer component={Paper} variant="outlined">
+      <TableContainer component={Paper} variant="outlined" sx={{ width: "100%" }}>
         {loadingActions ? (
           <Box sx={{ p: 3, display: "flex", justifyContent: "center" }}>
             <CircularProgress />
@@ -456,7 +474,7 @@ export default function Settings() {
   const RulesPane = (
     <Stack spacing={2}>
       {/* Create Rule */}
-      <Paper sx={{ p: 2 }}>
+      <Paper sx={{ p: 2, width: "100%" }}>
         <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
           Create Rule
         </Typography>
@@ -609,7 +627,7 @@ export default function Settings() {
           </Stack>
         </Stack>
 
-        <TableContainer sx={{ maxHeight: 520 }}>
+        <TableContainer sx={{ maxHeight: 520, width: "100%" }}>
           {loadingRules ? (
             <Box sx={{ p: 3, display: "flex", justifyContent: "center" }}>
               <CircularProgress />
@@ -937,12 +955,7 @@ export default function Settings() {
   return (
   <Box
     sx={{
-      // full-bleed even if a parent <Container maxWidth="lg"> exists
-      width: "100vw",
-      ml: "calc(-50vw + 50%)",
-      mr: "calc(-50vw + 50%)",
-
-      // page styling
+      width: "100%",            // simpler & safer than 100vw + negative margins
       bgcolor: "#f7fafd",
       minHeight: "calc(100vh - 64px)",
       px: { xs: 2, md: 3 },
@@ -953,26 +966,38 @@ export default function Settings() {
       Settings
     </Typography>
 
-    <Stack direction="row" spacing={3} alignItems="flex-start" sx={{ width: "100%" }}>
+    <Stack
+      direction="row"
+      spacing={3}
+      alignItems="flex-start"
+      sx={{
+        width: "100%",
+        // optionally center & cap max width
+        maxWidth: 1400,
+        mx: "auto",
+      }}
+    >
       {/* Sidebar */}
       <Paper sx={{ width: 260, flexShrink: 0 }}>
-        {/* ...left nav as-is... */}
+        <Sidebar activeTab={activeTab} onChange={setActiveTab} />
       </Paper>
 
-      {/* Content — make sure it can actually stretch */}
-      <Box sx={{ flex: 1, minWidth: 0, maxWidth: "100%" }}>
-        {activeTab === "actions" && ActionsPane}
-        {activeTab === "rules" && RulesPane}
-        {activeTab === "users" && UsersPane}
+      {/* Content */}
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Box sx={{ width: "100%" }}>
+          {activeTab === "actions" && <Box sx={{ width: "100%" }}>{ActionsPane}</Box>}
+          {activeTab === "rules" && <Box sx={{ width: "100%" }}>{RulesPane}</Box>}
+          {activeTab === "users" && <Box sx={{ width: "100%" }}>{UsersPane}</Box>}
+        </Box>
       </Box>
     </Stack>
 
-      {/* Snackbar */}
-      <Snackbar open={alert.open} autoHideDuration={3500} onClose={closeAlert}>
-        <Alert onClose={closeAlert} severity={alert.severity} variant="filled">
-          {alert.message}
-        </Alert>
-      </Snackbar>
-    </Box>
-  );
+    {/* Snackbar */}
+    <Snackbar open={alert.open} autoHideDuration={3500} onClose={closeAlert}>
+      <Alert onClose={closeAlert} severity={alert.severity} variant="filled">
+        {alert.message}
+      </Alert>
+    </Snackbar>
+  </Box>
+);
 }
