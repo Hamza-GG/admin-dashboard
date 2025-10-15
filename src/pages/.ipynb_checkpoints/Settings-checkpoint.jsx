@@ -955,7 +955,14 @@ export default function Settings() {
   return (
   <Box
     sx={{
-      width: "100%",            // simpler & safer than 100vw + negative margins
+      // Break out of any parent Container maxWidth to use full viewport width
+      position: "relative",
+      left: "50%",
+      right: "50%",
+      marginLeft: "-50vw",
+      marginRight: "-50vw",
+      width: "100vw",
+
       bgcolor: "#f7fafd",
       minHeight: "calc(100vh - 64px)",
       px: { xs: 2, md: 4 },
@@ -970,7 +977,7 @@ export default function Settings() {
   direction="row"
   spacing={3}
   alignItems="flex-start"
-  sx={{ width: "100%" }}   // remove maxWidth & centering
+  sx={{ width: "100vw", maxWidth: "100vw" }}
 >
       {/* Sidebar */}
       <Paper sx={{ width: 280, flexShrink: 0 }}>
@@ -978,7 +985,7 @@ export default function Settings() {
       </Paper>
 
       {/* Content */}
-      <Box sx={{ flex: 1, minWidth: 0 }}>
+      <Box sx={{ flex: 1, minWidth: 0, maxWidth: "100%" }}>
         <Box sx={{ width: "100%" }}>
           {activeTab === "actions" && <Box sx={{ width: "100%" }}>{ActionsPane}</Box>}
           {activeTab === "rules" && <Box sx={{ width: "100%" }}>{RulesPane}</Box>}
