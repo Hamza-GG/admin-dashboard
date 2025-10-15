@@ -132,6 +132,7 @@ export default function ActionCenter() {
   const [fStatus, setFStatus] = useState(""); // "", "pending", "done"
   const [fStartDate, setFStartDate] = useState(""); // "YYYY-MM-DD"
   const [fEndDate, setFEndDate] = useState("");
+  const [fRiderId, setFRiderId] = useState("");
 
   const show = (severity, message) => setAlert({ open: true, severity, message });
   const hide = () => setAlert(a => ({ ...a, open: false }));
@@ -239,10 +240,11 @@ export default function ActionCenter() {
           if (tsDay > day(end)) return false;
         }
       }
-
+// Rider ID filter (supports partial match)
+if (fRiderId && String(r.rider_id ?? "").indexOf(String(fRiderId).trim()) === -1) return false;
       return true;
     });
-  }, [rows, fCity, fField, fOption, fAction, fPriority, fAssignee1, fAssignee2, fStatus, fStartDate, fEndDate]);
+  }, [rows, fCity, fField, fOption, fAction, fPriority, fAssignee1, fAssignee2, fStatus, fStartDate, fEndDate, fRiderId]);
 
   // ---------- SCORECARDS ----------
   const totals = useMemo(() => {
@@ -410,6 +412,7 @@ export default function ActionCenter() {
     setFStatus("");
     setFStartDate("");
     setFEndDate("");
+    setFRiderId("");  
     setPage(0);
   };
 
@@ -552,6 +555,17 @@ export default function ActionCenter() {
               {uniquePriorities.map(p => <MenuItem key={p} value={p}>{p}</MenuItem>)}
             </TextField>
           </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+  <TextField
+    size="small"
+    label="Rider ID"
+    value={fRiderId}
+    onChange={(e) => { setFRiderId(e.target.value); setPage(0); }}
+    sx={{ minWidth: 220 }}
+    placeholder="e.g. 12345"
+    inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+  />
+</Grid>
 
           <Grid item xs={12} sm={6} md={3}>
             <Autocomplete
@@ -976,37 +990,47 @@ export default function ActionCenter() {
             <Typography color="error">Failed to load inspection details.</Typography>
           ) : (
             <Grid container spacing={2}>
-              {/* Left: fields */}
-              <Grid item xs={12} md={7}>
-                <Grid container spacing={1}>
-                  {[
-                    ["ID", detailsData.id],
-                    ["Rider ID", detailsData.rider_id ?? "—"],
-                    ["ID Number", detailsData.id_number ?? "—"],
-                    ["Inspected By", detailsData.inspected_by ?? "—"],
-                    ["City", detailsData.city ?? "—"],
-                    ["Location", detailsData.location ?? "—"],
-                    ["Timestamp", detailsData.timestamp ? new Date(detailsData.timestamp).toLocaleString("fr-MA") : "—"],
-                    ["Helmet", detailsData.helmet ?? "—"],
-                    ["Box", detailsData.box ?? "—"],
-                    ["Account", detailsData.account ?? "—"],
-                    ["Parking", detailsData.parking ?? "—"],
-                    ["Appearance", detailsData.appearance ?? "—"],
-                    ["Driving", detailsData.driving ?? "—"],
-                    ["MFC Status", detailsData.mfc_status ?? "—"],
-                    ["MFC Location", detailsData.mfc_location ?? "—"],
-                    ["Courier Behavior", detailsData.courier_behavior ?? "—"],
-                    ["Plate Number", detailsData.plate_number ?? "—"],
-                    ["Box Serial", detailsData.box_serial_number ?? "—"],
-                    ["Comments", detailsData.comments ?? "—"],
-                  ].map(([k, v]) => (
-                    <Grid item xs={6} key={k}>
-                      <Typography variant="caption" color="text.secondary">{k}</Typography>
-                      <Typography variant="body2">{String(v)}</Typography>
-                    </Grid>
-                  ))}
-                </Grid>
-              </Grid>
+
+
+             {/* Left: fields as table */}
+<Grid item xs={12} md={7}>
+  <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
+    <Table size="small">
+      <TableBody>
+        {[
+          ["ID", detailsData.id],
+          ["Rider ID", detailsData.rider_id ?? "—"],
+          ["ID Number", detailsData.id_number ?? "—"],
+          ["Inspected By", detailsData.inspected_by ?? "—"],
+          ["City", detailsData.city ?? "—"],
+          ["Location", detailsData.location ?? "—"],
+          ["Timestamp", detailsData.timestamp ? new Date(detailsData.timestamp).toLocaleString("fr-MA") : "—"],
+          ["Helmet", detailsData.helmet ?? "—"],
+          ["Box", detailsData.box ?? "—"],
+          ["Account", detailsData.account ?? "—"],
+          ["Parking", detailsData.parking ?? "—"],
+          ["Appearance", detailsData.appearance ?? "—"],
+          ["Driving", detailsData.driving ?? "—"],
+          ["MFC Status", detailsData.mfc_status ?? "—"],
+          ["MFC Location", detailsData.mfc_location ?? "—"],
+          ["Courier Behavior", detailsData.courier_behavior ?? "—"],
+          ["Plate Number", detailsData.plate_number ?? "—"],
+          ["Box Serial", detailsData.box_serial_number ?? "—"],
+          ["Comments", detailsData.comments ?? "—"],
+        ].map(([k, v]) => (
+          <TableRow key={k}>
+            <TableCell sx={{ width: 180 }}>
+              <Typography variant="caption" color="text.secondary">{k}</Typography>
+            </TableCell>
+            <TableCell>
+              <Typography variant="body2">{String(v)}</Typography>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  </TableContainer>
+</Grid>
 
               {/* Right: image (if any) */}
               <Grid item xs={12} md={5}>
