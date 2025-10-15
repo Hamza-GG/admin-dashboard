@@ -597,7 +597,7 @@ export default function Settings() {
       </Paper>
 
       {/* Manage Rules */}
-      <Paper sx={{ p: 2 }}>
+      <Paper sx={{ p: 2, width: "100%" }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
           <Typography variant="h6" fontWeight={700}>Active Rules</Typography>
           <Stack direction="row" spacing={2}>
@@ -839,11 +839,11 @@ export default function Settings() {
   );
 
   const UsersPane = (
-    <Paper sx={{ p: 2 }}>
+    <Paper sx={{ p: 2, width: "100%" }}>
       <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
         Users
       </Typography>
-      <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: 560 }}>
+      <TableContainer component={Paper} variant="outlined" sx={{ width: "100%" }}>
         {loadingUsers ? (
           <Box sx={{ p: 3, display: "flex", justifyContent: "center" }}>
             <CircularProgress />
@@ -967,16 +967,11 @@ export default function Settings() {
     </Typography>
 
     <Stack
-      direction="row"
-      spacing={3}
-      alignItems="flex-start"
-      sx={{
-        width: "100%",
-        // optionally center & cap max width
-        maxWidth: 1400,
-        mx: "auto",
-      }}
-    >
+  direction="row"
+  spacing={3}
+  alignItems="flex-start"
+  sx={{ width: "100%" }}   // remove maxWidth & centering
+>
       {/* Sidebar */}
       <Paper sx={{ width: 260, flexShrink: 0 }}>
         <Sidebar activeTab={activeTab} onChange={setActiveTab} />
