@@ -567,7 +567,7 @@ if (editRow.second_level_threshold !== "") {
     />
 
     <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
-      <FormControl size="small" sx={{ flex: 1 }}>
+      <FormControl size="small">
         <InputLabel>Action</InputLabel>
         <Select
           value={createForm.action}
@@ -580,7 +580,7 @@ if (editRow.second_level_threshold !== "") {
         </Select>
       </FormControl>
 
-      <FormControl size="small" sx={{ flex: 1 }}>
+      <FormControl size="small">
         <InputLabel>Priority</InputLabel>
         <Select
           value={createForm.priority}
@@ -595,7 +595,7 @@ if (editRow.second_level_threshold !== "") {
     </Stack>
 
     <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
-      <FormControl size="small" sx={{ flex: 1 }}>
+      <FormControl size="small">
         <InputLabel>2nd-level Action (optional)</InputLabel>
         <Select
           value={createForm.second_level_action}
