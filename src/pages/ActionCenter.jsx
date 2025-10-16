@@ -277,10 +277,10 @@ if (fRiderId && String(r.rider_id ?? "").indexOf(String(fRiderId).trim()) === -1
   const doConfirm = async () => {
     try {
       await authAxios.post("/actions/confirm", {
-        inspection_id: confirmItem.inspection_id,
-        rule_id: confirmItem.rule_id,
-        notes: notes || undefined,
-      });
+  inspection_id: confirmItem.inspection_id,
+  rule_id: String(confirmItem.rule_id), // <-- Convert to string
+  notes: notes || undefined,
+});
       show("success", "Action marked as done.");
       setConfirmOpen(false);
       setConfirmItem(null);
@@ -299,11 +299,11 @@ if (fRiderId && String(r.rider_id ?? "").indexOf(String(fRiderId).trim()) === -1
 
   const doUnconfirm = async () => {
     try {
-      await authAxios.post("/actions/unconfirm", {
-        inspection_id: unconfirmItem.inspection_id,
-        rule_id: unconfirmItem.rule_id,
-        reason: unconfirmReason || undefined,
-      });
+    await authAxios.post("/actions/unconfirm", {
+  inspection_id: unconfirmItem.inspection_id,
+  rule_id: String(unconfirmItem.rule_id), // <-- Convert to string
+  reason: unconfirmReason || undefined,
+});
       show("success", "Action set back to pending.");
       setUnconfirmOpen(false);
       setUnconfirmItem(null);
@@ -343,13 +343,13 @@ if (fRiderId && String(r.rider_id ?? "").indexOf(String(fRiderId).trim()) === -1
     if (!assignItem) return;
     try {
       setAssignSaving(true);
-      await authAxios.post("/actions/assign", {
-        inspection_id: assignItem.inspection_id,
-        rule_id: assignItem.rule_id,
-        assignee_user_id: assignee1?.id ?? null,
-        assignee2_user_id: assignee2?.id ?? null,
-        notes: undefined,
-      });
+     await authAxios.post("/actions/assign", {
+  inspection_id: assignItem.inspection_id,
+  rule_id: String(assignItem.rule_id), // <-- Convert to string
+  assignee_user_id: assignee1?.id ?? null,
+  assignee2_user_id: assignee2?.id ?? null,
+  notes: undefined,
+});
       show("success", "Assignees updated.");
       setAssignOpen(false);
       setAssignItem(null);
