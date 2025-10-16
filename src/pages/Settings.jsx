@@ -439,41 +439,46 @@ const saveEditRule = async () => {
     setEditUserOpen(true);
   };
 
-  const saveUser = async () => {
-    try {
+const saveUser = async () => {
+  try {
+    if (!editUserRow.username) {
+      showAlert("warning", "Username is required.");
+      return;
+    }
+
+    if (!editUserRow?.id) {
+      // ✅ NEW user → call /register
+      const payload = {
+        username: editUserRow.username,
+        role: editUserRow.role || "supervisor",
+        password: newPassword || "changeme123", // You can require this instead
+      };
+      await authAxios.post("/register", payload);
+      showAlert("success", "User created successfully.");
+    } else {
+      // ✅ Existing user → update
       const form = new FormData();
       if (editUserRow.role) form.append("role", editUserRow.role);
-      if (typeof editUserRow.is_verified === "boolean") {
+      if (typeof editUserRow.is_verified === "boolean")
         form.append("is_verified", String(editUserRow.is_verified));
-      }
       if (newPassword) form.append("new_password", newPassword);
 
       await authAxios.put(`/users/by-username/${encodeURIComponent(editUserRow.username)}`, form, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      showAlert("success", "User updated.");
-      setEditUserOpen(false);
-      setEditUserRow(null);
-      setNewPassword("");
-      fetchUsers();
-    } catch (e) {
-      console.error(e);
-      const msg = e?.response?.data?.detail || "Failed to update user.";
-      showAlert("error", msg);
+      showAlert("success", "User updated successfully.");
     }
-  };
 
-  const deleteUser = async (u) => {
-    try {
-      await authAxios.delete(`/users/by-username/${encodeURIComponent(u.username)}`);
-      showAlert("success", "User deleted.");
-      fetchUsers();
-    } catch (e) {
-      console.error(e);
-      const msg = e?.response?.data?.detail || "Failed to delete user.";
-      showAlert("error", msg);
-    }
-  };
+    setEditUserOpen(false);
+    setEditUserRow(null);
+    setNewPassword("");
+    fetchUsers();
+  } catch (e) {
+    console.error(e);
+    const msg = e?.response?.data?.detail || "Failed to save user.";
+    showAlert("error", msg);
+  }
+};
 
   // ===== Helpers for display =====
   const renderSecondAction = (row) =>
