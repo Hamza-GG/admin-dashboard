@@ -41,6 +41,27 @@ import RuleIcon from "@mui/icons-material/Rule";
 import BoltIcon from "@mui/icons-material/Bolt";
 import authAxios from "../utils/authAxios";
 
+const CITY_OPTIONS = [
+  "Agadir","Ben guerir","Beni mellal","Berrechid","Bouskoura","Bouznika","Casablanca","Dakhla",
+  "Dar bouazza","El jadida","Essaouira","Fes","Ifrane","Kenitra","Khemisset","Khouribga",
+  "Laayoune","Larache","M'diq","Marrakech","Meknes","Mohammedia","Nador","Nouacer","Ouarzazate",
+  "Oujda","Rabat","Safi","Settat","Tamesna","Tanger","Technopolis","Tetouan"
+];
+const FIELD_OPTIONS_MAP = {
+  helmet: ["Non Contrôlé","Oui","Non"],
+  box: ["Bon état","Mauvais état","N'a pas de box"],
+  account: ["Non Vérifié","Vérifié et Validé","Compte loué","A refusé de fournir les informations"],
+  parking: ["Non Vérifié","Stationement dans une zone dédiée","Stationement Interdit"],
+  appearance: [
+    "Non Vérifié",
+    "Tenue correcte avec gilet Glovo",
+    "Tenue correcte sans gilet Glovo",
+    "Tenue non correcte: Porte un pyjama, des sandales, des sabots, etc."
+  ],
+  driving: ["Non Vérifié","Conduite dangereuse","Excès de vitesse","Conduite en sens interdit","Bonne conduite"],
+  mfc_status: ["Non Vérifié","Commande en cours","Attente sans commande en cours"],
+  courier_behavior: ["Collaboratif","Non Collaboratif"],
+};
 const ALLOWED_FIELDS = [
   "helmet",
   "box",
@@ -552,13 +573,18 @@ const saveEditRule = async () => {
     sx={{ width: '100%' }}
   />
 
-  <TextField
-    label="City"
+  <FormControl size="small" sx={{ width: '100%' }}>
+  <InputLabel>City</InputLabel>
+  <Select
     value={createForm.city}
     onChange={(e) => setCreateForm((s) => ({ ...s, city: e.target.value }))}
-    size="small"
-    sx={{ width: '100%' }}
-  />
+    label="City"
+  >
+    {CITY_OPTIONS.map((c) => (
+      <MenuItem key={c} value={c}>{c}</MenuItem>
+    ))}
+  </Select>
+</FormControl>
 
   <FormControl size="small" sx={{ width: '100%' }}>
     <InputLabel>Field</InputLabel>
@@ -567,19 +593,26 @@ const saveEditRule = async () => {
       onChange={(e) => setCreateForm((s) => ({ ...s, field: e.target.value }))}
       label="Field"
     >
+      
       {ALLOWED_FIELDS.map((f) => (
         <MenuItem key={f} value={f}>{f}</MenuItem>
       ))}
     </Select>
   </FormControl>
 
-  <TextField
-    label="Option"
+<FormControl size="small" sx={{ width: '100%' }}>
+  <InputLabel>Option</InputLabel>
+  <Select
     value={createForm.option_value}
     onChange={(e) => setCreateForm((s) => ({ ...s, option_value: e.target.value }))}
-    size="small"
-    sx={{ width: '100%' }}
-  />
+    label="Option"
+    disabled={!createForm.field}
+  >
+    {(FIELD_OPTIONS_MAP[createForm.field] || []).map((opt) => (
+      <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+    ))}
+  </Select>
+</FormControl>
 
   <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
     <FormControl size="small" sx={{ flex: 1 }}>
