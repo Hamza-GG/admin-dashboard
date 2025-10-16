@@ -137,6 +137,19 @@ export default function ActionCenter() {
   const show = (severity, message) => setAlert({ open: true, severity, message });
   const hide = () => setAlert(a => ({ ...a, open: false }));
 
+  const parseError = (e) => {
+  const data = e?.response?.data;
+  if (Array.isArray(data)) {
+    // Handle Pydantic validation errors (the {type, loc, msg, input} case)
+    return data.map(err => `${err.loc?.join(".")}: ${err.msg}`).join(", ");
+  } else if (typeof data === "object" && data?.detail) {
+    return data.detail;
+  } else if (typeof data === "string") {
+    return data;
+  }
+  return "Something went wrong.";
+};
+
   const fetchUsers = async () => {
     try {
       setLoadingUsers(true);
@@ -274,7 +287,7 @@ if (fRiderId && String(r.rider_id ?? "").indexOf(String(fRiderId).trim()) === -1
       fetchMatches();
     } catch (e) {
       console.error(e);
-      show("error", e?.response?.data?.detail || "Failed to confirm action.");
+      show("error", parseError(e));
     }
   };
 
@@ -1085,8 +1098,10 @@ if (fRiderId && String(r.rider_id ?? "").indexOf(String(fRiderId).trim()) === -1
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert severity={alert.severity} onClose={hide} variant="filled" sx={{ width: "100%" }}>
-          {alert.message}
-        </Alert>
+  {typeof alert.message === "object"
+    ? JSON.stringify(alert.message)
+    : alert.message}
+</Alert>
       </Snackbar>
     </Box>
   );
