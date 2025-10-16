@@ -479,6 +479,18 @@ const saveUser = async () => {
     showAlert("error", msg);
   }
 };
+const deleteUser = async (user) => {
+  if (!window.confirm(`Delete user "${user.username}"?`)) return;
+  try {
+    await authAxios.delete(`/users/by-username/${encodeURIComponent(user.username)}`);
+    showAlert("success", "User deleted successfully.");
+    fetchUsers();
+  } catch (e) {
+    console.error(e);
+    const msg = e?.response?.data?.detail || "Failed to delete user.";
+    showAlert("error", msg);
+  }
+};
 
   // ===== Helpers for display =====
   const renderSecondAction = (row) =>
