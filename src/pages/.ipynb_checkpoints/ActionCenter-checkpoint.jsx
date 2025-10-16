@@ -123,8 +123,8 @@ export default function ActionCenter() {
 
   // -------- FILTERS (client-side) --------
   const [fCity, setFCity] = useState("");
-  const [fField, setFField] = useState("");
-  const [fOption, setFOption] = useState("");
+  //const [fField, setFField] = useState("");
+  //const [fOption, setFOption] = useState("");
   const [fAction, setFAction] = useState("");
   const [fPriority, setFPriority] = useState(""); // "", "Urgent", "High", "Normal", "Low"
   const [fAssignee1, setFAssignee1] = useState(null); // user obj
@@ -189,14 +189,6 @@ export default function ActionCenter() {
     () => Array.from(new Set(rows.map(r => r.city).filter(Boolean))).sort(),
     [rows]
   );
-  const uniqueFields = useMemo(
-    () => Array.from(new Set(rows.map(r => r.field).filter(Boolean))).sort(),
-    [rows]
-  );
-  const uniqueOptions = useMemo(
-    () => Array.from(new Set(rows.map(r => r.option_value).filter(Boolean))).sort(),
-    [rows]
-  );
   const uniqueActions = useMemo(
     () => Array.from(new Set(rows.map(r => r.action_name).filter(Boolean))).sort(),
     [rows]
@@ -216,8 +208,6 @@ export default function ActionCenter() {
   const filteredRows = useMemo(() => {
     return rows.filter(r => {
       if (fCity && r.city !== fCity) return false;
-      if (fField && r.field !== fField) return false;
-      if (fOption && r.option_value !== fOption) return false;
       if (fAction && r.action_name !== fAction) return false;
       if (fPriority && (r.priority ?? "Normal") !== fPriority) return false;
 
@@ -532,32 +522,6 @@ if (fRiderId && String(r.rider_id ?? "").indexOf(String(fRiderId).trim()) === -1
           <Grid item xs={12} sm={6} md={3}>
             <TextField
               select size="small"
-              label="Field"
-              value={fField}
-              onChange={(e) => { setFField(e.target.value); setPage(0); }}
-              sx={{ minWidth: 220 }}
-            >
-              <MenuItem value="">All</MenuItem>
-              {uniqueFields.map(f => <MenuItem key={f} value={f}>{f}</MenuItem>)}
-            </TextField>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={3}>
-            <TextField
-              select size="small"
-              label="Option"
-              value={fOption}
-              onChange={(e) => { setFOption(e.target.value); setPage(0); }}
-              sx={{ minWidth: 220 }}
-            >
-              <MenuItem value="">All</MenuItem>
-              {uniqueOptions.map(o => <MenuItem key={o} value={o}>{o}</MenuItem>)}
-            </TextField>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={3}>
-            <TextField
-              select size="small"
               label="Action"
               value={fAction}
               onChange={(e) => { setFAction(e.target.value); setPage(0); }}
@@ -711,8 +675,7 @@ if (fRiderId && String(r.rider_id ?? "").indexOf(String(fRiderId).trim()) === -1
                 <TableCell>Inspection</TableCell>
                 <TableCell>Rider</TableCell>{/* NEW */}
                 <TableCell>City</TableCell>
-                <TableCell>Field</TableCell>
-                <TableCell>Option</TableCell>
+                <TableCell>Rule Name</TableCell>
                 <TableCell>Action</TableCell>
                 <TableCell>Priority</TableCell>
                 <TableCell>Assignee 1</TableCell>
@@ -755,8 +718,7 @@ if (fRiderId && String(r.rider_id ?? "").indexOf(String(fRiderId).trim()) === -1
                       <TableCell>#{r.inspection_id}</TableCell>
                       <TableCell>{r.rider_id ?? "—"}</TableCell> {/* NEW */}
                       <TableCell>{r.city || "—"}</TableCell>
-                      <TableCell>{r.field}</TableCell>
-                      <TableCell>{r.option_value}</TableCell>
+                      <TableCell>{r.rule_id || "—"}</TableCell>
                       <TableCell>{r.action_name}</TableCell>
                       <TableCell><PriorityChip value={r.priority} /></TableCell>
                       <TableCell><AssigneeChip name={assignee1Name} /></TableCell>
@@ -843,14 +805,14 @@ if (fRiderId && String(r.rider_id ?? "").indexOf(String(fRiderId).trim()) === -1
                 })}
               {(!loading && filteredRows.length === 0) && (
                 <TableRow>
-                  <TableCell colSpan={15} align="center" sx={{ py: 6, color: "text.secondary" }}>
+                  <TableCell colSpan={13} align="center" sx={{ py: 6, color: "text.secondary" }}>
                     No matches
                   </TableCell>
                 </TableRow>
               )}
               {loading && (
                 <TableRow>
-                  <TableCell colSpan={15} align="center" sx={{ py: 6, color: "text.secondary" }}>
+                  <TableCell colSpan={13} align="center" sx={{ py: 6, color: "text.secondary" }}>
                     Loading…
                   </TableCell>
                 </TableRow>
