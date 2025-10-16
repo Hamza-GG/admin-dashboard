@@ -245,6 +245,30 @@ export default function Settings() {
       showAlert("error", msg);
     }
   };
+  const handleEditAction = async (action) => {
+  const newName = prompt("Edit action name:", action.name);
+  if (!newName || !newName.trim()) return;
+  try {
+    await authAxios.put(`/actions/${action.id}`, { name: newName.trim() });
+    showAlert("success", "Action updated successfully.");
+    fetchActions();
+  } catch (e) {
+    console.error(e);
+    showAlert("error", e?.response?.data?.detail || "Failed to update action.");
+  }
+};
+
+const handleDeleteAction = async (action) => {
+  if (!window.confirm(`Delete action "${action.name}"?`)) return;
+  try {
+    await authAxios.delete(`/actions/${action.id}`);
+    showAlert("success", "Action deleted successfully.");
+    fetchActions();
+  } catch (e) {
+    console.error(e);
+    showAlert("error", e?.response?.data?.detail || "Failed to delete action.");
+  }
+};
 
   // ====== Rules: create ======
   const handleCreateRule = async (e) => {
@@ -459,20 +483,31 @@ if (editRow.second_level_threshold !== "") {
         ) : (
           <Table size="small" sx={{ width: "100%" }}>
             <TableHead>
-              <TableRow>
-                <TableCell width={80}>ID</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell width={140} align="right">Created By</TableCell>
-              </TableRow>
-            </TableHead>
+  <TableRow>
+    <TableCell width={80}>ID</TableCell>
+    <TableCell>Name</TableCell>
+    <TableCell align="right">Actions</TableCell>
+  </TableRow>
+</TableHead>
             <TableBody>
-              {actions.map((a) => (
-                <TableRow key={a.id} hover>
-                  <TableCell>{a.id}</TableCell>
-                  <TableCell>{a.name}</TableCell>
-                  <TableCell align="right">{a.created_by ?? "—"}</TableCell>
-                </TableRow>
-              ))}
+  {actions.map((a) => (
+    <TableRow key={a.id} hover>
+      <TableCell>{a.id}</TableCell>
+      <TableCell>{a.name}</TableCell>
+      <TableCell align="right">
+        <Tooltip title="Edit">
+          <IconButton size="small" onClick={() => handleEditAction(a)}>
+            <EditIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Delete">
+          <IconButton size="small" color="error" onClick={() => handleDeleteAction(a)}>
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </TableCell>
+    </TableRow>
+  ))}
               {actions.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={3} align="center" sx={{ py: 6, color: "text.secondary" }}>
@@ -560,14 +595,20 @@ if (editRow.second_level_threshold !== "") {
               </Select>
             </FormControl>
 
-            <TextField
-              label="2nd-level Action (optional)"
-              value={createForm.second_level_action}
-              onChange={(e) => setCreateForm((s) => ({ ...s, second_level_action: e.target.value }))}
-              size="small"
-              sx={{ flex: 1, minWidth: 220 }}
-              placeholder="e.g. Escalate to compliance"
-            />
+            <FormControl size="small" sx={{ flex: 1, minWidth: 220 }}>
+  <InputLabel>2nd-level Action (optional)</InputLabel>
+  <Select
+    value={createForm.second_level_action}
+    onChange={(e) => setCreateForm((s) => ({ ...s, second_level_action: e.target.value }))}
+    label="2nd-level Action (optional)"
+  >
+    {actions.map((a) => (
+      <MenuItem key={a.id} value={a.name}>
+        {a.name}
+      </MenuItem>
+    ))}
+  </Select>
+</FormControl>
 
             <TextField
               label="2nd-level Threshold (optional)"
