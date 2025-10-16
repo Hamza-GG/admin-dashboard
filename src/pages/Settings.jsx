@@ -783,8 +783,8 @@ if (editRow.second_level_threshold !== "") {
             <Stack spacing={2}>
             <TextField
   label="Rule Name"
-  value={createForm.rule_id}
-  onChange={(e) => setCreateForm((s) => ({ ...s, rule_id: e.target.value }))}
+  value={editRow.rule_id}
+  onChange={(e) => setEditRow((s) => ({ ...s, rule_id: e.target.value }))}
 
 />
               <TextField
@@ -938,7 +938,7 @@ const openCreateUser = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {users
+              {filteredUsers
                 .slice(userPage * userRpp, userPage * userRpp + userRpp)
                 .map((u) => (
                   <TableRow key={u.id} hover>
@@ -1098,3 +1098,4 @@ const openCreateUser = () => {
     </Box>
   </Box>
 );
+}
