@@ -525,134 +525,130 @@ if (editRow.second_level_threshold !== "") {
   const RulesPane = (
     <Stack spacing={2} sx={{ width: "100%", flex: 1, minWidth: 0 }}>
       {/* Create Rule */}
-      <Paper sx={{ p: 2, width: "100%" }}>
-        <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
-          Create Rule
-        </Typography>
-        <Stack component="form" spacing={2} onSubmit={handleCreateRule}>
-          <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
-            <TextField
-  label="Rule Name"
-  value={createForm.rule_id}
-  onChange={(e) => setCreateForm((s) => ({ ...s, rule_id: e.target.value }))}
-  size="small"
-  sx={{ minWidth: 160 }}
-  placeholder="e.g. Helmet missing"
-  helperText="Use a short descriptive name"
-/>
-            <TextField
-              label="City"
-              value={createForm.city}
-              onChange={(e) => setCreateForm((s) => ({ ...s, city: e.target.value }))}
-              size="small"
-              sx={{ minWidth: 200 }}
-            />
-            <FormControl size="small" sx={{ minWidth: 200 }}>
-              <InputLabel>Field</InputLabel>
-              <Select
-                value={createForm.field}
-                onChange={(e) => setCreateForm((s) => ({ ...s, field: e.target.value }))}
-                label="Field"
-              >
-                {ALLOWED_FIELDS.map((f) => (
-                  <MenuItem key={f} value={f}>{f}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <TextField
-              label="Option"
-              value={createForm.option_value}
-              onChange={(e) => setCreateForm((s) => ({ ...s, option_value: e.target.value }))}
-              size="small"
-              sx={{ minWidth: 200 }}
-            />
-          </Stack>
+<Paper sx={{ p: 2, width: "100%" }}>
+  <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
+    Create Rule
+  </Typography>
+  <Stack component="form" spacing={2} onSubmit={handleCreateRule}>
+    <TextField
+      label="Rule Name"
+      value={createForm.rule_id}
+      onChange={(e) => setCreateForm((s) => ({ ...s, rule_id: e.target.value }))}
+      size="small"
+      placeholder="e.g. Helmet missing"
+      helperText="Use a short descriptive name"
+    />
 
-          <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
-            <FormControl size="small" sx={{ minWidth: 240 }}>
-              <InputLabel>Action</InputLabel>
-              <Select
-                value={createForm.action}
-                onChange={(e) => setCreateForm((s) => ({ ...s, action: e.target.value }))}
-                label="Action"
-              >
-                {actions.map((a) => (
-                  <MenuItem key={a.id} value={a.name}>{a.name}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+    <TextField
+      label="City"
+      value={createForm.city}
+      onChange={(e) => setCreateForm((s) => ({ ...s, city: e.target.value }))}
+      size="small"
+    />
 
-            <FormControl size="small" sx={{ minWidth: 180 }}>
-              <InputLabel>Priority</InputLabel>
-              <Select
-                value={createForm.priority}
-                onChange={(e) => setCreateForm((s) => ({ ...s, priority: e.target.value }))}
-                label="Priority"
-              >
-                {PRIORITY_OPTIONS.map((p) => (
-                  <MenuItem key={p} value={p}>{p}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+    <FormControl size="small">
+      <InputLabel>Field</InputLabel>
+      <Select
+        value={createForm.field}
+        onChange={(e) => setCreateForm((s) => ({ ...s, field: e.target.value }))}
+        label="Field"
+      >
+        {ALLOWED_FIELDS.map((f) => (
+          <MenuItem key={f} value={f}>{f}</MenuItem>
+        ))}
+      </Select>
+    </FormControl>
 
-            <FormControl size="small" sx={{ flex: 1, minWidth: 220 }}>
-  <InputLabel>2nd-level Action (optional)</InputLabel>
-  <Select
-    value={createForm.second_level_action}
-    onChange={(e) => setCreateForm((s) => ({ ...s, second_level_action: e.target.value }))}
-    label="2nd-level Action (optional)"
-  >
-    {actions.map((a) => (
-      <MenuItem key={a.id} value={a.name}>
-        {a.name}
-      </MenuItem>
-    ))}
-  </Select>
-</FormControl>
+    <TextField
+      label="Option"
+      value={createForm.option_value}
+      onChange={(e) => setCreateForm((s) => ({ ...s, option_value: e.target.value }))}
+      size="small"
+    />
 
-            <TextField
-              label="2nd-level Threshold (optional)"
-              type="number"
-              value={createForm.second_level_threshold}
-              onChange={(e) => setCreateForm((s) => ({ ...s, second_level_threshold: e.target.value }))}
-              size="small"
-              sx={{ minWidth: 180 }}
-              placeholder="e.g. 3"
-            />
-          </Stack>
+    <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
+      <FormControl size="small" sx={{ flex: 1 }}>
+        <InputLabel>Action</InputLabel>
+        <Select
+          value={createForm.action}
+          onChange={(e) => setCreateForm((s) => ({ ...s, action: e.target.value }))}
+          label="Action"
+        >
+          {actions.map((a) => (
+            <MenuItem key={a.id} value={a.name}>{a.name}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
 
-          <Autocomplete
-            options={users}
-            loading={loadingUsers}
-            getOptionLabel={(o) => o?.username ?? ""}
-            value={createAssignee}
-            onChange={(_, v) => setCreateAssignee(v)}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Assignee (optional)"
-                size="small"
-                InputProps={{
-                  ...params.InputProps,
-                  endAdornment: (
-                    <>
-                      {loadingUsers ? <CircularProgress size={16} /> : null}
-                      {params.InputProps.endAdornment}
-                    </>
-                  ),
-                }}
-              />
-            )}
-            sx={{ maxWidth: 420 }}
-          />
+      <FormControl size="small" sx={{ flex: 1 }}>
+        <InputLabel>Priority</InputLabel>
+        <Select
+          value={createForm.priority}
+          onChange={(e) => setCreateForm((s) => ({ ...s, priority: e.target.value }))}
+          label="Priority"
+        >
+          {PRIORITY_OPTIONS.map((p) => (
+            <MenuItem key={p} value={p}>{p}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Stack>
 
-          <Box>
-            <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateRule}>
-              Create Rule
-            </Button>
-          </Box>
-        </Stack>
-      </Paper>
+    <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
+      <FormControl size="small" sx={{ flex: 1 }}>
+        <InputLabel>2nd-level Action (optional)</InputLabel>
+        <Select
+          value={createForm.second_level_action}
+          onChange={(e) => setCreateForm((s) => ({ ...s, second_level_action: e.target.value }))}
+          label="2nd-level Action (optional)"
+        >
+          {actions.map((a) => (
+            <MenuItem key={a.id} value={a.name}>
+              {a.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      <TextField
+        label="2nd-level Threshold (optional)"
+        type="number"
+        value={createForm.second_level_threshold}
+        onChange={(e) => setCreateForm((s) => ({ ...s, second_level_threshold: e.target.value }))}
+        size="small"
+        sx={{ width: 200 }}
+      />
+    </Stack>
+
+    <Autocomplete
+      options={users}
+      loading={loadingUsers}
+      getOptionLabel={(o) => o?.username ?? ""}
+      value={createAssignee}
+      onChange={(_, v) => setCreateAssignee(v)}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          label="Assignee (optional)"
+          size="small"
+          InputProps={{
+            ...params.InputProps,
+            endAdornment: (
+              <>
+                {loadingUsers ? <CircularProgress size={16} /> : null}
+                {params.InputProps.endAdornment}
+              </>
+            ),
+          }}
+        />
+      )}
+    />
+
+    <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateRule}>
+      Create Rule
+    </Button>
+  </Stack>
+</Paper>
 
       {/* Manage Rules */}
       <Paper sx={{ p: 2, width: "100%" }}>
@@ -895,12 +891,33 @@ if (editRow.second_level_threshold !== "") {
       </Dialog>
     </Stack>
   );
+const [userSearch, setUserSearch] = useState("");
+const filteredUsers = users.filter(u =>
+  u.username?.toLowerCase().includes(userSearch.toLowerCase())
+);
 
+const openCreateUser = () => {
+  setEditUserRow({ username: "", role: "supervisor", is_verified: false });
+  setNewPassword("");
+  setEditUserOpen(true);
+};
   const UsersPane = (
     <Paper sx={{ p: 2, width: "100%" }}>
       <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
         Users
       </Typography>
+      <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+  <TextField
+    size="small"
+    label="Search users"
+    value={userSearch}
+    onChange={(e) => setUserSearch(e.target.value)}
+    sx={{ maxWidth: 300 }}
+  />
+  <Button variant="contained" startIcon={<AddIcon />} onClick={openCreateUser}>
+    Create User
+  </Button>
+</Stack>
       <TableContainer component={Paper} variant="outlined" sx={{ width: "100%" }}>
         {loadingUsers ? (
           <Box sx={{ p: 3, display: "flex", justifyContent: "center" }}>
