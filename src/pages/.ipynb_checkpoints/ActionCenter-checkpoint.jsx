@@ -296,9 +296,21 @@ if (fRiderId && String(r.rider_id ?? "").indexOf(String(fRiderId).trim()) === -1
       setUnconfirmItem(null);
       fetchMatches();
     } catch (e) {
-      console.error(e);
-      show("error", e?.response?.data?.detail || "Failed to unconfirm action.");
-    }
+  console.error(e);
+  const data = e?.response?.data;
+  let msg = "Something went wrong.";
+
+  if (Array.isArray(data)) {
+    // Handle Pydantic validation errors (the {type, loc, msg, input} case)
+    msg = data.map(err => `${err.loc?.join(".")}: ${err.msg}`).join(", ");
+  } else if (typeof data === "object" && data?.detail) {
+    msg = data.detail;
+  } else if (typeof data === "string") {
+    msg = data;
+  }
+
+  show("error", msg);
+}
   };
 
   const openAssign = (row) => {
