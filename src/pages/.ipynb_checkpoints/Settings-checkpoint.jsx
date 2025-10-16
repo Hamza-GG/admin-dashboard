@@ -353,7 +353,7 @@ const saveEditRule = async () => {
       field: editRow.field || "",
       option_value: editRow.option_value || "",
       action: editRow.action || "",
-      priority: editRow.priority || "None",
+      priority: editRow.priority?.toLowerCase() || "none",
       assignee_user_id: editAssignee?.id ?? null,
       escalate_action: editRow.second_level_action?.trim() || null,
       escalate_threshold:
