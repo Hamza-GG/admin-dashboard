@@ -344,43 +344,41 @@ if (second_level_threshold !== "" && !Number.isNaN(Number(second_level_threshold
     setEditOpen(true);
   };
 
-  const saveEditRule = async () => {
-    try {
-      const payload = {
-        rule_id: editRow.rule_id.trim(),
-        city: editRow.city,
-        field: editRow.field,
-        option_value: editRow.option_value,
-        action: editRow.action,
-        priority: editRow.priority || "None",
-        assignee_user_id: editAssignee?.id ?? null, // allow clearing
-      };
+const saveEditRule = async () => {
+  if (!editRow) return;
+  try {
+    const payload = {
+      rule_id: editRow.rule_id?.trim() || "",
+      city: editRow.city || "",
+      field: editRow.field || "",
+      option_value: editRow.option_value || "",
+      action: editRow.action || "",
+      priority: editRow.priority || "None",
+      assignee_user_id: editAssignee?.id ?? null,
+      escalate_action: editRow.second_level_action?.trim() || null,
+      escalate_threshold:
+        editRow.second_level_threshold && !isNaN(Number(editRow.second_level_threshold))
+          ? Number(editRow.second_level_threshold)
+          : null,
+    };
 
-      if (editRow.second_level_action && editRow.second_level_action.trim()) {
-  payload.escalate_action = editRow.second_level_action.trim();
-} else {
-  payload.escalate_action = null;
-}
-
-if (editRow.second_level_threshold !== "") {
-  const n = Number(editRow.second_level_threshold);
-  payload.escalate_threshold = Number.isNaN(n) ? null : n;
-} else {
-  payload.escalate_threshold = null;
-}
-
-      await authAxios.put(`/inspection-rules/${editRow.id}`, payload);
-      showAlert("success", "Rule updated.");
-      setEditOpen(false);
-      setEditRow(null);
-      setEditAssignee(null);
-      fetchRules();
-    } catch (e) {
-      console.error(e);
-      const msg = e?.response?.data?.detail || "Failed to update rule.";
-      showAlert("error", msg);
+    if (!payload.rule_id || !payload.city || !payload.field || !payload.option_value) {
+      showAlert("warning", "Please fill all mandatory fields before saving.");
+      return;
     }
-  };
+
+    await authAxios.put(`/inspection-rules/${editRow.id}`, payload);
+    showAlert("success", "Rule updated successfully.");
+    setEditOpen(false);
+    setEditRow(null);
+    setEditAssignee(null);
+    fetchRules();
+  } catch (e) {
+    console.error("Error updating rule:", e);
+    const msg = e?.response?.data?.detail || "Failed to update rule.";
+    showAlert("error", msg);
+  }
+};
 
   // ====== Rules: delete ======
   const confirmDeleteRule = (row) => {
