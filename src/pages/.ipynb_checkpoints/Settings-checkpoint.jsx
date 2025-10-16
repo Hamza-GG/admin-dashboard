@@ -955,7 +955,7 @@ const openCreateUser = () => {
                     </TableCell>
                   </TableRow>
                 ))}
-              {!loadingUsers && users.length === 0 && (
+              {!loadingUsers && filteredUsers.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={4} align="center" sx={{ py: 6, color: "text.secondary" }}>
                     No users found
