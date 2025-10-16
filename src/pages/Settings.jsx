@@ -702,7 +702,7 @@ const saveEditRule = async () => {
           <Typography variant="h6" fontWeight={700}>Active Rules</Typography>
           <Stack direction="row" spacing={2}>
             <TextField
-              label="Filter by Rule ID"
+               label="Filter by Rule Name"
               size="small"
               value={filterRuleId}
               onChange={(e) => setFilterRuleId(e.target.value)}
@@ -1047,7 +1047,12 @@ const openCreateUser = () => {
         <DialogContent dividers>
           {editUserRow && (
             <Stack spacing={2}>
-              <TextField label="Username" value={editUserRow.username} InputProps={{ readOnly: true }} />
+              <TextField
+  label="Username"
+  value={editUserRow.username}
+  onChange={(e) => setEditUserRow((s) => ({ ...s, username: e.target.value }))}
+  InputProps={{ readOnly: !!editUserRow?.id }} // editable only for new users
+/>
               <FormControl>
                 <InputLabel>Role</InputLabel>
                 <Select
