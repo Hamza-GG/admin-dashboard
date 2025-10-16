@@ -374,10 +374,22 @@ const saveEditRule = async () => {
     setEditAssignee(null);
     fetchRules();
   } catch (e) {
-    console.error("Error updating rule:", e);
-    const msg = e?.response?.data?.detail || "Failed to update rule.";
+  console.error("Error updating rule:", e);
+  const detail = e?.response?.data?.detail;
+
+  if (Array.isArray(detail)) {
+    // Backend validation errors (like 422)
+    const msg = detail.map((d) => `${d.loc?.join(" → ")}: ${d.msg}`).join("; ");
+    showAlert("error", msg);
+  } else if (typeof detail === "object") {
+    // Handle if backend returns a single object instead of list
+    const msg = Object.values(detail).join("; ");
+    showAlert("error", msg);
+  } else {
+    const msg = detail || e.message || "Failed to update rule.";
     showAlert("error", msg);
   }
+}
 };
 
   // ====== Rules: delete ======
