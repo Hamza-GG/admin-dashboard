@@ -247,7 +247,7 @@ export default function ActionCenter() {
 if (fRiderId && String(r.rider_id ?? "").indexOf(String(fRiderId).trim()) === -1) return false;
       return true;
     });
-  }, [rows, fCity, fField, fOption, fAction, fPriority, fAssignee1, fAssignee2, fStatus, fStartDate, fEndDate, fRiderId]);
+  }, [rows, fCity, fAction, fPriority, fAssignee1, fAssignee2, fStatus, fStartDate, fEndDate, fRiderId]);
 
   // ---------- SCORECARDS ----------
   const totals = useMemo(() => {
