@@ -331,28 +331,33 @@ if (fRiderId && String(r.rider_id ?? "").indexOf(String(fRiderId).trim()) === -1
     setAssignOpen(true);
   };
 
-  const doAssign = async () => {
-    if (!assignItem) return;
-    try {
-      setAssignSaving(true);
-     await authAxios.post("/actions/assign", {
-  inspection_id: assignItem.inspection_id,
-  rule_id: String(assignItem.rule_id), // <-- Convert to string
-  assignee_user_id: assignee1?.id ?? null,
-  assignee2_user_id: assignee2?.id ?? null,
-  notes: undefined,
-});
-      show("success", "Assignees updated.");
-      setAssignOpen(false);
-      setAssignItem(null);
-      fetchMatches();
-    } catch (e) {
-      console.error(e);
-      show("error", e?.response?.data?.detail || "Failed to set assignees.");
-    } finally {
-      setAssignSaving(false);
-    }
-  };
+const doAssign = async () => {
+  if (!assignItem) return;
+  try {
+    setAssignSaving(true);
+
+    const payload = {
+      inspection_id: assignItem.inspection_id,
+      rule_id: String(assignItem.rule_id), // backend expects string
+      assignee_user_id: assignee1?.id ?? null,
+      assignee2_user_id: assignee2?.id ?? null, // ✅ second assignee support
+      notes: undefined,
+    };
+
+    console.log("Assign payload:", payload); // ✅ debugging helper
+    await authAxios.post("/actions/assign", payload);
+
+    show("success", "Assignees updated.");
+    setAssignOpen(false);
+    setAssignItem(null);
+    fetchMatches();
+  } catch (e) {
+    console.error(e);
+    show("error", parseError(e));
+  } finally {
+    setAssignSaving(false);
+  }
+};
 
   // -------- Delete flow ----------
   const openDelete = (row) => {
