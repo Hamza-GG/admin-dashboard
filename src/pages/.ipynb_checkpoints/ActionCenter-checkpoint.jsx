@@ -133,6 +133,7 @@ export default function ActionCenter() {
   const [fStartDate, setFStartDate] = useState(""); // "YYYY-MM-DD"
   const [fEndDate, setFEndDate] = useState("");
   const [fRiderId, setFRiderId] = useState("");
+  const [fRuleId, setFRuleId] = useState("");
 
   const show = (severity, message) => setAlert({ open: true, severity, message });
   const hide = () => setAlert(a => ({ ...a, open: false }));
@@ -197,6 +198,7 @@ export default function ActionCenter() {
     () => Array.from(new Set(rows.map(r => (r.priority ?? "Normal")).filter(Boolean))).sort(),
     [rows]
   );
+  
 
   const userById = useMemo(() => {
     const m = new Map();
@@ -210,7 +212,7 @@ export default function ActionCenter() {
       if (fCity && r.city !== fCity) return false;
       if (fAction && r.action_name !== fAction) return false;
       if (fPriority && (r.priority ?? "Normal") !== fPriority) return false;
-
+if (fRuleId && String(r.rule_name ?? "").toLowerCase().indexOf(String(fRuleId).trim().toLowerCase()) === -1) return false;
       // Assignee 1: match-level assignee1, else fallback to rule default
       if (fAssignee1) {
         const a1id = r.match_assignee_user_id ?? r.rule_assignee_user_id ?? null;
@@ -247,7 +249,7 @@ export default function ActionCenter() {
 if (fRiderId && String(r.rider_id ?? "").indexOf(String(fRiderId).trim()) === -1) return false;
       return true;
     });
-  }, [rows, fCity, fAction, fPriority, fAssignee1, fAssignee2, fStatus, fStartDate, fEndDate, fRiderId]);
+  }, [rows, fCity, fAction, fPriority, fAssignee1, fAssignee2, fStatus, fStartDate, fEndDate, fRiderId, fRuleId]);
 
   // ---------- SCORECARDS ----------
   const totals = useMemo(() => {
@@ -556,6 +558,18 @@ if (fRiderId && String(r.rider_id ?? "").indexOf(String(fRiderId).trim()) === -1
   />
 </Grid>
 
+<Grid item xs={12} sm={6} md={3}>
+  <TextField
+    size="small"
+    label="Rule Name"
+    value={fRuleId}
+    onChange={(e) => { setFRuleId(e.target.value); setPage(0); }}
+    sx={{ minWidth: 220 }}
+    placeholder="e.g. 123"
+    inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+  />
+</Grid>
+
           <Grid item xs={12} sm={6} md={3}>
             <Autocomplete
               options={users}
@@ -718,7 +732,7 @@ if (fRiderId && String(r.rider_id ?? "").indexOf(String(fRiderId).trim()) === -1
                       <TableCell>#{r.inspection_id}</TableCell>
                       <TableCell>{r.rider_id ?? "—"}</TableCell> {/* NEW */}
                       <TableCell>{r.city || "—"}</TableCell>
-                      <TableCell>{r.rule_id || "—"}</TableCell>
+                      <TableCell>{r.rule_name || "—"}</TableCell>
                       <TableCell>{r.action_name}</TableCell>
                       <TableCell><PriorityChip value={r.priority} /></TableCell>
                       <TableCell><AssigneeChip name={assignee1Name} /></TableCell>
