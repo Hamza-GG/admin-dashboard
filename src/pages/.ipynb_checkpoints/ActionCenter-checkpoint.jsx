@@ -112,6 +112,14 @@ export default function ActionCenter() {
   const [assignee2, setAssignee2] = useState(null); // user obj or null
   const [assignSaving, setAssignSaving] = useState(false);
 
+  // bulk assign
+const [bulkAssignOpen, setBulkAssignOpen] = useState(false);
+const [bulkRule, setBulkRule] = useState(null);
+const [bulkCity, setBulkCity] = useState(null);
+const [bulkAssignee1, setBulkAssignee1] = useState(null);
+const [bulkAssignee2, setBulkAssignee2] = useState(null);
+const [bulkSaving, setBulkSaving] = useState(false);
+
   // delete dialog
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteItem, setDeleteItem] = useState(null);
@@ -359,6 +367,39 @@ const doAssign = async () => {
   }
 };
 
+const doBulkAssign = async () => {
+  if (!bulkRule || !bulkCity) {
+    show("error", "Please select both a rule and a city.");
+    return;
+  }
+
+  try {
+    setBulkSaving(true);
+    const payload = {
+      rule_name: bulkRule,
+      city: bulkCity,
+      assignee_user_id: bulkAssignee1?.id ?? null,
+      assignee2_user_id: bulkAssignee2?.id ?? null,
+    };
+
+    console.log("Bulk Assign Payload:", payload);
+    await authAxios.post("/actions/bulk-assign", payload);
+
+    show("success", "Bulk assignment completed successfully.");
+    setBulkAssignOpen(false);
+    setBulkRule(null);
+    setBulkCity(null);
+    setBulkAssignee1(null);
+    setBulkAssignee2(null);
+    fetchMatches();
+  } catch (e) {
+    console.error(e);
+    show("error", parseError(e));
+  } finally {
+    setBulkSaving(false);
+  }
+};
+
   // -------- Delete flow ----------
   const openDelete = (row) => {
     setDeleteItem(row);
@@ -450,6 +491,11 @@ const doAssign = async () => {
           <Tooltip title="Refresh">
             <IconButton onClick={fetchMatches}><RefreshIcon /></IconButton>
           </Tooltip>
+          <Tooltip title="Bulk Assign">
+  <IconButton color="primary" onClick={() => setBulkAssignOpen(true)}>
+    <AssignmentIndIcon />
+  </IconButton>
+</Tooltip>
         </Box>
       </Stack>
 
@@ -919,6 +965,92 @@ const doAssign = async () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Bulk Assign dialog */}
+<Dialog open={bulkAssignOpen} onClose={() => setBulkAssignOpen(false)} maxWidth="sm" fullWidth>
+  <DialogTitle>Bulk Assign</DialogTitle>
+  <DialogContent dividers>
+    <Typography variant="body2" sx={{ mb: 2 }}>
+      Assign multiple actions at once based on Rule and City.
+    </Typography>
+
+    <Stack spacing={2}>
+      <Autocomplete
+        options={Array.from(new Set(rows.map(r => r.rule_name).filter(Boolean)))}
+        getOptionLabel={(o) => o}
+        value={bulkRule}
+        onChange={(_, v) => setBulkRule(v)}
+        renderInput={(params) => (
+          <TextField {...params} label="Rule Name" size="small" />
+        )}
+      />
+
+      <Autocomplete
+        options={uniqueCities}
+        getOptionLabel={(o) => o}
+        value={bulkCity}
+        onChange={(_, v) => setBulkCity(v)}
+        renderInput={(params) => (
+          <TextField {...params} label="City" size="small" />
+        )}
+      />
+
+      <Autocomplete
+        options={users}
+        loading={loadingUsers}
+        getOptionLabel={(o) => o?.username ?? ""}
+        value={bulkAssignee1}
+        onChange={(_, v) => setBulkAssignee1(v)}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Assignee 1"
+            size="small"
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {loadingUsers ? <CircularProgress size={16} /> : null}
+                  {params.InputProps.endAdornment}
+                </>
+              ),
+            }}
+          />
+        )}
+      />
+
+      <Autocomplete
+        options={users}
+        loading={loadingUsers}
+        getOptionLabel={(o) => o?.username ?? ""}
+        value={bulkAssignee2}
+        onChange={(_, v) => setBulkAssignee2(v)}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Assignee 2 (optional)"
+            size="small"
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {loadingUsers ? <CircularProgress size={16} /> : null}
+                  {params.InputProps.endAdornment}
+                </>
+              ),
+            }}
+          />
+        )}
+      />
+    </Stack>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setBulkAssignOpen(false)}>Cancel</Button>
+    <Button variant="contained" onClick={doBulkAssign} disabled={bulkSaving}>
+      {bulkSaving ? "Saving..." : "Save"}
+    </Button>
+  </DialogActions>
+</Dialog>
 
       {/* Confirm dialog */}
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)} maxWidth="sm" fullWidth>
