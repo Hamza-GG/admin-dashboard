@@ -788,9 +788,13 @@ const deleteUser = async (user) => {
                   <TableRow key={row.id} hover>
                     <TableCell>{row.id}</TableCell>
                     <TableCell>{row.rule_id}</TableCell>
-                    <TableCell>{row.city}</TableCell>
+                   <TableCell>
+  {Array.isArray(row.city) ? row.city.join(", ") : row.city}
+</TableCell>
                     <TableCell>{row.field}</TableCell>
-                    <TableCell>{row.option_value}</TableCell>
+                    <TableCell>
+  {Array.isArray(row.option_value) ? row.option_value.join(", ") : row.option_value}
+</TableCell>
                     <TableCell>{row.action}</TableCell>
                     <TableCell>
                       <Chip
