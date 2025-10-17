@@ -375,17 +375,15 @@ const doBulkAssign = async () => {
 
   try {
     setBulkSaving(true);
-    const filtered = rows.filter(r => r.rule_name === bulkRule && r.city === bulkCity);
-
-    const payloads = filtered.map(r => ({
-      inspection_id: r.inspection_id,
-      rule_id: String(r.rule_id),
+    const payload = {
+      rule_id: bulkRule.id, // ✅ send actual rule_id now
+      city: bulkCity,
       assignee_user_id: bulkAssignee1?.id ?? null,
       assignee2_user_id: bulkAssignee2?.id ?? null,
       notes: null,
-    }));
+    };
 
-    await authAxios.post("/actions/assign/bulk", payloads);
+    await authAxios.post("/actions/assign/bulk", [payload]);
 
     show("success", "Bulk assignment completed successfully.");
     setBulkAssignOpen(false);
@@ -401,7 +399,6 @@ const doBulkAssign = async () => {
     setBulkSaving(false);
   }
 };
-
   // -------- Delete flow ----------
   const openDelete = (row) => {
     setDeleteItem(row);
@@ -977,15 +974,17 @@ const doBulkAssign = async () => {
     </Typography>
 
     <Stack spacing={2}>
-      <Autocomplete
-        options={Array.from(new Set(rows.map(r => r.rule_name).filter(Boolean)))}
-        getOptionLabel={(o) => o}
-        value={bulkRule}
-        onChange={(_, v) => setBulkRule(v)}
-        renderInput={(params) => (
-          <TextField {...params} label="Rule Name" size="small" />
-        )}
-      />
+  <Autocomplete
+  options={Array.from(
+    new Map(rows.map(r => [r.rule_id, r.rule_name])).entries()
+  ).map(([id, name]) => ({ id, name }))}
+  getOptionLabel={(o) => o?.name ?? ""}
+  value={bulkRule}
+  onChange={(_, v) => setBulkRule(v)}
+  renderInput={(params) => (
+    <TextField {...params} label="Rule Name" size="small" />
+  )}
+/>
 
       <Autocomplete
         options={uniqueCities}
