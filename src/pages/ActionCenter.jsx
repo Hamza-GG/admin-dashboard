@@ -375,15 +375,22 @@ const doBulkAssign = async () => {
 
   try {
     setBulkSaving(true);
-    const payload = {
-      rule_id: bulkRule.id, // ✅ send actual rule_id now
-      city: bulkCity,
+
+    // Filter the inspections (rows) that belong to the selected city
+    const rowsToAssign = rows.filter(r => r.city === bulkCity);
+
+    // Build payload array
+    const payloads = rowsToAssign.map(r => ({
+      inspection_id: r.inspection_id,     // ✅ Required by backend
+      rule_id: bulkRule.id,               // ✅ Match backend schema
       assignee_user_id: bulkAssignee1?.id ?? null,
       assignee2_user_id: bulkAssignee2?.id ?? null,
       notes: null,
-    };
+    }));
 
-    await authAxios.post("/actions/assign/bulk", [payload]);
+    console.log("Bulk Assign Payloads:", payloads);
+
+    await authAxios.post("/actions/assign/bulk", payloads);
 
     show("success", "Bulk assignment completed successfully.");
     setBulkAssignOpen(false);
