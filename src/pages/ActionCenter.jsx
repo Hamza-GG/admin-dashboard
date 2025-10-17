@@ -380,13 +380,14 @@ const doBulkAssign = async () => {
     const rowsToAssign = rows.filter(r => r.city === bulkCity);
 
     // Build payload array
-    const payloads = rowsToAssign.map(r => ({
-      inspection_id: r.inspection_id,     // ✅ Required by backend
-      rule_id: bulkRule.id,               // ✅ Match backend schema
-      assignee_user_id: bulkAssignee1?.id ?? null,
-      assignee2_user_id: bulkAssignee2?.id ?? null,
-      notes: null,
-    }));
+    // Build payload array
+const payloads = rowsToAssign.map(r => ({
+  inspection_id: r.inspection_id,
+  rule_id: String(bulkRule.id), // ✅ Force to string
+  assignee_user_id: bulkAssignee1?.id ?? null,
+  assignee2_user_id: bulkAssignee2?.id ?? null,
+  notes: null,
+}));
 
     console.log("Bulk Assign Payloads:", payloads);
 
