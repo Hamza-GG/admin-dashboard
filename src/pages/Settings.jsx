@@ -311,14 +311,14 @@ const handleDeleteAction = async (action) => {
 
     try {
       const payload = {
-        rule_id: rule_id.trim(),
-        city,
-        field,
-        option_value,
-        action, // text action
-        priority, // text priority
-        assignee_user_id: createAssignee?.id ?? null,
-      };
+  rule_id: rule_id.trim(),
+  city: Array.isArray(city) ? city : [city],
+  field,
+  option_value: Array.isArray(option_value) ? option_value : [option_value],
+  action,
+  priority,
+  assignee_user_id: createAssignee?.id ?? null,
+};
 
       if (second_level_action && second_level_action.trim()) {
   payload.escalate_action = second_level_action.trim();
@@ -349,38 +349,50 @@ if (second_level_threshold !== "" && !Number.isNaN(Number(second_level_threshold
   };
 
   // ====== Rules: edit ======
-  const openEditRule = (row) => {
-    setEditRow({
-      ...row,
-      priority: row.priority || "None",
-      second_level_action: (row.second_level_action ?? row.escalate_action) || "",
-      second_level_threshold:
-        typeof (row.second_level_threshold ?? row.escalate_threshold) === "number"
-          ? String(row.second_level_threshold ?? row.escalate_threshold)
-          : "",
-    });
-    const u = row.assignee_user_id ? userById.get(row.assignee_user_id) : null;
-    setEditAssignee(u || null);
-    setEditOpen(true);
-  };
+const openEditRule = (row) => {
+  setEditRow({
+    ...row,
+    city: Array.isArray(row.city)
+      ? row.city
+      : typeof row.city === "string"
+      ? row.city.split(",").map((s) => s.trim())
+      : [],
+    option_value: Array.isArray(row.option_value)
+      ? row.option_value
+      : typeof row.option_value === "string"
+      ? row.option_value.split(",").map((s) => s.trim())
+      : [],
+    priority: row.priority || "None",
+    second_level_action: (row.second_level_action ?? row.escalate_action) || "",
+    second_level_threshold:
+      typeof (row.second_level_threshold ?? row.escalate_threshold) === "number"
+        ? String(row.second_level_threshold ?? row.escalate_threshold)
+        : "",
+  });
+  const u = row.assignee_user_id ? userById.get(row.assignee_user_id) : null;
+  setEditAssignee(u || null);
+  setEditOpen(true);
+};
 
 const saveEditRule = async () => {
   if (!editRow) return;
   try {
     const payload = {
-      rule_id: editRow.rule_id?.trim() || "",
-      city: editRow.city || "",
-      field: editRow.field || "",
-      option_value: editRow.option_value || "",
-      action: editRow.action || "",
-      priority: editRow.priority?.toLowerCase() || "none",
-      assignee_user_id: editAssignee?.id ?? null,
-      escalate_action: editRow.second_level_action?.trim() || null,
-      escalate_threshold:
-        editRow.second_level_threshold && !isNaN(Number(editRow.second_level_threshold))
-          ? Number(editRow.second_level_threshold)
-          : null,
-    };
+  rule_id: editRow.rule_id?.trim() || "",
+  city: Array.isArray(editRow.city) ? editRow.city : [editRow.city],
+  field: editRow.field || "",
+  option_value: Array.isArray(editRow.option_value)
+    ? editRow.option_value
+    : [editRow.option_value],
+  action: editRow.action || "",
+  priority: editRow.priority?.toLowerCase() || "none",
+  assignee_user_id: editAssignee?.id ?? null,
+  escalate_action: editRow.second_level_action?.trim() || null,
+  escalate_threshold:
+    editRow.second_level_threshold && !isNaN(Number(editRow.second_level_threshold))
+      ? Number(editRow.second_level_threshold)
+      : null,
+};
 
     if (!payload.rule_id || !payload.city || !payload.field || !payload.option_value) {
       showAlert("warning", "Please fill all mandatory fields before saving.");
@@ -589,12 +601,14 @@ const deleteUser = async (user) => {
     sx={{ width: '100%' }}
   />
 
-  <FormControl size="small" sx={{ width: '100%' }}>
+<FormControl size="small" sx={{ width: '100%' }}>
   <InputLabel>City</InputLabel>
   <Select
-    value={createForm.city}
+    multiple
+    value={createForm.city || []}
     onChange={(e) => setCreateForm((s) => ({ ...s, city: e.target.value }))}
     label="City"
+    renderValue={(selected) => selected.join(", ")}
   >
     {CITY_OPTIONS.map((c) => (
       <MenuItem key={c} value={c}>{c}</MenuItem>
@@ -619,10 +633,12 @@ const deleteUser = async (user) => {
 <FormControl size="small" sx={{ width: '100%' }}>
   <InputLabel>Option</InputLabel>
   <Select
-    value={createForm.option_value}
+    multiple
+    value={createForm.option_value || []}
     onChange={(e) => setCreateForm((s) => ({ ...s, option_value: e.target.value }))}
     label="Option"
     disabled={!createForm.field}
+    renderValue={(selected) => selected.join(", ")}
   >
     {(FIELD_OPTIONS_MAP[createForm.field] || []).map((opt) => (
       <MenuItem key={opt} value={opt}>{opt}</MenuItem>
@@ -848,11 +864,13 @@ const deleteUser = async (user) => {
 />
               <FormControl fullWidth size="small">
   <InputLabel>City</InputLabel>
-  <Select
-    value={editRow.city || ""}
-    onChange={(e) => setEditRow((s) => ({ ...s, city: e.target.value }))}
-    label="City"
-  >
+ <Select
+  multiple
+  value={editRow.city || []}
+  onChange={(e) => setEditRow((s) => ({ ...s, city: e.target.value }))}
+  renderValue={(selected) => selected.join(", ")}
+  label="City"
+>
     {CITY_OPTIONS.map((c) => (
       <MenuItem key={c} value={c}>{c}</MenuItem>
     ))}
@@ -872,12 +890,14 @@ const deleteUser = async (user) => {
               </FormControl>
               <FormControl fullWidth size="small">
   <InputLabel>Option</InputLabel>
-  <Select
-    value={editRow.option_value || ""}
-    onChange={(e) => setEditRow((s) => ({ ...s, option_value: e.target.value }))}
-    label="Option"
-    disabled={!editRow.field}
-  >
+ <Select
+  multiple
+  value={editRow.option_value || []}
+  onChange={(e) => setEditRow((s) => ({ ...s, option_value: e.target.value }))}
+  renderValue={(selected) => selected.join(", ")}
+  label="Option"
+  disabled={!editRow.field}
+>
     {(FIELD_OPTIONS_MAP[editRow.field] || []).map((opt) => (
       <MenuItem key={opt} value={opt}>{opt}</MenuItem>
     ))}
