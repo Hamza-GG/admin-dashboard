@@ -376,14 +376,15 @@ const doBulkAssign = async () => {
   try {
     setBulkSaving(true);
     const payload = {
-      rule_name: bulkRule,
+      rule_id: bulkRule, // backend expects rule_id, not rule_name
       city: bulkCity,
       assignee_user_id: bulkAssignee1?.id ?? null,
       assignee2_user_id: bulkAssignee2?.id ?? null,
+      notes: null,
     };
 
     console.log("Bulk Assign Payload:", payload);
-    await authAxios.post("/actions/bulk-assign", payload);
+    await authAxios.post("/actions/assign/bulk", [payload]); // ✅ wrap in array
 
     show("success", "Bulk assignment completed successfully.");
     setBulkAssignOpen(false);
