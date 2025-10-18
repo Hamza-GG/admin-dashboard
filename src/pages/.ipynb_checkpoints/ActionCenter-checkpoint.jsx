@@ -379,18 +379,22 @@ const doBulkAssign = async () => {
     // Filter inspections belonging to the selected city
     const rowsToAssign = rows.filter(r => r.city === bulkCity);
 
-    // Build payload array (send rule name instead of ID)
-    const payloads = rowsToAssign.map(r => ({
-      inspection_id: r.inspection_id,
-      rule_id: String(bulkRule.name), // ✅ send rule name not rule.id
+    // Collect all inspection IDs
+    const inspectionIds = rowsToAssign.map(r => r.inspection_id);
+
+    // Build the single payload
+    const payload = {
+      inspection_id: inspectionIds, // ✅ multiple IDs
+      rule_id: String(bulkRule.name), // ✅ send rule name instead of ID
       assignee_user_id: bulkAssignee1?.id ?? null,
       assignee2_user_id: bulkAssignee2?.id ?? null,
       notes: null,
-    }));
+    };
 
-    console.log("Bulk Assign Payloads:", payloads);
+    console.log("Bulk Assign Payload:", payload);
 
-    await authAxios.post("/actions/assign/bulk", payloads);
+    // ✅ backend expects an array of payloads
+    await authAxios.post("/actions/assign/bulk", [payload]);
 
     show("success", "Bulk assignment completed successfully.");
     setBulkAssignOpen(false);
@@ -739,7 +743,7 @@ const doBulkAssign = async () => {
 
       {/* Table */}
       <Paper sx={{ p: 2, borderRadius: 3 }} elevation={0}>
-        <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: 560, borderRadius: 2 }}>
+        <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
           <Table stickyHeader size="small">
             <TableHead>
               <TableRow>

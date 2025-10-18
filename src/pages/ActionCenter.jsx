@@ -743,7 +743,7 @@ const doBulkAssign = async () => {
 
       {/* Table */}
       <Paper sx={{ p: 2, borderRadius: 3 }} elevation={0}>
-        <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: 560, borderRadius: 2 }}>
+        <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
           <Table stickyHeader size="small">
             <TableHead>
               <TableRow>
