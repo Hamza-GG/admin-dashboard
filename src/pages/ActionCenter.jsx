@@ -368,26 +368,25 @@ const doAssign = async () => {
 };
 
 const doBulkAssign = async () => {
-  if (!bulkRule || !bulkCity) {
-    show("error", "Please select both a rule and a city.");
+  if (!bulkRule?.name || !bulkCity) {
+    show("error", "Please select both a rule and a city before assigning.");
     return;
   }
 
   try {
     setBulkSaving(true);
 
-    // Filter the inspections (rows) that belong to the selected city
+    // Filter inspections belonging to the selected city
     const rowsToAssign = rows.filter(r => r.city === bulkCity);
 
-    // Build payload array
-    // Build payload array
-const payloads = rowsToAssign.map(r => ({
-  inspection_id: r.inspection_id,
-  rule_id: String(bulkRule.id), // ✅ Force to string
-  assignee_user_id: bulkAssignee1?.id ?? null,
-  assignee2_user_id: bulkAssignee2?.id ?? null,
-  notes: null,
-}));
+    // Build payload array (send rule name instead of ID)
+    const payloads = rowsToAssign.map(r => ({
+      inspection_id: r.inspection_id,
+      rule_id: String(bulkRule.name), // ✅ send rule name not rule.id
+      assignee_user_id: bulkAssignee1?.id ?? null,
+      assignee2_user_id: bulkAssignee2?.id ?? null,
+      notes: null,
+    }));
 
     console.log("Bulk Assign Payloads:", payloads);
 
@@ -401,7 +400,7 @@ const payloads = rowsToAssign.map(r => ({
     setBulkAssignee2(null);
     fetchMatches();
   } catch (e) {
-    console.error(e);
+    console.error("Bulk assign failed:", e);
     show("error", parseError(e));
   } finally {
     setBulkSaving(false);
