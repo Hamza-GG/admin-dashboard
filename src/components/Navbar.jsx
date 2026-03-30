@@ -89,14 +89,11 @@ function Navbar({ setIsAuthenticated }) {
 
   // Role-based filtering
   const filteredNavItems =
-    userRole === "supervisor" || userRole === "user"
+    userRole === "supervisor"
+      ? navItems.filter((i) => ["/inspection-form"].includes(i.to))
+      : userRole === "user"
       ? navItems.filter((i) =>
-          [
-            "/dashboard",
-            "/inspections",
-            "/inspection-form",
-            ...(userRole === "user" ? ["/action-center"] : []),
-          ].includes(i.to)
+          ["/dashboard", "/inspections", "/inspection-form", "/action-center"].includes(i.to)
         )
       : navItems;
 
