@@ -1,0 +1,35 @@
+{
+  "common": {
+    "unknownError": "Erreur inconnue"
+  },
+  "inspectionForm": {
+    "title": "Ajouter un nouveau contrôle",
+    "subtitle": "Remplissez le formulaire. Les champs marqués comme (optionnel) peuvent être laissés vides.",
+    "formLabel": "Formulaire",
+    "formPlaceholder": "Sélectionner un formulaire",
+    "selectFormError": "Veuillez sélectionner un formulaire.",
+    "locationRequiredError": "Veuillez fournir la localisation.",
+    "geoNotSupported": "La géolocalisation n’est pas supportée par votre navigateur.",
+    "geoFailedPrefix": "Impossible de récupérer la localisation:",
+    "submittedOk": "Contrôle soumis !",
+    "submitFailed": "Échec de la soumission du contrôle.",
+    "riderId": "Rider ID",
+    "boxSerial": "Numéro de série de la Box",
+    "plate": "Numéro d’immatriculation",
+    "cin": "CIN",
+    "firstName": "Prénom",
+    "lastName": "Nom de famille",
+    "partnerName": "Nom du partenaire",
+    "supervisorLabel": "Superviseur",
+    "cityLabel": "Ville",
+    "locationLabel": "Emplacement",
+    "locationBtn": "Ma localisation",
+    "fieldsTitle": "Champs du formulaire",
+    "multiHelp": "Multi-valeurs : une valeur par ligne",
+    "imageBtnAdd": "Ajouter une image (optionnel)",
+    "imageBtnChange": "Changer l’image",
+    "commentsLabel": "Commentaire",
+    "commentsPlaceholder": "Saisissez ici vos commentaires ou observations",
+    "submitBtn": "Valider le contrôle"
+  }
+}

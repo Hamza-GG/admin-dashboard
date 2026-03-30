@@ -1,0 +1,14 @@
+/* App-level style overrides */
+
+/* Ensure the root fills the viewport cleanly */
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+/* Traj marker CSS is injected via Supervisors.jsx already */

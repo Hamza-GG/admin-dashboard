@@ -1,0 +1,35 @@
+{
+  "common": {
+    "unknownError": "Unknown error"
+  },
+  "inspectionForm": {
+    "title": "Add a new inspection",
+    "subtitle": "Fill in the form. Fields marked as (optional) can be left empty.",
+    "formLabel": "Form",
+    "formPlaceholder": "Select a form",
+    "selectFormError": "Please select a form.",
+    "locationRequiredError": "Please provide the location.",
+    "geoNotSupported": "Geolocation is not supported by your browser.",
+    "geoFailedPrefix": "Failed to retrieve location:",
+    "submittedOk": "Inspection submitted successfully!",
+    "submitFailed": "Failed to submit the inspection.",
+    "riderId": "Rider ID",
+    "boxSerial": "Box serial number",
+    "plate": "Plate number",
+    "cin": "National ID",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "partnerName": "Partner name",
+    "supervisorLabel": "Supervisor",
+    "cityLabel": "City",
+    "locationLabel": "Location",
+    "locationBtn": "Use my location",
+    "fieldsTitle": "Form fields",
+    "multiHelp": "Multi-values: one value per line",
+    "imageBtnAdd": "Add an image (optional)",
+    "imageBtnChange": "Change image",
+    "commentsLabel": "Comment",
+    "commentsPlaceholder": "Type your comments or observations here",
+    "submitBtn": "Submit inspection"
+  }
+}

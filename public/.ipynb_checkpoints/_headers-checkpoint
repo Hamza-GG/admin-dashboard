@@ -1,0 +1,8 @@
+/*
+  Content-Security-Policy: default-src 'self';
+    img-src 'self' data: blob: https://tile.openstreetmap.org https://*.tile.openstreetmap.org;
+    style-src 'self' 'unsafe-inline';
+    script-src 'self';
+    connect-src 'self' https://employee-inspection-backend.onrender.com;
+    font-src 'self' data:;
+    worker-src 'self' blob:;
