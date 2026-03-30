@@ -260,23 +260,14 @@ export default function Riders() {
   );
 
   return (
-    <Box sx={{ minHeight: "100vh", width: "100vw", background: "linear-gradient(160deg, #f0f4f8 0%, #e8f4f0 50%, #f0f4f8 100%)" }}>
-      {/* Page header */}
-      <Box
-        sx={{
-          background: "linear-gradient(135deg, #0f2744 0%, #1a3254 55%, #00896d 100%)",
-          color: "#fff",
-          px: { xs: 3, md: 6 },
-          py: 4,
-          mb: 0,
-        }}
-      >
-        <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "#f0f4f8" }}>
+      <Box sx={{ width: "100%", maxWidth: 1300, mx: "auto", px: { xs: 2, md: 4 }, py: 4 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" flexWrap="wrap" gap={2} sx={{ mb: 3 }}>
           <Box>
-            <Typography variant="h4" fontWeight={800} sx={{ color: "#fff", letterSpacing: -0.5 }}>
+            <Typography variant="h4" fontWeight={800} sx={{ letterSpacing: -0.5, color: "text.primary" }}>
               Riders
             </Typography>
-            <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.65)", mt: 0.5 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
               Gérer, rechercher et importer des riders
             </Typography>
           </Box>
@@ -285,14 +276,6 @@ export default function Riders() {
               variant="contained"
               startIcon={<AddIcon />}
               onClick={handleAddOpen}
-              sx={{
-                background: "rgba(255,255,255,0.15)",
-                color: "#fff",
-                border: "1px solid rgba(255,255,255,0.3)",
-                backdropFilter: "blur(8px)",
-                "&:hover": { background: "rgba(255,255,255,0.25)", boxShadow: "none" },
-                boxShadow: "none",
-              }}
             >
               Add Rider
             </Button>
@@ -300,20 +283,12 @@ export default function Riders() {
               component="label"
               variant="outlined"
               startIcon={<UploadFileIcon />}
-              sx={{
-                color: "rgba(255,255,255,0.85)",
-                borderColor: "rgba(255,255,255,0.3)",
-                "&:hover": { borderColor: "#fff", color: "#fff", background: "rgba(255,255,255,0.08)" },
-              }}
             >
               Upload CSV
               <input type="file" accept=".csv" hidden onChange={handleCSVUpload} />
             </Button>
           </Stack>
         </Stack>
-      </Box>
-
-      <Box sx={{ width: "100%", maxWidth: 1300, mx: "auto", px: { xs: 2, md: 4 }, py: 4 }}>
         <Paper
           elevation={2}
           sx={{

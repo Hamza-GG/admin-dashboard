@@ -353,9 +353,8 @@ export default function InspectionForm() {
     <FormErrorBoundary>
       <Box
         sx={{
-          minHeight: "calc(100vh - 64px)",
-          width: "100vw",
-          background: "linear-gradient(160deg, #f0f4f8 0%, #e8f4f0 50%, #f0f4f8 100%)",
+          minHeight: "100vh",
+          bgcolor: "#f0f4f8",
           display: "flex",
           alignItems: "flex-start",
           justifyContent: "center",

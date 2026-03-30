@@ -547,26 +547,16 @@ export default function InspectionsDashboard() {
   );
 
   return (
-    <Box sx={{ minHeight: "100vh", background: "linear-gradient(160deg, #f0f4f8 0%, #e8f4f0 50%, #f0f4f8 100%)" }}>
-      {/* Page header */}
-      <Box
-        sx={{
-          background: "linear-gradient(135deg, #0f2744 0%, #1a3254 55%, #00896d 100%)",
-          color: "#fff",
-          px: { xs: 3, md: 6 },
-          py: 4,
-          mb: 0,
-        }}
-      >
-        <Typography variant="h4" fontWeight={800} sx={{ color: "#fff", letterSpacing: -0.5 }}>
-          Inspection Dashboard
-        </Typography>
-        <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.65)", mt: 0.5 }}>
-          Filtrer, visualiser et exporter les données de contrôle
-        </Typography>
-      </Box>
-
+    <Box sx={{ minHeight: "100vh", bgcolor: "#f0f4f8" }}>
       <Box sx={{ p: { xs: 2, md: 4 } }}>
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h4" fontWeight={800} sx={{ letterSpacing: -0.5, color: "text.primary" }}>
+            Inspection Dashboard
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            Filtrer, visualiser et exporter les données de contrôle
+          </Typography>
+        </Box>
       {/* Filters */}
       <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3, flexWrap: "wrap" }}>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
