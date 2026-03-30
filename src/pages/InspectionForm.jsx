@@ -85,10 +85,10 @@ export default function InspectionForm() {
   let userEmail = "";
   try {
     const decoded = jwtDecode(token || "") || {};
-    userRole = decoded?.role || decoded?.user_role || decoded?.user_type || "";
+    userRole = decoded?.role || decoded?.user_role || decoded?.user_type || localStorage.getItem("role") || "";
     userEmail = decoded?.email || decoded?.username || decoded?.user_email || "";
   } catch {
-    userRole = "";
+    userRole = localStorage.getItem("role") || "";
     userEmail = "";
   }
   // Debug: verify role parsing
