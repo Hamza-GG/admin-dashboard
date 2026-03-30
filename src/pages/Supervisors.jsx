@@ -436,8 +436,8 @@ export default function Supervisors() {
             width: 220,
             borderRadius: 2,
             position: "sticky",
-            top: 80,
-            zIndex: 1,
+            top: 16,
+            zIndex: 1100,
           }}
         >
           <Box sx={{ p: 1.5, pb: 0.5 }}>

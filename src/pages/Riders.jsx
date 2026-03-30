@@ -260,22 +260,16 @@ export default function Riders() {
   );
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "#f0f4f8" }}>
-      <Box sx={{ width: "100%", maxWidth: 1300, mx: "auto", px: { xs: 2, md: 4 }, py: 4 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" flexWrap="wrap" gap={2} sx={{ mb: 3 }}>
+    <Box sx={{ minHeight: "100vh", width: "100vw", backgroundColor: "#f7fafd" }}>
+      <Box sx={{ width: "100%", maxWidth: 1200, mx: "auto", py: 6 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+          <Typography variant="h4" fontWeight="bold">Riders</Typography>
           <Box>
-            <Typography variant="h4" fontWeight={800} sx={{ letterSpacing: -0.5, color: "text.primary" }}>
-              Riders
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-              Gérer, rechercher et importer des riders
-            </Typography>
-          </Box>
-          <Stack direction="row" spacing={1.5}>
             <Button
               variant="contained"
               startIcon={<AddIcon />}
               onClick={handleAddOpen}
+              sx={{ bgcolor: "#17417e", ":hover": { bgcolor: "#122e57" } }}
             >
               Add Rider
             </Button>
@@ -283,32 +277,24 @@ export default function Riders() {
               component="label"
               variant="outlined"
               startIcon={<UploadFileIcon />}
+              sx={{ ml: 2 }}
             >
               Upload CSV
               <input type="file" accept=".csv" hidden onChange={handleCSVUpload} />
             </Button>
-          </Stack>
+          </Box>
         </Stack>
-        <Paper
-          elevation={2}
-          sx={{
-            p: 2,
-            mb: 3,
-            display: "flex",
-            alignItems: "center",
-            gap: 1.5,
-            border: "1px solid rgba(0,0,0,0.06)",
-          }}
-        >
-          <SearchIcon sx={{ color: "text.secondary", ml: 0.5 }} />
-          <TextField
-            label="Rechercher un rider…"
-            variant="standard"
-            fullWidth
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            InputProps={{ disableUnderline: false }}
-          />
+        <Paper sx={{ p: 2, mb: 3 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <SearchIcon color="action" />
+            <TextField
+              label="Search riders"
+              variant="standard"
+              fullWidth
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </Box>
         </Paper>
         {errorMsg ? (
           <Typography sx={{ mt: 1, color: "text.secondary" }}>{errorMsg}</Typography>

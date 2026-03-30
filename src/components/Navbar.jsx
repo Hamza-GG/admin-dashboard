@@ -15,13 +15,12 @@ import {
   InputLabel,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import authAxios from "../utils/authAxios";
 import { useTranslation } from "react-i18next";
 
 function Navbar({ setIsAuthenticated }) {
   const navigate = useNavigate();
-  const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -102,28 +101,23 @@ function Navbar({ setIsAuthenticated }) {
       : navItems;
 
   return (
-    <AppBar position="fixed" elevation={0}>
-      <Toolbar sx={{ display: "flex", justifyContent: "space-between", minHeight: 64, px: { xs: 2, sm: 3 } }}>
+    <AppBar position="fixed" sx={{ backgroundColor: "#00A082" }} elevation={3}>
+      <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
         {/* Logo + Title */}
         <Box
           component={Link}
           to="/dashboard"
-          sx={{ display: "flex", alignItems: "center", textDecoration: "none", gap: 1.5 }}
+          sx={{ display: "flex", alignItems: "center", textDecoration: "none" }}
         >
           <img
             src="/glopi.png"
             alt="logo"
-            style={{ height: 44, borderRadius: 8, filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.25))" }}
+            style={{ height: 52, marginRight: 30 }}
             type="image/gif"
           />
-          <Box>
-            <Typography variant="h6" sx={{ color: "#fff", fontWeight: 800, lineHeight: 1.1, letterSpacing: 0.3 }}>
-              OPS Watcher
-            </Typography>
-            <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.55)", fontWeight: 400, letterSpacing: 0.5 }}>
-              Admin Dashboard
-            </Typography>
-          </Box>
+          <Typography variant="h6" sx={{ color: "#fff", fontWeight: 700 }}>
+            OPS Watcher
+          </Typography>
         </Box>
 
         {/* Don’t render links until we know the role, to avoid a brief flash */}
@@ -185,60 +179,38 @@ function Navbar({ setIsAuthenticated }) {
           <Box
             sx={{
               display: "flex",
-              gap: 0.5,
+              gap: 2,
               alignItems: "center",
               flexWrap: "wrap",
               justifyContent: "flex-end",
-              maxWidth: "75vw",
+              maxWidth: "70vw",
             }}
           >
-            {filteredNavItems.map((item) => {
-              const isActive = location.pathname === item.to;
-              return (
-                <Button
-                  key={item.to}
-                  color="inherit"
-                  component={Link}
-                  to={item.to}
-                  sx={{
-                    px: 1.5,
-                    py: 0.75,
-                    whiteSpace: "nowrap",
-                    fontWeight: isActive ? 700 : 500,
-                    fontSize: "0.8125rem",
-                    letterSpacing: 0.2,
-                    color: isActive ? "#fff" : "rgba(255,255,255,0.75)",
-                    backgroundColor: isActive ? "rgba(255,255,255,0.15)" : "transparent",
-                    borderRadius: 2,
-                    position: "relative",
-                    transition: "all 0.2s ease",
-                    "&:hover": {
-                      backgroundColor: "rgba(255,255,255,0.12)",
-                      color: "#fff",
-                    },
-                  }}
-                >
-                  {item.label}
-                </Button>
-              );
-            })}
-
-            <Box sx={{ width: 1, height: 28, bgcolor: "rgba(255,255,255,0.15)", mx: 1 }} />
-
+            {filteredNavItems.map((item) => (
+              <Button
+                key={item.to}
+                color="inherit"
+                component={Link}
+                to={item.to}
+                sx={{ px: 1.25, whiteSpace: "nowrap" }}
+              >
+                {item.label}
+              </Button>
+            ))}
             <FormControl
               size="small"
               variant="outlined"
               sx={{
-                minWidth: 88,
-                bgcolor: "rgba(255,255,255,0.08)",
-                borderRadius: 2,
-                "& .MuiInputBase-root": { color: "#fff", fontSize: "0.8125rem" },
-                "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255,255,255,0.25)" },
-                "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255,255,255,0.6)" },
-                "& .MuiSvgIcon-root": { color: "rgba(255,255,255,0.7)" },
+                minWidth: 110,
+                bgcolor: "rgba(255,255,255,0.10)",
+                borderRadius: 1,
+                "& .MuiInputBase-root": { color: "#fff" },
+                "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(255,255,255,0.7)" },
+                "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#fff" },
+                "& .MuiSvgIcon-root": { color: "#fff" },
               }}
             >
-              <InputLabel id="lang-select-label" sx={{ color: "rgba(255,255,255,0.7)", fontSize: "0.8125rem" }}>
+              <InputLabel id="lang-select-label" sx={{ color: "#fff" }}>
                 Lang
               </InputLabel>
               <Select
@@ -251,24 +223,15 @@ function Navbar({ setIsAuthenticated }) {
                 <MenuItem value="en">EN</MenuItem>
               </Select>
             </FormControl>
-
             <Button
               color="inherit"
               variant="outlined"
               sx={{
-                ml: 0.5,
-                borderColor: "rgba(255,255,255,0.35)",
-                fontWeight: 600,
-                fontSize: "0.8125rem",
-                color: "rgba(255,255,255,0.9)",
-                bgcolor: "rgba(255,255,255,0.06)",
-                borderRadius: 2,
-                px: 2,
-                "&:hover": {
-                  bgcolor: "rgba(255, 80, 80, 0.25)",
-                  borderColor: "rgba(255,150,150,0.6)",
-                  color: "#fff",
-                },
+                ml: 2,
+                borderColor: "#fff",
+                fontWeight: 700,
+                bgcolor: "rgba(255,255,255,0.08)",
+                "&:hover": { bgcolor: "rgba(255,255,255,0.15)" },
               }}
               onClick={handleLogout}
             >

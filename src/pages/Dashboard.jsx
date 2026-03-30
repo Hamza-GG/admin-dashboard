@@ -24,114 +24,80 @@ useEffect(() => {
     .then((res) => setUser(res.data))
     .catch((err) => console.error("Failed to fetch user info:", err));
 }, []);
-  const cards = [
-    {
-      icon: <GroupIcon sx={{ fontSize: 36, color: "#00A082" }} />,
-      iconBg: "rgba(0,160,130,0.1)",
-      accentColor: "linear-gradient(90deg, #00A082, #007a63)",
-      title: "Riders",
-      desc: "Afficher, modifier ou rechercher des riders",
-      buttons: [
-        { label: "Gérer les Riders", color: "primary", to: "/riders" },
-      ],
-    },
-    {
-      icon: <FactCheckIcon sx={{ fontSize: 36, color: "#3182ce" }} />,
-      iconBg: "rgba(49,130,206,0.1)",
-      accentColor: "linear-gradient(90deg, #3182ce, #2563eb)",
-      title: "Contrôles",
-      desc: "Afficher, modifier, rechercher ou supprimer des contrôles.",
-      buttons: [
-        { label: "Gérer les Contrôles", color: "primary", to: "/inspections" },
-        {
-          label: "+ Nouveau Contrôle",
-          to: "/inspection-form",
-          customStyle: {
-            background: "linear-gradient(135deg, #dd6b20, #c05621)",
-            color: "#fff",
-            boxShadow: "0 4px 12px rgba(221,107,32,0.35)",
-            "&:hover": {
-              background: "linear-gradient(135deg, #ed8936, #dd6b20)",
-              boxShadow: "0 6px 16px rgba(221,107,32,0.45)",
-            },
-          },
-        },
-      ],
-    },
-  ];
-
   return (
     <Box
       minHeight="100vh"
       width="100vw"
-      sx={{
-        background: "linear-gradient(160deg, #f0f4f8 0%, #e8f4f0 50%, #f0f4f8 100%)",
-        paddingY: 6,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      sx={{ background: "#fff", paddingY: 4 }}
     >
       <Container maxWidth="lg">
-        {/* Hero header */}
-        <Box sx={{ textAlign: "center", mb: 6 }}>
-          <Typography
-            variant="h3"
-            gutterBottom
-            sx={{
-              fontWeight: 800,
-              background: "linear-gradient(135deg, #0f2744 0%, #00A082 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-              letterSpacing: -1,
-            }}
-          >
-            Admin Dashboard
+        <Typography
+          variant="h3"
+          align="center"
+          gutterBottom
+          sx={{ fontWeight: 700 }}
+        >
+          Admin Dashboard
+        </Typography>
+
+        {user && (
+          <Typography variant="h6" align="center" sx={{ mb: 4 }}>
+            Welcome, {user.username} 👋
           </Typography>
-          {user && (
-            <Typography
-              variant="h6"
-              sx={{
-                color: "text.secondary",
-                fontWeight: 500,
-                mt: 1,
-              }}
-            >
-              Bienvenue,{" "}
-              <Box
-                component="span"
-                sx={{ color: "#00A082", fontWeight: 700 }}
-              >
-                {user.username}
-              </Box>{" "}
-              👋
-            </Typography>
-          )}
-        </Box>
+        )}
 
         <Grid container spacing={4} justifyContent="center">
-          {cards.map((card, index) => (
+          {[ // Riders and Controls config
+            {
+              icon: <GroupIcon color="primary" sx={{ fontSize: 60, mb: 2 }} />,
+              title: "Riders",
+              desc: "Afficher, modifier ou rechercher des riders",
+              buttons: [
+                {
+                  label: "GÉRER LES RIDERS",
+                  color: "primary",
+                  to: "/riders",
+                },
+              ],
+            },
+            {
+              icon: <FactCheckIcon color="success" sx={{ fontSize: 60, mb: 2 }} />,
+              title: "Contrôles",
+              desc: "Afficher, modifier, rechercher ou supprimer des contrôles.",
+              buttons: [
+                {
+                  label: "GÉRER LES CONTRÔLES",
+                  color: "success",
+                  to: "/inspections",
+                },
+                {
+                  label: "➕ NOUVEAU CONTRÔLE",
+                  color: "warning",
+                  to: "/inspection-form",
+                  customStyle: {
+                    bgcolor: "orange",
+                    color: "white",
+                    "&:hover": {
+                      bgcolor: "#ff9800",
+                    },
+                  },
+                },
+              ],
+            },
+          ].map((card, index) => (
             <Grid item xs={12} md={6} key={index} sx={{ display: "flex" }}>
               <Card
                 sx={{
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "space-between",
+                  alignItems: "center",
                   flex: 1,
-                  borderRadius: 3,
-                  overflow: "hidden",
-                  position: "relative",
-                  border: "1px solid rgba(0,0,0,0.06)",
-                  "&::before": {
-                    content: '""',
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: 4,
-                    background: card.accentColor,
-                  },
+                  boxShadow: 6,
+                  padding: 2,
                 }}
               >
                 <CardContent
@@ -141,52 +107,32 @@ useEffect(() => {
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    pt: 4,
-                    pb: 2,
-                    px: 4,
                   }}
                 >
-                  <Box
-                    sx={{
-                      width: 72,
-                      height: 72,
-                      borderRadius: "50%",
-                      bgcolor: card.iconBg,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      mb: 2.5,
-                    }}
-                  >
-                    {card.icon}
-                  </Box>
-                  <Typography variant="h5" gutterBottom sx={{ fontWeight: 700 }}>
+                  {card.icon}
+                  <Typography variant="h5" gutterBottom>
                     {card.title}
                   </Typography>
-                  <Typography color="text.secondary" sx={{ fontSize: "0.9375rem", lineHeight: 1.6 }}>
-                    {card.desc}
-                  </Typography>
+                  <Typography color="text.secondary">{card.desc}</Typography>
                 </CardContent>
                 <CardActions
                   sx={{
                     width: "100%",
                     display: "flex",
                     flexDirection: "column",
-                    gap: 1.5,
-                    px: 3,
-                    pb: 3,
+                    gap: 1,
                   }}
                 >
                   {card.buttons.map((btn, i) => (
                     <Button
                       key={i}
                       variant="contained"
-                      color={btn.color || "primary"}
+                      color={btn.color}
                       component={Link}
                       to={btn.to}
                       size="large"
                       fullWidth
-                      sx={{ py: 1.25, fontSize: "0.875rem", ...btn.customStyle }}
+                      sx={btn.customStyle}
                     >
                       {btn.label}
                     </Button>

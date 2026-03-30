@@ -547,16 +547,11 @@ export default function InspectionsDashboard() {
   );
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "#f0f4f8" }}>
-      <Box sx={{ p: { xs: 2, md: 4 } }}>
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="h4" fontWeight={800} sx={{ letterSpacing: -0.5, color: "text.primary" }}>
-            Inspection Dashboard
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            Filtrer, visualiser et exporter les données de contrôle
-          </Typography>
-        </Box>
+    <Box sx={{ p: 4, background: "#f7fafd", minHeight: "100vh" }}>
+      <Typography variant="h4" fontWeight="bold" gutterBottom>
+        Inspection Dashboard
+      </Typography>
+
       {/* Filters */}
       <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3, flexWrap: "wrap" }}>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -781,7 +776,6 @@ export default function InspectionsDashboard() {
           </Button>
         </DialogActions>
       </Dialog>
-      </Box>
     </Box>
   );
 }

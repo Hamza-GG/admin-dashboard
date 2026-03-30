@@ -353,46 +353,34 @@ export default function InspectionForm() {
     <FormErrorBoundary>
       <Box
         sx={{
-          minHeight: "100vh",
-          bgcolor: "#f0f4f8",
+          minHeight: "calc(100vh - 64px)",
+          width: "100vw",
+          bgcolor: "#eef2fa",
           display: "flex",
-          alignItems: "flex-start",
+          alignItems: "center",
           justifyContent: "center",
-          py: { xs: 3, md: 5 },
+          py: { xs: 2, md: 4 },
         }}
       >
         <Paper
-          elevation={3}
+          elevation={6}
           sx={{
-            p: { xs: 3, sm: 5 },
-            borderRadius: 3,
-            bgcolor: "#fff",
-            maxWidth: 720,
+            p: { xs: 2, sm: 5 },
+            borderRadius: 4,
+            bgcolor: "#f5f7fa",
+            maxWidth: 700,
             width: "100%",
+            minHeight: { xs: "auto", md: 600 },
             mx: 2,
-            border: "1px solid rgba(0,0,0,0.06)",
           }}
         >
-          <Box sx={{ textAlign: "center", mb: 3 }}>
-            <Typography
-              variant="h4"
-              fontWeight={800}
-              gutterBottom
-              sx={{
-                background: "linear-gradient(135deg, #0f2744 0%, #00A082 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                letterSpacing: -0.5,
-              }}
-            >
-              {t("inspectionForm.title")}
-            </Typography>
-            <Typography color="text.secondary" sx={{ fontSize: "0.9375rem" }}>
-              {t("inspectionForm.subtitle")}
-            </Typography>
-          </Box>
-          <Divider sx={{ mb: 3 }} />
+          <Typography variant="h4" fontWeight="bold" align="center" gutterBottom sx={{ color: "#17417e" }}>
+            {t("inspectionForm.title")}
+          </Typography>
+          <Typography align="center" color="text.secondary" sx={{ mb: 3 }}>
+            {t("inspectionForm.subtitle")}
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
 
           <form
             onSubmit={handleSubmit}

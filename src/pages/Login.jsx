@@ -60,86 +60,32 @@ function Login({ setIsAuthenticated }) {
     <div style={{
       minHeight: "100vh",
       width: "100vw",
-      background: "linear-gradient(135deg, #0f2744 0%, #1a3254 45%, #00896d 100%)",
+      background: "#f4f8fc",
       display: "flex",
       alignItems: "center",
-      justifyContent: "center",
-      position: "relative",
-      overflow: "hidden",
+      justifyContent: "center"
     }}>
-      {/* Decorative blobs */}
       <div style={{
-        position: "absolute",
-        top: "-10%",
-        right: "-5%",
-        width: 400,
-        height: 400,
-        borderRadius: "50%",
-        background: "rgba(0,160,130,0.12)",
-        filter: "blur(60px)",
-        pointerEvents: "none",
-      }} />
-      <div style={{
-        position: "absolute",
-        bottom: "-15%",
-        left: "-5%",
-        width: 500,
-        height: 500,
-        borderRadius: "50%",
-        background: "rgba(30,58,95,0.4)",
-        filter: "blur(80px)",
-        pointerEvents: "none",
-      }} />
-
-      <div style={{
-        maxWidth: 440,
-        width: "calc(100% - 32px)",
-        background: "rgba(255,255,255,0.97)",
-        backdropFilter: "blur(20px)",
-        padding: "48px 40px",
-        borderRadius: 24,
-        boxShadow: "0 32px 64px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.08)",
+        maxWidth: 400,
+        width: "100%",
+        background: "#fff",
+        padding: "36px 32px",
+        borderRadius: 16,
+        boxShadow: "0 4px 32px rgba(0,0,0,0.09)",
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
-        position: "relative",
-        zIndex: 1,
+        alignItems: "center"
       }}>
-        {/* Logo area */}
-        <div style={{
-          width: 64,
-          height: 64,
-          borderRadius: 16,
-          background: "linear-gradient(135deg, #0f2744, #00A082)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginBottom: 20,
-          boxShadow: "0 8px 24px rgba(0,160,130,0.35)",
-        }}>
-          <img src="/glopi.png" alt="logo" style={{ height: 40, borderRadius: 8 }} />
-        </div>
-
         <h2 style={{
           fontWeight: 800,
-          color: "#0f2744",
-          letterSpacing: -0.5,
-          marginBottom: 6,
-          marginTop: 0,
-          fontSize: 26,
-          textAlign: "center",
+          color: "#1565c0",
+          letterSpacing: 1,
+          marginBottom: 24,
+          fontSize: 32,
+          textAlign: "center"
         }}>
-          OPS Watcher
+          Inspection Admin Login
         </h2>
-        <p style={{
-          color: "#5a6a7e",
-          fontSize: 14,
-          marginTop: 0,
-          marginBottom: 28,
-          textAlign: "center",
-        }}>
-          Connectez-vous à votre espace admin
-        </p>
         <form onSubmit={handleSubmit} style={{ width: "100%" }}>
           <input
             type="email"
@@ -200,47 +146,39 @@ function Login({ setIsAuthenticated }) {
 // Reusable styles
 const inputStyle = {
   width: "100%",
-  marginBottom: 14,
-  padding: "13px 16px",
-  border: "1.5px solid #e2e8f0",
-  borderRadius: 10,
-  fontSize: 15,
+  marginBottom: 16,
+  padding: "12px 14px",
+  border: "1px solid #b5c4d6",
+  borderRadius: 8,
+  fontSize: 17,
   outline: "none",
-  background: "#f8fafc",
-  color: "#1a2332",
-  WebkitTextFillColor: "#1a2332",
-  fontFamily: "'Montserrat', sans-serif",
-  fontWeight: 500,
-  transition: "border-color 0.2s, box-shadow 0.2s",
+  background: "#f6faff",
+  color: "black",
+  WebkitTextFillColor: "black",
 };
 
 const buttonStyle = {
   width: "100%",
-  padding: "13px",
-  background: "linear-gradient(135deg, #00A082 0%, #007a63 100%)",
+  padding: "12px",
+  background: "#1565c0",
   color: "#fff",
   fontWeight: 700,
-  fontSize: 15,
+  fontSize: 17,
   border: "none",
-  borderRadius: 10,
+  borderRadius: 8,
   cursor: "pointer",
-  transition: "all 0.2s",
-  marginBottom: 6,
-  fontFamily: "'Montserrat', sans-serif",
-  letterSpacing: 0.3,
-  boxShadow: "0 4px 14px rgba(0,160,130,0.35)",
+  transition: "background 0.2s",
+  marginBottom: 6
 };
 
 const forgotButtonStyle = {
   background: "none",
   border: "none",
-  color: "#00A082",
-  textDecoration: "none",
+  color: "#1565c0",
+  textDecoration: "underline",
   cursor: "pointer",
-  fontSize: 13,
-  padding: 0,
-  fontFamily: "'Montserrat', sans-serif",
-  fontWeight: 600,
+  fontSize: 15,
+  padding: 0
 };
 
 const overlayStyle = {
@@ -249,42 +187,34 @@ const overlayStyle = {
   left: 0,
   width: "100vw",
   height: "100vh",
-  background: "rgba(0,0,0,0.45)",
-  backdropFilter: "blur(4px)",
+  background: "rgba(0,0,0,0.13)",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  zIndex: 20,
+  zIndex: 20
 };
 
 const modalStyle = {
-  minWidth: 340,
+  minWidth: 320,
   background: "#fff",
-  borderRadius: 20,
-  boxShadow: "0 24px 48px rgba(0,0,0,0.18)",
-  padding: "36px 28px 28px",
+  borderRadius: 12,
+  boxShadow: "0 4px 16px rgba(0,0,0,0.14)",
+  padding: "32px 24px 24px 24px",
   position: "relative",
   display: "flex",
   flexDirection: "column",
-  alignItems: "center",
+  alignItems: "center"
 };
 
 const closeBtnStyle = {
   position: "absolute",
-  right: 14,
-  top: 14,
-  background: "#f1f5f9",
+  right: 10,
+  top: 10,
+  background: "none",
   border: "none",
-  width: 30,
-  height: 30,
-  borderRadius: "50%",
-  fontSize: 16,
-  color: "#5a6a7e",
-  cursor: "pointer",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  lineHeight: 1,
+  fontSize: 20,
+  color: "#888",
+  cursor: "pointer"
 };
 
 export default Login;
