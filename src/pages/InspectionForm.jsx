@@ -431,9 +431,11 @@ export default function InspectionForm() {
                       <TextField label={t("inspectionForm.plate")} name="plate_number" value={form.plate_number} onChange={handleChange} onBlur={handleBlur} placeholder="Plate Number" fullWidth size="small" />
                     </Grid>
 
-                    <Grid item xs={12} sm={6}>
-                      <TextField label={t("inspectionForm.cin")} name="id_number" value={form.id_number} onChange={handleChange} onBlur={handleBlur} placeholder="National ID/Other" fullWidth size="small" />
-                    </Grid>
+                    {String(userRole).toLowerCase() !== "supervisor" && (
+                      <Grid item xs={12} sm={6}>
+                        <TextField label={t("inspectionForm.cin")} name="id_number" value={form.id_number} onChange={handleChange} onBlur={handleBlur} placeholder="National ID/Other" fullWidth size="small" />
+                      </Grid>
+                    )}
                     <Grid item xs={12} sm={6}>
                       <TextField label={t("inspectionForm.firstName")} name="first_name" value={form.first_name} onChange={handleChange} onBlur={handleBlur} placeholder="First Name" fullWidth size="small" />
                     </Grid>
