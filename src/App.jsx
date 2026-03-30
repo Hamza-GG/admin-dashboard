@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ThemeProvider, CssBaseline, Box } from "@mui/material";
+import { ThemeProvider, CssBaseline, Box, Toolbar } from "@mui/material";
 import { createTheme } from "@mui/material/styles";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
@@ -285,7 +285,8 @@ export default function App() {
       <Router>
         {isAuthenticated && <Navbar setIsAuthenticated={setIsAuthenticated} />}
         {isAuthenticated && <LocationTracker />}
-        <Box sx={{ mt: isAuthenticated ? "64px" : 0 }}>
+        {isAuthenticated && <Toolbar />}
+        <Box>
           <Routes>
             <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
             <Route path="/reset-password" element={<ResetPassword />} />
