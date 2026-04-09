@@ -499,11 +499,11 @@ export default function InspectionForm() {
                           label={t("inspectionForm.locationLabel")}
                           name="location"
                           value={form.location}
-                          onChange={handleChange}
                           placeholder="Location or coordinates"
                           fullWidth
                           size="small"
                           required
+                          InputProps={{ readOnly: true }}
                         />
                         <Button
                           startIcon={<LocationOnIcon />}
