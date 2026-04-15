@@ -162,6 +162,7 @@ export default function Supervisors() {
   const [locations, setLocations] = useState([]);
   const [locationPings, setLocationPings] = useState([]); // raw pings for trajectories
   const [allSupervisors, setAllSupervisors] = useState([]); // full supervisors list for filter
+  const [supervisorNameMap, setSupervisorNameMap] = useState({}); // username -> display name
   const [selectedUser, setSelectedUser] = useState(null);
   const [inspections, setInspections] = useState([]);
   const [activeTab, setActiveTab] = useState(0);
@@ -200,19 +201,20 @@ export default function Supervisors() {
       // Preferred: users endpoint (used by Settings > Users)
       const res = await authAxios.get("/users");
       const users = res.data || [];
-      const sups = users
-        .filter((u) => String(u.role || "").toLowerCase() === "supervisor")
-        .map((u) => u.username)
-        .filter(Boolean);
-      setAllSupervisors(Array.from(new Set(sups)).sort());
+      const sups = users.filter((u) => String(u.role || "").toLowerCase() === "supervisor");
+      const usernames = sups.map((u) => u.username).filter(Boolean);
+      setAllSupervisors(Array.from(new Set(usernames)).sort());
+      const nameMap = {};
+      sups.forEach((u) => {
+        if (u.username) nameMap[u.username] = u.full_name || u.username;
+      });
+      setSupervisorNameMap(nameMap);
       return;
     } catch (e1) {
       // Fallback: supervisors endpoint (if present)
       try {
         const res2 = await authAxios.get("/supervisors");
-        const sups2 = (res2.data || [])
-          .map((u) => u.username || u.email || u.name)
-          .filter(Boolean);
+        const sups2 = (res2.data || []).map((u) => u.username || u.email || u.name).filter(Boolean);
         setAllSupervisors(Array.from(new Set(sups2)).sort());
         return;
       } catch (e2) {
@@ -394,6 +396,8 @@ export default function Supervisors() {
     inspectionsCountLast10Days[name] = Object.values(dayCounts).reduce((a, b) => a + b, 0);
   });
 
+  const displayName = (username) => supervisorNameMap[username] || username || "";
+
   // Casablanca fallback center
   const fallbackCenter = [33.5899, -7.6039];
 
@@ -503,6 +507,7 @@ export default function Supervisors() {
                   options={usernames}
                   value={selectedUser}
                   onChange={(_, v) => setSelectedUser(v)}
+                  getOptionLabel={(u) => displayName(u)}
                   renderInput={(params) => (
                     <TextField {...params} label="Superviseur" />
                   )}
@@ -527,7 +532,7 @@ export default function Supervisors() {
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
                   {selectedUser ? (
                     <Typography variant="body2" color="text.secondary">
-                      Filtré sur: <strong>{selectedUser}</strong>
+                      Filtré sur: <strong>{displayName(selectedUser)}</strong>
                     </Typography>
                   ) : (
                     <Typography variant="body2" color="text.secondary">
@@ -614,7 +619,7 @@ export default function Supervisors() {
                           icon={startIcon}
                         >
                           <Popup>
-                            <strong>{selectedUser}</strong>
+                            <strong>{displayName(selectedUser)}</strong>
                             <br />
                             Départ: {(() => {
                               const d = safeDate(todayTrajectory[0].timestamp || todayTrajectory[0].created_at || todayTrajectory[0].created_at_local);
@@ -636,7 +641,7 @@ export default function Supervisors() {
                           icon={endIcon}
                         >
                           <Popup>
-                            <strong>{selectedUser}</strong>
+                            <strong>{displayName(selectedUser)}</strong>
                             <br />
                             Arrivée: {(() => {
                               const last = todayTrajectory[todayTrajectory.length - 1];
@@ -660,7 +665,7 @@ export default function Supervisors() {
                           icon={defaultIcon}
                         >
                           <Popup>
-                            <strong>{loc.username}</strong>
+                            <strong>{displayName(loc.username)}</strong>
                             <br />
                             {(() => {
                               const d = safeDate(loc.timestamp);
@@ -897,7 +902,7 @@ export default function Supervisors() {
                               verticalAlign: 'middle',
                             }}
                           >
-                            {name}
+                            {displayName(name)}
                           </TableCell>
                           {dateLabels.map((date) => {
                             const val = inspectionsByInspector[name][date] || 0;
