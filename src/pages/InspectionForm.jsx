@@ -46,6 +46,7 @@ export default function InspectionForm() {
     first_last_name: "",
     box_serial_number: "",
     plate_number: "",
+    phone_number: "",
 
     // Partner base fields
     partner_name: "",
@@ -227,6 +228,7 @@ export default function InspectionForm() {
         first_last_name: match.first_last_name || "",
         box_serial_number: match.box_serial_number || "",
         plate_number: match.plate_number || "",
+        phone_number: match.phone_number || "",
       }));
     }
   }
@@ -320,6 +322,7 @@ export default function InspectionForm() {
         first_last_name: "",
         box_serial_number: "",
         plate_number: "",
+        phone_number: "",
 
         partner_name: "",
         supervisor_email: "",
@@ -441,6 +444,9 @@ export default function InspectionForm() {
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <TextField label={t("inspectionForm.lastName")} name="first_last_name" value={form.first_last_name} onChange={handleChange} onBlur={handleBlur} placeholder="Last Name" fullWidth size="small" />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField label="Phone Number" name="phone_number" value={form.phone_number} onChange={handleChange} placeholder="Phone Number" fullWidth size="small" />
                     </Grid>
                   </>
                 )}

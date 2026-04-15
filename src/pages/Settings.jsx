@@ -1111,6 +1111,8 @@ const saveUser = async () => {
         username: editUserRow.username,
         role: editUserRow.role || "supervisor",
         password: newPassword || "changeme123", // You can require this instead
+        full_name: editUserRow.full_name || null,
+        badge_number: editUserRow.badge_number || null,
       };
       await authAxios.post("/register", payload);
       showAlert("success", "User created successfully.");
@@ -1121,6 +1123,8 @@ const saveUser = async () => {
       if (typeof editUserRow.is_verified === "boolean")
         form.append("is_verified", String(editUserRow.is_verified));
       if (newPassword) form.append("new_password", newPassword);
+      if (editUserRow.full_name != null) form.append("full_name", editUserRow.full_name);
+      if (editUserRow.badge_number != null) form.append("badge_number", editUserRow.badge_number);
 
       await authAxios.put(`/users/by-username/${encodeURIComponent(editUserRow.username)}`, form, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -1748,7 +1752,7 @@ const filteredUsers = users.filter(u =>
 );
 
 const openCreateUser = () => {
-  setEditUserRow({ username: "", role: "supervisor", is_verified: false });
+  setEditUserRow({ username: "", role: "supervisor", is_verified: false, full_name: "", badge_number: "" });
   setNewPassword("");
   setEditUserOpen(true);
 };
@@ -1779,6 +1783,8 @@ const openCreateUser = () => {
             <TableHead>
               <TableRow>
                 <TableCell>Username (email)</TableCell>
+                <TableCell>Full Name</TableCell>
+                <TableCell>Badge #</TableCell>
                 <TableCell>Role</TableCell>
                 <TableCell>Verified</TableCell>
                 <TableCell align="right">Actions</TableCell>
@@ -1790,6 +1796,8 @@ const openCreateUser = () => {
                 .map((u) => (
                   <TableRow key={u.id} hover>
                     <TableCell>{u.username}</TableCell>
+                    <TableCell>{u.full_name || "—"}</TableCell>
+                    <TableCell>{u.badge_number || "—"}</TableCell>
                     <TableCell>{u.role}</TableCell>
                     <TableCell>{u.is_verified ? "Yes" : "No"}</TableCell>
                     <TableCell align="right">
@@ -1808,7 +1816,7 @@ const openCreateUser = () => {
                 ))}
               {!loadingUsers && filteredUsers.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} align="center" sx={{ py: 6, color: "text.secondary" }}>
+                  <TableCell colSpan={6} align="center" sx={{ py: 6, color: "text.secondary" }}>
                     No users found
                   </TableCell>
                 </TableRow>
@@ -1866,6 +1874,16 @@ const openCreateUser = () => {
                   <MenuItem value="false">No</MenuItem>
                 </Select>
               </FormControl>
+              <TextField
+                label="Full Name"
+                value={editUserRow.full_name || ""}
+                onChange={(e) => setEditUserRow((s) => ({ ...s, full_name: e.target.value }))}
+              />
+              <TextField
+                label="Badge Number"
+                value={editUserRow.badge_number || ""}
+                onChange={(e) => setEditUserRow((s) => ({ ...s, badge_number: e.target.value }))}
+              />
               <TextField
                 label="New password (optional)"
                 type="password"
