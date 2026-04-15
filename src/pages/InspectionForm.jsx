@@ -220,6 +220,10 @@ export default function InspectionForm() {
     }
 
     if (match) {
+      const matchedCity = CITIES.find(
+        (c) => c.toLowerCase() === String(match.city_code || "").toLowerCase()
+      ) || "";
+
       setForm(prev => ({
         ...prev,
         rider_id: match.rider_id || "",
@@ -229,6 +233,7 @@ export default function InspectionForm() {
         box_serial_number: match.box_serial_number || "",
         plate_number: match.plate_number || "",
         phone_number: match.phone_number || "",
+        city: matchedCity,
       }));
     }
   }
@@ -349,6 +354,12 @@ export default function InspectionForm() {
       setSubmitting(false);
     }
   }
+
+  const CITIES = [
+    "Agadir","Ben guerir","Beni mellal","Berrechid","Bouskoura","Bouznika","Casablanca","Dakhla","Dar bouazza","El jadida",
+    "Essaouira","Fes","Ifrane","Kenitra","Khemisset","Khouribga","Laayoune","Larache","M'diq","Marrakech","Meknes",
+    "Mohammedia","Nador","Nouacer","Ouarzazate","Oujda","Rabat","Safi","Settat","Tamesna","Tanger","Technopolis","Tetouan"
+  ];
 
   const selectedType = String(selectedForm?.type || "").toLowerCase();
 
@@ -488,11 +499,7 @@ export default function InspectionForm() {
                         <InputLabel id="city-label">{t("inspectionForm.cityLabel")}</InputLabel>
                         <Select labelId="city-label" id="city" name="city" value={form.city} label={t("inspectionForm.cityLabel")} onChange={handleChange}>
                           <MenuItem value="" />
-                          {[
-                            "Agadir","Ben guerir","Beni mellal","Berrechid","Bouskoura","Bouznika","Casablanca","Dakhla","Dar bouazza","El jadida",
-                            "Essaouira","Fes","Ifrane","Kenitra","Khemisset","Khouribga","Laayoune","Larache","M'diq","Marrakech","Meknes",
-                            "Mohammedia","Nador","Nouacer","Ouarzazate","Oujda","Rabat","Safi","Settat","Tamesna","Tanger","Technopolis","Tetouan"
-                          ].map((city) => (
+                          {CITIES.map((city) => (
                             <MenuItem key={city} value={city}>{city}</MenuItem>
                           ))}
                         </Select>
