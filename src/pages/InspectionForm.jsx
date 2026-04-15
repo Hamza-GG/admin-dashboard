@@ -65,6 +65,7 @@ export default function InspectionForm() {
   const [gettingLocation, setGettingLocation] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const [riderDailyCount, setRiderDailyCount] = useState(0);
 
   const [riders, setRiders] = useState([]);
   const [forms, setForms] = useState([]);
@@ -234,10 +235,24 @@ export default function InspectionForm() {
     }
   }
 
+  async function checkRiderDailyCount(riderId) {
+    if (!riderId) { setRiderDailyCount(0); return; }
+    try {
+      const res = await authAxios.get("/inspections/daily-count");
+      const entry = (res.data || []).find((r) => String(r.rider_id) === String(riderId));
+      setRiderDailyCount(entry ? entry.count : 0);
+    } catch {
+      setRiderDailyCount(0);
+    }
+  }
+
   function handleBlur(e) {
     const { name, value } = e.target;
     if (["rider_id", "id_number", "box_serial_number", "plate_number", "first_name", "first_last_name"].includes(name)) {
       autofillByField(name, value);
+    }
+    if (name === "rider_id") {
+      checkRiderDailyCount(value);
     }
   }
 
@@ -334,6 +349,7 @@ export default function InspectionForm() {
       });
       setSelectedFormId("");
       setSelectedForm(null);
+      setRiderDailyCount(0);
     } catch (err) {
       console.error("Submit error:", err);
       const detail = err?.response?.data?.detail;
@@ -434,6 +450,13 @@ export default function InspectionForm() {
                     <Grid item xs={12} sm={4}>
                       <TextField label={t("inspectionForm.riderId")} name="rider_id" value={form.rider_id} onChange={handleChange} onBlur={handleBlur} placeholder="e.g. 123" fullWidth size="small" />
                     </Grid>
+                    {riderDailyCount > 0 && (
+                      <Grid item xs={12}>
+                        <Alert severity="warning">
+                          This rider already has {riderDailyCount} inspection{riderDailyCount > 1 ? "s" : ""} today.
+                        </Alert>
+                      </Grid>
+                    )}
                     <Grid item xs={12} sm={4}>
                       <TextField label={t("inspectionForm.boxSerial")} name="box_serial_number" value={form.box_serial_number} onChange={handleChange} onBlur={handleBlur} placeholder="Box Serial Number" fullWidth size="small" />
                     </Grid>
