@@ -232,6 +232,7 @@ export default function InspectionForm() {
         phone_number: match.phone_number || "",
         city: match.city_code || "",
       }));
+      checkRiderDailyCount(match.rider_id);
     }
   }
 
@@ -250,9 +251,6 @@ export default function InspectionForm() {
     const { name, value } = e.target;
     if (["rider_id", "id_number", "box_serial_number", "plate_number", "first_name", "first_last_name"].includes(name)) {
       autofillByField(name, value);
-    }
-    if (name === "rider_id") {
-      checkRiderDailyCount(value);
     }
   }
 
