@@ -17,7 +17,8 @@ import LocationTracker from "./components/LocationTracker";
 import Supervisors from "./pages/Supervisors";
 import "leaflet/dist/leaflet.css";
 import Settings from "./pages/Settings";
-import ActionCenter from "./pages/ActionCenter";
+// --- DISABLED page: Action Center ---
+// import ActionCenter from "./pages/ActionCenter";
 
 // ✅ Protected route wrapper
 function ProtectedRoute({ children }) {
@@ -61,7 +62,9 @@ export default function App() {
       <Settings />
     </ProtectedRoute>
   }
-/><Route
+/>
+{/* --- DISABLED page: Action Center ---
+<Route
   path="/action-center"
   element={
     <ProtectedRoute>
@@ -69,6 +72,7 @@ export default function App() {
     </ProtectedRoute>
   }
 />
+--- END DISABLED page: Action Center --- */}
             <Route
               path="/users"
               element={

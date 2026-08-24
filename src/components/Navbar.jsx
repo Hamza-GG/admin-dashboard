@@ -84,7 +84,8 @@ function Navbar({ setIsAuthenticated }) {
     { label: "Contrôles", to: "/inspections" },
     { label: "Ajouter un contrôle", to: "/inspection-form" },
       { label: "Settings", to: "/settings" },
-      { label: "Action Center", to: "/action-center" },
+      // --- DISABLED nav item: Action Center ---
+      // { label: "Action Center", to: "/action-center" },
   ];
 
   // Role-based filtering

@@ -243,14 +243,18 @@ function formatAssignedUsers(form, users) {
 function Sidebar({ activeTab, onChange }) {
   return (
     <List dense disablePadding>
+      {/* --- HIDDEN panel: Actions ---
       <ListItemButton selected={activeTab === "actions"} onClick={() => onChange("actions")}>
         <BoltIcon sx={{ mr: 1 }} />
         <ListItemText primary="Actions" />
       </ListItemButton>
+      --- END HIDDEN panel: Actions --- */}
+      {/* --- HIDDEN panel: Rules ---
       <ListItemButton selected={activeTab === "rules"} onClick={() => onChange("rules")}>
         <RuleIcon sx={{ mr: 1 }} />
         <ListItemText primary="Rules" />
       </ListItemButton>
+      --- END HIDDEN panel: Rules --- */}
       <ListItemButton selected={activeTab === "users"} onClick={() => onChange("users")}>
         <PeopleAltIcon sx={{ mr: 1 }} />
         <ListItemText primary="Users" />
@@ -264,7 +268,7 @@ function Sidebar({ activeTab, onChange }) {
 }
 
 export default function Settings() {
-    const [activeTab, setActiveTab] = useState("actions"); // "actions" | "rules" | "users" | "forms"
+    const [activeTab, setActiveTab] = useState("users"); // "actions" | "rules" | "users" | "forms" -- "actions"/"rules" panels hidden, default changed from "actions"
 
   // -------- Actions ----------
   const [actions, setActions] = useState([]);
@@ -2324,8 +2328,10 @@ const openCreateUser = () => {
               overflowY: "auto",
             }}
           >
+            {/* --- HIDDEN panel content: Actions/Rules ---
             {activeTab === "actions" && ActionsPane}
             {activeTab === "rules" && RulesPane}
+            --- END HIDDEN panel content: Actions/Rules --- */}
             {activeTab === "users" && UsersPane}
             {activeTab === "forms" && FormsPane}
           </Box>
