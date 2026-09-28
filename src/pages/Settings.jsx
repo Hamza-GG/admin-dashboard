@@ -40,6 +40,7 @@ import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import RuleIcon from "@mui/icons-material/Rule";
 import BoltIcon from "@mui/icons-material/Bolt";
 import DescriptionIcon from "@mui/icons-material/Description";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import authAxios from "../utils/authAxios";
 
 const CITY_OPTIONS = [
@@ -398,6 +399,20 @@ export default function Settings() {
   const [editAssignee, setEditAssignee] = useState(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [toDelete, setToDelete] = useState(null);
+
+  // -------- Riders cache --------------
+  const [refreshingRiders, setRefreshingRiders] = useState(false);
+  const refreshRiders = async () => {
+    setRefreshingRiders(true);
+    try {
+      const res = await authAxios.post("/riders/refresh");
+      showAlert("success", `Riders reloaded from Google Sheets (${res.data?.count ?? 0}).`);
+    } catch (e) {
+      showAlert("error", e?.response?.data?.detail || "Failed to refresh riders.");
+    } finally {
+      setRefreshingRiders(false);
+    }
+  };
 
   // -------- Snackbars --------------
   const [alert, setAlert] = useState({ open: false, severity: "success", message: "" });
@@ -2313,6 +2328,18 @@ const openCreateUser = () => {
             }}
           >
             <Sidebar activeTab={activeTab} onChange={setActiveTab} />
+            <Box sx={{ p: 1.5, borderTop: 1, borderColor: "divider" }}>
+              <Button
+                fullWidth
+                size="small"
+                variant="outlined"
+                startIcon={refreshingRiders ? <CircularProgress size={16} /> : <RefreshIcon />}
+                onClick={refreshRiders}
+                disabled={refreshingRiders}
+              >
+                Refresh riders
+              </Button>
+            </Box>
           </Paper>
 
               {/* Content */}
