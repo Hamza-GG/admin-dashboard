@@ -13,9 +13,6 @@ import ResetPassword from "./pages/ResetPassword";
 import VerifyEmail from "./pages/VerifyEmail";
 import Users from "./pages/Users";
 const theme = createTheme();
-import LocationTracker from "./components/LocationTracker";
-import Supervisors from "./pages/Supervisors";
-import "leaflet/dist/leaflet.css";
 import Settings from "./pages/Settings";
 // --- DISABLED page: Action Center ---
 // import ActionCenter from "./pages/ActionCenter";
@@ -41,7 +38,6 @@ export default function App() {
       <CssBaseline />
       <Router>
         {isAuthenticated && <Navbar setIsAuthenticated={setIsAuthenticated} />}
-        {isAuthenticated && <LocationTracker />}
         <Box sx={{ mt: isAuthenticated ? 8 : 0 }}>
           <Routes>
             <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
@@ -89,14 +85,6 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-              <Route
-  path="/supervisors"
-  element={
-    <ProtectedRoute>
-      <Supervisors />
-    </ProtectedRoute>
-  }
-/>
             <Route
               path="/inspections"
               element={
