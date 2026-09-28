@@ -83,8 +83,6 @@ function Navbar({ setIsAuthenticated }) {
     { label: "Contrôles", to: "/inspections" },
     { label: "Ajouter un contrôle", to: "/inspection-form" },
       { label: "Settings", to: "/settings" },
-      // --- DISABLED nav item: Action Center ---
-      // { label: "Action Center", to: "/action-center" },
   ];
 
   // Role-based filtering
@@ -93,7 +91,7 @@ function Navbar({ setIsAuthenticated }) {
       ? navItems.filter((i) => ["/inspection-form"].includes(i.to))
       : userRole === "user"
       ? navItems.filter((i) =>
-          ["/dashboard", "/inspections", "/inspection-form", "/action-center"].includes(i.to)
+          ["/dashboard", "/inspections", "/inspection-form"].includes(i.to)
         )
       : navItems;
 

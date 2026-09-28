@@ -10,6 +10,7 @@ import {
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import ImageIcon from "@mui/icons-material/Image";
 import { useTranslation } from "react-i18next";
+import compressImage from "../utils/compressImage";
 
 /* -------- Error Boundary to avoid full blank page -------- */
 class FormErrorBoundary extends React.Component {
@@ -145,6 +146,11 @@ export default function InspectionForm() {
   // Supervisors list (for Supervisor-type base field)
   useEffect(() => {
     async function fetchSupervisors() {
+      // /users is refused (403) for supervisors, so don't send the request at all.
+      if (String(userRole || "").toLowerCase().trim() === "supervisor") {
+        setSupervisors([]);
+        return;
+      }
       try {
         const res = await authAxios.get(`/users`);
         const list = Array.isArray(res.data) ? res.data : [];
@@ -162,7 +168,8 @@ export default function InspectionForm() {
       }
     }
     fetchSupervisors();
-  }, [token]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, userRole]);
 
   function handleSelectForm(e) {
     const id = e.target.value;
@@ -304,9 +311,11 @@ export default function InspectionForm() {
     try {
       const data = new FormData();
 
+      const image = form.image ? await compressImage(form.image) : null;
+
       Object.entries(form).forEach(([k, v]) => {
         if (k === "image") {
-          if (v) data.append("image", v);
+          if (image) data.append("image", image);
           return;
         }
         if (k === "custom_fields") {
