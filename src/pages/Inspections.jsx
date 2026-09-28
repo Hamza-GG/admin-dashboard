@@ -37,17 +37,21 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import Grid from "@mui/material/Grid";
 
+// Upper bound on rows fetched for one date range (the backend caps at 10000).
+const MAX_ROWS = 5000;
+
 export default function InspectionsDashboard() {
   const [inspections, setInspections] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [cityFilter, setCityFilter] = useState([]);
   const [inspectorFilter, setInspectorFilter] = useState([]);
   const [riderFilter, setRiderFilter] = useState([]);
   const [formFilter, setFormFilter] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [timeFrom, setTimeFrom] = useState(null); // dayjs | null
-  const [timeTo, setTimeTo] = useState(null); // dayjs | null
+  const [timeFrom, setTimeFrom] = useState(() => dayjs()); // dayjs | null
+  const [timeTo, setTimeTo] = useState(() => dayjs()); // dayjs | null
+  const [loadedRange, setLoadedRange] = useState(null); // { from, to } of the currently displayed data
 
   const [editOpen, setEditOpen] = useState(false);
   const [editRow, setEditRow] = useState(null);
@@ -57,37 +61,44 @@ export default function InspectionsDashboard() {
   const [forms, setForms] = useState([]);
 
   useEffect(() => {
-    const fetchInspections = async () => {
-      try {
-        const res = await authAxios.get(`/inspections?ts=${Date.now()}`);
-        setInspections(res.data);
-        try {
-          const formsRes = await authAxios.get(`/forms?ts=${Date.now()}`);
-          setForms(Array.isArray(formsRes.data) ? formsRes.data : []);
-        } catch (e) {
-          setForms([]);
-        }
-      } catch (error) {
-        alert("Failed to fetch inspections");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchInspections();
+    authAxios
+      .get(`/forms?ts=${Date.now()}`)
+      .then((res) => setForms(Array.isArray(res.data) ? res.data : []))
+      .catch(() => setForms([]));
   }, []);
 
-  const refetchInspections = useCallback(async () => {
+  const fetchInspections = useCallback(async (range) => {
     try {
       setLoading(true);
-      const res = await authAxios.get(`/inspections?ts=${Date.now()}`);
+      const res = await authAxios.get("/inspections", {
+        params: { date_from: range.from, date_to: range.to, limit: MAX_ROWS, ts: Date.now() },
+      });
       setInspections(res.data);
+      setLoadedRange(range);
     } catch (e) {
       console.error(e);
-      alert("Failed to refresh inspections");
+      alert("Failed to fetch inspections");
     } finally {
       setLoading(false);
     }
   }, []);
+
+  const handleShow = () => {
+    if (!timeFrom || !timeTo || !timeFrom.isValid() || !timeTo.isValid()) {
+      alert("Please select both a start and an end date.");
+      return;
+    }
+    if (timeFrom.isAfter(timeTo, "day")) {
+      alert("The start date must be before the end date.");
+      return;
+    }
+    setPage(0);
+    fetchInspections({ from: timeFrom.format("YYYY-MM-DD"), to: timeTo.format("YYYY-MM-DD") });
+  };
+
+  const refetchInspections = useCallback(async () => {
+    if (loadedRange) await fetchInspections(loadedRange);
+  }, [loadedRange, fetchInspections]);
 
   const getField = (insp, key) => {
     const f = insp?.fields || {};
@@ -97,46 +108,6 @@ export default function InspectionsDashboard() {
   const toStr = (v) => {
     if (v === null || v === undefined) return "";
     return String(v);
-  };
-
-  const getInspectionTime = (insp) => {
-    // Prefer top-level timestamps if present
-    const t = insp?.control_time || insp?.controlTime || insp?.created_at || insp?.createdAt || insp?.timestamp;
-    if (t) return t;
-
-    // Fallback: sometimes stored inside fields
-    const f = insp?.fields || {};
-    return (
-      f?.control_time ||
-      f?.controlTime ||
-      f?.created_at ||
-      f?.createdAt ||
-      f?.timestamp ||
-      ""
-    );
-  };
-
-  const getInspectionDate = (insp) => {
-    const t = getInspectionTime(insp);
-    if (!t) return "";
-
-    // 1) Try dayjs (works for most ISO strings)
-    const parsed = dayjs(t);
-    if (parsed.isValid()) return parsed.format("YYYY-MM-DD");
-
-    // 2) Try native Date parsing (handles some edge cases dayjs may treat as invalid)
-    const dNative = new Date(String(t));
-    if (!Number.isNaN(dNative.getTime())) {
-      const yyyy = dNative.getFullYear();
-      const mm = String(dNative.getMonth() + 1).padStart(2, "0");
-      const dd = String(dNative.getDate()).padStart(2, "0");
-      return `${yyyy}-${mm}-${dd}`;
-    }
-
-    // 3) Fallback: slice YYYY-MM-DD
-    const s = String(t);
-    const d = s.slice(0, 10);
-    return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : "";
   };
 
   const filtered = inspections.filter((insp) => {
@@ -150,19 +121,7 @@ export default function InspectionsDashboard() {
     const matchesRider = riderFilter.length === 0 || riderFilter.includes(riderId);
     const matchesForm = formFilter.length === 0 || formFilter.includes(formName);
 
-    const inspDate = getInspectionDate(insp); // YYYY-MM-DD
-    const fromStr = timeFrom ? timeFrom.format("YYYY-MM-DD") : "";
-    const toStrD = timeTo ? timeTo.format("YYYY-MM-DD") : "";
-
-    const matchesTime = (() => {
-      if (!fromStr && !toStrD) return true;
-      if (!inspDate) return false;
-      if (fromStr && inspDate < fromStr) return false;
-      if (toStrD && inspDate > toStrD) return false;
-      return true;
-    })();
-
-    return matchesCity && matchesInspector && matchesRider && matchesForm && matchesTime;
+    return matchesCity && matchesInspector && matchesRider && matchesForm;
   });
 
   const fieldKeys = React.useMemo(() => {
@@ -573,6 +532,11 @@ export default function InspectionsDashboard() {
             slotProps={{ textField: { size: "small", sx: { minWidth: 180 } } }}
           />
         </LocalizationProvider>
+
+        <Button variant="contained" onClick={handleShow} disabled={loading}>
+          Show
+        </Button>
+
         {[{
           label: "Form",
           value: formFilter,
@@ -642,9 +606,19 @@ export default function InspectionsDashboard() {
 
       {/* Inspection List */}
       <Box mt={6}>
-        <Typography variant="h5" mb={2}>Inspection Records</Typography>
+        <Typography variant="h5" mb={1}>Inspection Records</Typography>
+        {loadedRange && !loading && (
+          <Typography variant="body2" color="text.secondary" mb={2}>
+            {inspections.length} controls from {loadedRange.from} to {loadedRange.to}
+            {inspections.length >= MAX_ROWS && ` — only the latest ${MAX_ROWS} are shown, narrow the date range to see all.`}
+          </Typography>
+        )}
         {loading ? (
           <CircularProgress />
+        ) : !loadedRange ? (
+          <Typography variant="body1" color="text.secondary">
+            Select a date range and click "Show" to display controls.
+          </Typography>
         ) : (
           <TableContainer component={Paper}>
             <Table size="small">

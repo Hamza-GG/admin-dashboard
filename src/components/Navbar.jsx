@@ -80,7 +80,6 @@ function Navbar({ setIsAuthenticated }) {
   // All items
   const navItems = [
     { label: "Home", to: "/dashboard" },
-    { label: "Superviseurs", to: "/supervisors" },
     { label: "Contrôles", to: "/inspections" },
     { label: "Ajouter un contrôle", to: "/inspection-form" },
       { label: "Settings", to: "/settings" },
