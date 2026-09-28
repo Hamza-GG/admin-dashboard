@@ -11,14 +11,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@date-io/date-fns": "^3.2.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.2.0",
     "@mui/material": "^7.2.0",
     "@mui/x-date-pickers": "^8.9.0",
     "axios": "^1.11.0",
-    "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "file-saver": "^2.0.5",
     "i18next": "^23.0.0",
@@ -27,8 +25,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-i18next": "^13.0.0",
-    "react-router-dom": "^7.7.1",
-    "recharts": "^2.9.0"
+    "react-router-dom": "^7.7.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",

@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from "react";
-import { ThemeProvider, CssBaseline, Box } from "@mui/material";
+import React, { Suspense, lazy, useEffect, useState } from "react";
+import { ThemeProvider, CssBaseline, Box, CircularProgress } from "@mui/material";
 import { createTheme } from "@mui/material/styles";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
-import Dashboard from "./pages/Dashboard";
-import Riders from "./pages/Riders";
-import Inspections from "./pages/Inspections";
-import InspectionForm from "./pages/InspectionForm";
 import Login from "./pages/Login";
 import Navbar from "./components/Navbar";
-import ResetPassword from "./pages/ResetPassword";
-import VerifyEmail from "./pages/VerifyEmail";
-import Users from "./pages/Users";
+
+// Pages are loaded on demand so the first load only downloads what's needed.
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Riders = lazy(() => import("./pages/Riders"));
+const Inspections = lazy(() => import("./pages/Inspections"));
+const InspectionForm = lazy(() => import("./pages/InspectionForm"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
+const Settings = lazy(() => import("./pages/Settings"));
+
 const theme = createTheme();
-import Settings from "./pages/Settings";
-// --- DISABLED page: Action Center ---
-// import ActionCenter from "./pages/ActionCenter";
 
 // ✅ Protected route wrapper
 function ProtectedRoute({ children }) {
@@ -39,6 +39,7 @@ export default function App() {
       <Router>
         {isAuthenticated && <Navbar setIsAuthenticated={setIsAuthenticated} />}
         <Box sx={{ mt: isAuthenticated ? 8 : 0 }}>
+          <Suspense fallback={<Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}><CircularProgress /></Box>}>
           <Routes>
             <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
             <Route path="/reset-password" element={<ResetPassword />} />
@@ -59,24 +60,6 @@ export default function App() {
     </ProtectedRoute>
   }
 />
-{/* --- DISABLED page: Action Center ---
-<Route
-  path="/action-center"
-  element={
-    <ProtectedRoute>
-      <ActionCenter />
-    </ProtectedRoute>
-  }
-/>
---- END DISABLED page: Action Center --- */}
-            <Route
-              path="/users"
-              element={
-                <ProtectedRoute>
-                  <Users />
-                </ProtectedRoute>
-              }
-            />
             <Route
               path="/riders"
               element={
@@ -106,6 +89,7 @@ export default function App() {
               element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />}
             />
           </Routes>
+          </Suspense>
         </Box>
       </Router>
     </ThemeProvider>
