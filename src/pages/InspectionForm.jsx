@@ -68,6 +68,7 @@ export default function InspectionForm() {
   const [riderDailyCount, setRiderDailyCount] = useState(0);
 
   const [riders, setRiders] = useState([]);
+  const [riderMatches, setRiderMatches] = useState([]);
   const [forms, setForms] = useState([]);
   const [selectedFormId, setSelectedFormId] = useState("");
   const [selectedForm, setSelectedForm] = useState(null);
@@ -201,38 +202,40 @@ export default function InspectionForm() {
     }));
   }
 
+  function applyRider(match) {
+    setForm(prev => ({
+      ...prev,
+      rider_id: match.rider_id || "",
+      id_number: match.id_number || "",
+      first_name: match.first_name || "",
+      first_last_name: match.first_last_name || "",
+      box_serial_number: match.box_serial_number || "",
+      plate_number: match.plate_number || "",
+      phone_number: match.phone_number || "",
+      city: match.city_code || "",
+    }));
+    setRiderMatches([]);
+    checkRiderDailyCount(match.rider_id);
+  }
+
   function autofillByField(field, value) {
     if (!value) return;
-    const v = String(value).toLowerCase();
-    let match = null;
+    const v = String(value).trim().toLowerCase();
+    let matches = [];
 
     if (field === "rider_id") {
-      match = riders.find(r => String(r.rider_id) === String(value));
-    } else if (field === "id_number") {
-      match = riders.find(r => r.id_number && r.id_number.toLowerCase() === v);
-    } else if (field === "box_serial_number") {
-      match = riders.find(r => r.box_serial_number && r.box_serial_number.toLowerCase() === v);
-    } else if (field === "first_name") {
-      match = riders.find(r => r.first_name && r.first_name.toLowerCase() === v);
-    } else if (field === "first_last_name") {
-      match = riders.find(r => r.first_last_name && r.first_last_name.toLowerCase() === v);
-    } else if (field === "plate_number") {
-      match = riders.find(r => r.plate_number && r.plate_number.toLowerCase() === v);
+      matches = riders.filter(r => String(r.rider_id).toLowerCase() === v);
+    } else {
+      matches = riders.filter(r => r[field] && String(r[field]).trim().toLowerCase() === v);
     }
 
-    if (match) {
-      setForm(prev => ({
-        ...prev,
-        rider_id: match.rider_id || "",
-        id_number: match.id_number || "",
-        first_name: match.first_name || "",
-        first_last_name: match.first_last_name || "",
-        box_serial_number: match.box_serial_number || "",
-        plate_number: match.plate_number || "",
-        phone_number: match.phone_number || "",
-        city: match.city_code || "",
-      }));
-      checkRiderDailyCount(match.rider_id);
+    if (matches.length === 1) {
+      applyRider(matches[0]);
+    } else if (matches.length > 1) {
+      // Several riders share this value: let the user pick one
+      setRiderMatches(matches);
+    } else {
+      setRiderMatches([]);
     }
   }
 
@@ -326,6 +329,7 @@ export default function InspectionForm() {
 
       console.log("Submit OK:", res.status, res.data);
       setSuccess(t("inspectionForm.submittedOk"));
+      setRiderMatches([]);
       setForm({
         city: "",
         location: "",
@@ -448,6 +452,31 @@ export default function InspectionForm() {
                     <Grid item xs={12} sm={4}>
                       <TextField label={t("inspectionForm.riderId")} name="rider_id" value={form.rider_id} onChange={handleChange} onBlur={handleBlur} placeholder="e.g. 123" fullWidth size="small" />
                     </Grid>
+                    {riderMatches.length > 1 && (
+                      <Grid item xs={12}>
+                        <Alert severity="info" onClose={() => setRiderMatches([])}>
+                          <Typography variant="body2" sx={{ mb: 1 }}>
+                            {riderMatches.length} riders match. Choose one:
+                          </Typography>
+                          <Stack spacing={1}>
+                            {riderMatches.map((r) => (
+                              <Button
+                                key={r.rider_id}
+                                variant="outlined"
+                                size="small"
+                                onClick={() => applyRider(r)}
+                                sx={{ justifyContent: "flex-start", textTransform: "none" }}
+                              >
+                                #{r.rider_id} — {[r.first_name, r.first_last_name].filter(Boolean).join(" ") || "No name"}
+                                {r.plate_number ? ` · Plate ${r.plate_number}` : ""}
+                                {r.box_serial_number ? ` · Box ${r.box_serial_number}` : ""}
+                                {r.city_code ? ` · ${r.city_code}` : ""}
+                              </Button>
+                            ))}
+                          </Stack>
+                        </Alert>
+                      </Grid>
+                    )}
                     {riderDailyCount > 0 && (
                       <Grid item xs={12}>
                         <Alert severity="warning">
